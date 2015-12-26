@@ -27,9 +27,8 @@
 */
 
 #include "mastercontrol.h"
-#include "templatecam.h"
+#include "quartocam.h"
 #include "inputmaster.h"
-#include "urho.h"
 
 URHO3D_DEFINE_APPLICATION_MAIN(MasterControl);
 
@@ -55,7 +54,7 @@ void MasterControl::Start()
 
 
     //Play music
-    Sound* music = cache_->GetResource<Sound>("Resources/Music/Urho - Disciples of Urho.ogg");
+    Sound* music = cache_->GetResource<Sound>("Resources/Music/Angelight - The Knowledge River.ogg");
     music->SetLooped(true);
     Node* musicNode = world.scene->CreateChild("Music");
     SoundSource* musicSource = musicNode->CreateComponent<SoundSource>();
@@ -76,9 +75,8 @@ void MasterControl::CreateScene()
 {
     world.scene = new Scene(context_);
     world.scene->CreateComponent<Octree>();
-    world.camera = new TemplateCam(context_, this);
+    world.camera = new QuartoCam(context_, this);
     CreateLights();
-    new Urho(context_, this);
 }
 
 void MasterControl::CreateLights()

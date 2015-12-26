@@ -41,12 +41,12 @@ class Sprite;
 
 using namespace Urho3D;
 
-class TemplateCam;
+class QuartoCam;
 class InputMaster;
 
 typedef struct GameWorld
 {
-    SharedPtr<TemplateCam> camera;
+    SharedPtr<QuartoCam> camera;
     SharedPtr<Scene> scene;
     struct {
         SharedPtr<Node> sceneCursor;

@@ -20,12 +20,10 @@ SOURCES += \
     luckey.cpp \
     mastercontrol.cpp \
     inputmaster.cpp \
-    templatecam.cpp \
-    urho.cpp
+    quartocam.cpp
 
 HEADERS += \
     luckey.h \
     mastercontrol.h \
     inputmaster.h \
-    templatecam.h \
-    urho.h
+    quartocam.h

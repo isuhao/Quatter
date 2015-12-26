@@ -27,7 +27,7 @@
 */
 
 #include "inputmaster.h"
-#include "templatecam.h"
+#include "quartocam.h"
 
 InputMaster::InputMaster(Context* context, MasterControl* masterControl) : Object(context),
     masterControl_{masterControl},
