@@ -39,8 +39,8 @@ MasterControl::MasterControl(Context *context):
 
 void MasterControl::Setup()
 {
-    engineParameters_["WindowTitle"] = "LucKey Productions Urho3D Project Template";
-    engineParameters_["LogName"] = GetSubsystem<FileSystem>()->GetAppPreferencesDir("urho3d", "logs")+"LucKeyTemplate.log";
+    engineParameters_["WindowTitle"] = "Quarto";
+    engineParameters_["LogName"] = GetSubsystem<FileSystem>()->GetAppPreferencesDir("urho3d", "logs")+"Quarto.log";
 //    engineParameters_["FullScreen"] = false;
 //    engineParameters_["WindowWidth"] = 960;
 //    engineParameters_["WindowHeight"] = 540;
@@ -51,7 +51,6 @@ void MasterControl::Start()
     cache_ = GetSubsystem<ResourceCache>();
 
     CreateScene();
-
 
     //Play music
     Sound* music = cache_->GetResource<Sound>("Resources/Music/Angelight - The Knowledge River.ogg");

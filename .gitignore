@@ -29,6 +29,7 @@ Makefile*
 
 *.autosave
 
-#QtCtreator Qml
-*.qmlproject.user
-*.qmlproject.user.*
+# Urho3D
+
+/Urho3D
+Quarto
