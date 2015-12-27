@@ -20,10 +20,14 @@ SOURCES += \
     luckey.cpp \
     mastercontrol.cpp \
     inputmaster.cpp \
-    quartocam.cpp
+    quartocam.cpp \
+    board.cpp \
+    piece.cpp
 
 HEADERS += \
     luckey.h \
     mastercontrol.h \
     inputmaster.h \
-    quartocam.h
+    quartocam.h \
+    board.h \
+    piece.h
