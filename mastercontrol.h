@@ -16,6 +16,8 @@ using namespace Urho3D;
 class QuartoCam;
 class InputMaster;
 
+enum class GamePhase{PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS};
+
 typedef struct GameWorld
 {
     SharedPtr<QuartoCam> camera;
@@ -46,10 +48,13 @@ public:
 
     void Exit();
     void CreateLights();
+    inline GamePhase GetGamePhase() const noexcept { return gamePhase_; }
 private:
+    GamePhase gamePhase_;
     Node* movingLightNode_;
 
     void CreateScene();
+    void NextPhase();
 
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
 };

@@ -6,7 +6,8 @@
 URHO3D_DEFINE_APPLICATION_MAIN(MasterControl);
 
 MasterControl::MasterControl(Context *context):
-    Application(context)
+    Application(context),
+    gamePhase_{GamePhase::PLAYER1PICKS}
 {
 }
 
@@ -42,7 +43,6 @@ void MasterControl::Exit()
     engine_->Exit();
 }
 
-
 void MasterControl::CreateScene()
 {
     world.scene = new Scene(context_);
@@ -58,6 +58,7 @@ void MasterControl::CreateScene()
     tableModel->SetModel(cache_->GetResource<Model>("Models/Plane.mdl"));
     tableModel->SetMaterial(cache_->GetResource<Material>("Resources/Materials/Basic.xml"));
 
+    //Create board and pieces
     new Board(context_, this);
     for (int p = 0; p < 16; ++p){
         Piece* newPiece = new Piece(context_, this, std::bitset<4>(p));
@@ -65,6 +66,7 @@ void MasterControl::CreateScene()
                               Vector3::DOWN * 0.4f);
     }
 }
+
 
 void MasterControl::CreateLights()
 {
@@ -89,4 +91,18 @@ void MasterControl::CreateLights()
     pointLight->SetBrightness(0.5f);
     pointLight->SetRange(42.0f);
     pointLight->SetColor(Color(0.75f, 1.0f, 0.75f));
+}
+
+void MasterControl::NextPhase()
+{
+    switch (gamePhase_)    {
+    case GamePhase::PLAYER1PICKS: gamePhase_ = GamePhase::PLAYER2PUTS;
+        break;
+    case GamePhase::PLAYER2PUTS: gamePhase_ = GamePhase::PLAYER2PICKS;
+        break;
+    case GamePhase::PLAYER2PICKS: gamePhase_ = GamePhase::PLAYER1PUTS;
+        break;
+    case GamePhase::PLAYER1PUTS: gamePhase_ = GamePhase::PLAYER1PICKS;
+        break;
+    }
 }
