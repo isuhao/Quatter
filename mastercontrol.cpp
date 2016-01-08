@@ -1,6 +1,6 @@
 #include "mastercontrol.h"
 #include "inputmaster.h"
-#include "quartocam.h"
+#include "quattercam.h"
 #include "board.h"
 
 URHO3D_DEFINE_APPLICATION_MAIN(MasterControl);
@@ -13,8 +13,8 @@ MasterControl::MasterControl(Context *context):
 
 void MasterControl::Setup()
 {
-    engineParameters_["WindowTitle"] = "Quarto";
-    engineParameters_["LogName"] = GetSubsystem<FileSystem>()->GetAppPreferencesDir("urho3d", "logs")+"Quarto.log";
+    engineParameters_["WindowTitle"] = "Quatter";
+    engineParameters_["LogName"] = GetSubsystem<FileSystem>()->GetAppPreferencesDir("urho3d", "logs")+"Quatter.log";
 //    engineParameters_["FullScreen"] = false;
 //    engineParameters_["WindowWidth"] = 960;
 //    engineParameters_["WindowHeight"] = 540;
@@ -47,7 +47,7 @@ void MasterControl::CreateScene()
 {
     world.scene = new Scene(context_);
     world.scene->CreateComponent<Octree>();
-    world.camera = new QuartoCam(context_, this);
+    world.camera = new QuatterCam(context_, this);
     CreateLights();
 
     Node* tableNode = world.scene->CreateChild("Table");

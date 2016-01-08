@@ -16,13 +16,13 @@ class Camera;
 
 using namespace Urho3D;
 
-class QuartoCam : public Object
+class QuatterCam : public Object
 {
-    URHO3D_OBJECT(QuartoCam, Object);
+    URHO3D_OBJECT(QuatterCam, Object);
     friend class MasterControl;
     friend class InputMaster;
 public:
-    QuartoCam(Context *context, MasterControl* masterControl);
+    QuatterCam(Context *context, MasterControl* masterControl);
 
     SharedPtr<Camera> camera_;
     SharedPtr<Viewport> viewport_;

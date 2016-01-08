@@ -1,8 +1,7 @@
 #include "inputmaster.h"
-#include "quartocam.h"
+#include "quattercam.h"
 
-InputMaster::InputMaster(Context* context, MasterControl* masterControl) : Object(context),
-    masterControl_{masterControl},
+InputMaster::InputMaster(Context* context, MasterControl* masterControl) : Master(context, masterControl),
     input_{GetSubsystem<Input>()}
 {
     SubscribeToEvent(E_MOUSEBUTTONDOWN, URHO3D_HANDLER(InputMaster, HandleMouseButtonDown));
@@ -74,4 +73,9 @@ void InputMaster::HandleJoystickButtonUp(StringHash eventType, VariantMap &event
     int joystickId = eventData[P_JOYSTICKID].GetInt();
     int button = eventData[P_BUTTON].GetInt();
     if (pressedJoystickButtons_.Contains(button)) pressedJoystickButtons_.Erase(button);
+}
+
+void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
+{
+
 }

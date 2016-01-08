@@ -1,6 +1,6 @@
-#include "quartocam.h"
+#include "quattercam.h"
 
-QuartoCam::QuartoCam(Context *context, MasterControl *masterControl):
+QuatterCam::QuatterCam(Context *context, MasterControl *masterControl):
     Object(context)
 {
     masterControl_ = masterControl;
@@ -18,7 +18,7 @@ QuartoCam::QuartoCam(Context *context, MasterControl *masterControl):
     SetupViewport();
 }
 
-void QuartoCam::SetupViewport()
+void QuatterCam::SetupViewport()
 {
     //Set up a viewport to the Renderer subsystem so that the 3D scene can be seen
     SharedPtr<Viewport> viewport(new Viewport(context_, masterControl_->world.scene, camera_));
@@ -38,12 +38,12 @@ void QuartoCam::SetupViewport()
     renderer->SetViewport(0, viewport_);
 }
 
-Vector3 QuartoCam::GetWorldPosition()
+Vector3 QuatterCam::GetWorldPosition()
 {
     return rootNode_->GetWorldPosition();
 }
 
-Quaternion QuartoCam::GetRotation()
+Quaternion QuatterCam::GetRotation()
 {
     return rootNode_->GetRotation();
 }

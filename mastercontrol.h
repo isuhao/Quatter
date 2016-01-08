@@ -13,14 +13,14 @@ class Sprite;
 
 using namespace Urho3D;
 
-class QuartoCam;
+class QuatterCam;
 class InputMaster;
 
 enum class GamePhase{PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS};
 
 typedef struct GameWorld
 {
-    SharedPtr<QuartoCam> camera;
+    SharedPtr<QuatterCam> camera;
     SharedPtr<Scene> scene;
     struct {
         SharedPtr<Node> sceneCursor;
