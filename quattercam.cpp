@@ -1,14 +1,19 @@
 #include "quattercam.h"
 
 QuatterCam::QuatterCam(Context *context, MasterControl *masterControl):
-    Object(context)
+    Object(context),
+    distance_{23.0f},
+    dollyRotation_{Vector2::ZERO},
+    targetPosition_{Vector3::ZERO},
+    lastTargetPosition_{Vector3::ZERO}
+
 {
     masterControl_ = masterControl;
 
     rootNode_ = masterControl_->world.scene->CreateChild("Camera");
     camera_ = rootNode_->CreateComponent<Camera>();
     camera_->SetFarClip(1024.0f);
-    rootNode_->SetPosition(Vector3(0.0f, 5.0f, -13.0f));
+    rootNode_->SetPosition(Vector3(3.0f, 5.0f, -11.0f));
     rootNode_->LookAt(Vector3::UP);
 
     Zone* zone = rootNode_->CreateComponent<Zone>();
@@ -38,10 +43,21 @@ void QuatterCam::SetupViewport()
     renderer->SetViewport(0, viewport_);
 }
 
-Vector3 QuatterCam::GetWorldPosition()
+void QuatterCam::Rotate(Vector2 rotation)
 {
-    return rootNode_->GetWorldPosition();
+    rootNode_->RotateAround(targetPosition_,
+                            Quaternion(rotation.x_, Vector3::UP) * Quaternion(rotation.y_, rootNode_->GetRight()), TS_WORLD);
 }
+
+//void QuatterCam::Focus(Vector3 targetPosition, float distance, float duration)
+//{
+/////Focus on targetposition for duration from distance
+//}
+
+//Vector3 QuatterCam::GetWorldPosition()
+//{
+//    return rootNode_->GetWorldPosition();
+//}
 
 Quaternion QuatterCam::GetRotation()
 {

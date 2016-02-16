@@ -30,11 +30,22 @@ public:
 
     Vector3 GetWorldPosition();
     Quaternion GetRotation();
+    Vector2 GetDollyRotation();
 private:
     MasterControl* masterControl_;
     SharedPtr<Node> rootNode_;
 
+    float distance_;
+    Vector2 dollyRotation_;
+    Vector3 targetPosition_;
+    Vector3 lastTargetPosition_;
+
     void SetupViewport();
+
+    void Rotate(Vector2 rotation);
+//    void SetDollyRotation(Vector2 dollyRotation){ dollyRotation_ = dollyRotation;}
+//    void Rotate(Vector2 rotation){ SetDollyRotation(GetDollyRotation() + rotation);
+//    void Focus(Vector3 targetPosition, float distance, float duration);
 };
 
 #endif // TEMPLATECAM_H

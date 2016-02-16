@@ -10,6 +10,7 @@ InputMaster::InputMaster(Context* context, MasterControl* masterControl) : Maste
     SubscribeToEvent(E_KEYUP, URHO3D_HANDLER(InputMaster, HandleKeyUp));
     SubscribeToEvent(E_JOYSTICKBUTTONDOWN, URHO3D_HANDLER(InputMaster, HandleJoystickButtonDown));
     SubscribeToEvent(E_JOYSTICKBUTTONUP, URHO3D_HANDLER(InputMaster, HandleJoystickButtonUp));
+    SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(InputMaster, HandleUpdate));
 }
 
 void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
@@ -77,5 +78,9 @@ void InputMaster::HandleJoystickButtonUp(StringHash eventType, VariantMap &event
 
 void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
 {
-
+    if (input_->GetMouseButtonDown(2)){
+        IntVector2 mouseMove = input_->GetMouseMove();
+        Vector2 rotation = Vector2(mouseMove.x_, mouseMove.y_) * 0.23f;
+        masterControl_->world.camera->Rotate(rotation);
+    }
 }

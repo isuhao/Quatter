@@ -15,6 +15,8 @@ using namespace Urho3D;
 
 class QuatterCam;
 class InputMaster;
+class Board;
+class Piece;
 
 enum class GamePhase{PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS};
 
@@ -22,6 +24,8 @@ typedef struct GameWorld
 {
     SharedPtr<QuatterCam> camera;
     SharedPtr<Scene> scene;
+    SharedPtr<Board> board_;
+    Vector< SharedPtr<Piece> > pieces_;
     struct {
         SharedPtr<Node> sceneCursor;
         SharedPtr<Cursor> uiCursor;
