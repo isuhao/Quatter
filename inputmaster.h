@@ -14,6 +14,8 @@ public:
 private:
     Input* input_;
 
+    float idleTime_;
+
     HashSet<int> pressedKeys_;
     HashSet<int> pressedMouseButtons_;
     HashSet<int> pressedJoystickButtons_;

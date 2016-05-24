@@ -55,6 +55,8 @@
 #include <Urho3D/UI/Font.h>
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/UI.h>
+#include <Urho3D/Scene/ValueAnimation.h>
+
 
 #include <Urho3D/DebugNew.h>
 

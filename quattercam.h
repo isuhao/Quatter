@@ -32,7 +32,6 @@ public:
     Quaternion GetRotation();
     Vector2 GetDollyRotation();
 private:
-    MasterControl* masterControl_;
     SharedPtr<Node> rootNode_;
 
     float distance_;

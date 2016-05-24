@@ -57,14 +57,23 @@ public:
     void Exit();
     void CreateLights();
     inline GamePhase GetGamePhase() const noexcept { return gamePhase_; }
+
+    Material* GetMaterial(String name) const { return cache_->GetResource<Material>("Materials/"+name+".xml"); }
+    Model* GetModel(String name) const { return cache_->GetResource<Model>("Models/"+name+".mdl"); }
 private:
     static MasterControl* instance_;
+
+    SharedPtr<SoundSource> musicSource_;
+    float musicGain_;
 
     GamePhase gamePhase_;
     Node* movingLightNode_;
 
     void CreateScene();
     void NextPhase();
+    void ToggleMusic();
+    void MusicGainUp(float step);
+    void MusicGainDown(float step);
 
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
 };

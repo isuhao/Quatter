@@ -23,6 +23,8 @@ public:
     inline bool GetAttribute(int index) const noexcept { return attributes_[index]; }
 private:
     Node* rootNode_;
+    String modelName_;
+
     std::bitset<4> attributes_;
     PieceState state_;
 };

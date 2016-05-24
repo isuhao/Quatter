@@ -15,9 +15,10 @@ InputMaster::InputMaster() : Master(),
 
 void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
 {
-    using namespace KeyDown;
-    int key = eventData[P_KEY].GetInt();
+    int key{eventData[KeyDown::P_KEY].GetInt()};
     pressedKeys_.Insert(key);
+
+    float volumeStep{0.1f};
 
     switch (key){
         //Exit when ESC is pressed
@@ -34,6 +35,15 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
                 Time::GetTimeStamp().Replaced(':', '_').Replaced('.', '_').Replaced(' ', '_')+".png";
         Log::Write(1, fileName);
         screenshot.SavePNG(fileName);
+    } break;
+    case KEY_M: {
+        MC->ToggleMusic();
+    } break;
+    case KEY_KP_PLUS: {
+        MC->MusicGainUp(volumeStep);
+    } break;
+    case KEY_KP_MINUS: {
+        MC->MusicGainDown(volumeStep);
     } break;
     default: break;
     }
@@ -78,9 +88,26 @@ void InputMaster::HandleJoystickButtonUp(StringHash eventType, VariantMap &event
 
 void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
 {
-    if (input_->GetMouseButtonDown(2)){
+    float t{eventData[Update::P_TIMESTEP].GetFloat()};
+    idleTime_ += t;
+
+    if (input_->GetMouseButtonDown(1)){
+        idleTime_ = 0.0f;
         IntVector2 mouseMove = input_->GetMouseMove();
-        Vector2 rotation = Vector2(mouseMove.x_, mouseMove.y_) * 0.23f;
+        Vector2 rotation = Vector2(mouseMove.x_, mouseMove.y_) * 0.1f;
         MC->world.camera->Rotate(rotation);
     }
+    //Should check whose turn it is
+    JoystickState* joy0 = input_->GetJoystickByIndex(0);
+    if (joy0){
+        Vector2 rotation{-Vector2(joy0->GetAxisPosition(2), joy0->GetAxisPosition(3))};
+        if (rotation.Length()){
+            idleTime_ = 0.0f;
+            MC->world.camera->Rotate(rotation);
+        }
+    }
+
+    float idleThreshold{5.0f};
+    if (idleTime_ > idleThreshold)
+        MC->world.camera->Rotate(Vector2::LEFT * Min((idleTime_ - idleThreshold) * 0.0023f, 0.005f));
 }
