@@ -33,3 +33,7 @@ Makefile*
 
 /Urho3D
 Quatter
+
+# Blender
+
+*.blend*
