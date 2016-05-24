@@ -9,7 +9,7 @@ class InputMaster : public Master
 {
     URHO3D_OBJECT(InputMaster, Master);
 public:
-    InputMaster(Context* context, MasterControl* masterControl);
+    InputMaster();
     WeakPtr<Node> firstHit_;
 private:
     Input* input_;

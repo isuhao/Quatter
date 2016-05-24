@@ -1,7 +1,7 @@
 #include "inputmaster.h"
 #include "quattercam.h"
 
-InputMaster::InputMaster(Context* context, MasterControl* masterControl) : Master(context, masterControl),
+InputMaster::InputMaster() : Master(),
     input_{GetSubsystem<Input>()}
 {
     SubscribeToEvent(E_MOUSEBUTTONDOWN, URHO3D_HANDLER(InputMaster, HandleMouseButtonDown));
@@ -22,7 +22,7 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
     switch (key){
         //Exit when ESC is pressed
     case KEY_ESC:{
-        masterControl_->Exit();
+        MC->Exit();
     } break;
         //Take screenshot when 9 is pressed
     case KEY_9:{
@@ -81,6 +81,6 @@ void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
     if (input_->GetMouseButtonDown(2)){
         IntVector2 mouseMove = input_->GetMouseMove();
         Vector2 rotation = Vector2(mouseMove.x_, mouseMove.y_) * 0.23f;
-        masterControl_->world.camera->Rotate(rotation);
+        MC->world.camera->Rotate(rotation);
     }
 }

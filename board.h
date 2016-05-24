@@ -15,10 +15,9 @@ class Board : public Object
 {
     URHO3D_OBJECT(Board, Object);
 public:
-    Board(Context *context, MasterControl* masterControl);
+    Board();
     float GetHeight() const { return model_->GetBoundingBox().Size().y_; }
 private:
-    MasterControl* masterControl_;
     StaticModel* model_;
 };
 

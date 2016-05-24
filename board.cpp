@@ -1,11 +1,10 @@
 #include "board.h"
 
-Board::Board(Context* context, MasterControl *masterControl): Object(context),
-    masterControl_{masterControl}
+Board::Board(): Object(MC->GetContext())
 {
-    Node* rootNode = masterControl_->world.scene->CreateChild("Board");
+    Node* rootNode = MC->world.scene->CreateChild("Board");
     model_ = rootNode->CreateComponent<StaticModel>();
-    model_->SetModel(masterControl_->cache_->GetResource<Model>("Resources/Models/Board.mdl"));
-    model_->SetMaterial(masterControl_->cache_->GetResource<Material>("Resources/Materials/Board.xml"));
+    model_->SetModel(MC->cache_->GetResource<Model>("Resources/Models/Board.mdl"));
+    model_->SetMaterial(MC->cache_->GetResource<Material>("Resources/Materials/Board.xml"));
     model_->SetCastShadows(true);
 }

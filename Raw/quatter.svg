@@ -2917,6 +2917,39 @@
        fx="-172.85402"
        fy="566.65106"
        r="156.43126" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4841"
+       id="radialGradient6101"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(7.6275385e-8,1.6329197,-1.9043716,8.8955188e-8,-358.45081,703.44583)"
+       cx="-172.85405"
+       cy="566.65106"
+       fx="-172.85405"
+       fy="566.65106"
+       r="109.35714" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4841"
+       id="radialGradient6103"
+       gradientUnits="userSpaceOnUse"
+       cx="-172.85403"
+       cy="566.65106"
+       fx="-172.85402"
+       fy="566.65106"
+       r="156.43126"
+       gradientTransform="translate(-1264.711,-145.46197)" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4841"
+       id="radialGradient5098"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(7.6275385e-8,1.6329197,-1.9043716,8.8955188e-8,401.1839,848.9078)"
+       cx="-172.85405"
+       cy="566.65106"
+       fx="-172.85405"
+       fy="566.65106"
+       r="109.35714" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -2925,17 +2958,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.061871843"
-     inkscape:cx="5975.7572"
-     inkscape:cy="-5278.1825"
+     inkscape:zoom="0.24748737"
+     inkscape:cx="-785.49702"
+     inkscape:cy="-426.497"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      showborder="false"
      inkscape:window-width="1920"
-     inkscape:window-height="1032"
+     inkscape:window-height="1056"
      inkscape:window-x="0"
-     inkscape:window-y="24"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      showguides="true"
      inkscape:guide-bbox="true" />
@@ -2947,7 +2980,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -9868,5 +9901,60 @@
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="circle8122" />
     </g>
+    <g
+       id="g6105"
+       transform="translate(351.53309,177.78685)"
+       inkscape:export-filename="/home/frode/Sync/Creations/Games/Quatter/Resources/icon.png"
+       inkscape:export-xdpi="31.68"
+       inkscape:export-ydpi="31.68">
+      <path
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:url(#radialGradient6101);fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="path6095"
+         sodipodi:type="arc"
+         sodipodi:cx="-1437.5681"
+         sodipodi:cy="421.18597"
+         sodipodi:rx="195.71428"
+         sodipodi:ry="195.71428"
+         sodipodi:start="0"
+         sodipodi:end="1.5707963"
+         d="m -1241.8538,421.18597 a 195.71428,195.71428 0 0 1 -195.7143,195.71428 l 0,-195.71428 z" />
+      <path
+         id="path6097"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:url(#radialGradient6103);fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         sodipodi:type="arc"
+         sodipodi:cx="-1437.5681"
+         sodipodi:cy="421.18597"
+         sodipodi:rx="144.93436"
+         sodipodi:ry="144.93436"
+         sodipodi:start="1.5707963"
+         sodipodi:end="0"
+         d="m -1437.5681,566.12033 a 144.93436,144.93436 0 0 1 -133.9019,-89.47038 144.93436,144.93436 0 0 1 31.4178,-157.94804 144.93436,144.93436 0 0 1 157.9481,-31.41782 144.93436,144.93436 0 0 1 89.4703,133.90188 l -144.9343,0 z" />
+      <path
+         d="m -1437.567,515.58221 a 94.395134,94.395134 0 0 1 -87.2097,-58.27168 94.395134,94.395134 0 0 1 20.4622,-102.8709 94.395134,94.395134 0 0 1 102.8709,-20.46229 94.395134,94.395134 0 0 1 58.2717,87.20973"
+         sodipodi:end="0"
+         sodipodi:start="1.5707963"
+         sodipodi:ry="94.395134"
+         sodipodi:rx="94.395134"
+         sodipodi:cy="421.18707"
+         sodipodi:cx="-1437.567"
+         sodipodi:type="arc"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="path6099"
+         sodipodi:open="true" />
+    </g>
+    <path
+       d="m -482.21913,566.64795 a 195.71428,195.71428 0 0 1 -195.71428,195.71428 l 0,-195.71428 z"
+       sodipodi:end="1.5707963"
+       sodipodi:start="0"
+       sodipodi:ry="195.71428"
+       sodipodi:rx="195.71428"
+       sodipodi:cy="566.64795"
+       sodipodi:cx="-677.93341"
+       sodipodi:type="arc"
+       id="path5096"
+       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:url(#radialGradient5098);fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       inkscape:export-filename="/home/frode/Sync/Creations/Games/Quatter/Resources/Textures/Cursor.png"
+       inkscape:export-xdpi="105.34291"
+       inkscape:export-ydpi="105.34291" />
   </g>
 </svg>

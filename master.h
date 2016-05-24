@@ -15,11 +15,11 @@ using namespace Urho3D;
 
 class Master : public Object
 {
+    friend class MasterControl;
     URHO3D_OBJECT(Master, Object);
 public:
-    Master(Context *context, MasterControl* masterControl);
+    Master();
 protected:
-    MasterControl* masterControl_;
 
 //    virtual void HandleUpdate(StringHash eventType, VariantMap &eventData);
 };

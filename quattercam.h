@@ -22,7 +22,7 @@ class QuatterCam : public Object
     friend class MasterControl;
     friend class InputMaster;
 public:
-    QuatterCam(Context *context, MasterControl* masterControl);
+    QuatterCam();
 
     SharedPtr<Camera> camera_;
     SharedPtr<Viewport> viewport_;

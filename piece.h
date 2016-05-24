@@ -17,12 +17,11 @@ class Piece : public Object
 {
     URHO3D_OBJECT(Piece, Object);
 public:
-    Piece(Context *context, MasterControl* masterControl, std::bitset<4> attributes);
+    Piece(std::bitset<4> attributes);
 
     void SetPosition(Vector3 pos) { rootNode_->SetPosition(pos); }
     inline bool GetAttribute(int index) const noexcept { return attributes_[index]; }
 private:
-    MasterControl* masterControl_;
     Node* rootNode_;
     std::bitset<4> attributes_;
     PieceState state_;

@@ -1,8 +1,6 @@
 #include "master.h"
 
-Master::Master(Context* context, MasterControl *masterControl): Object(context),
-  masterControl_{masterControl}
+Master::Master(): Object(MC->GetContext())
 {
-
 }
 

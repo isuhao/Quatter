@@ -5,23 +5,33 @@
 
 URHO3D_DEFINE_APPLICATION_MAIN(MasterControl);
 
+MasterControl* MasterControl::instance_ = NULL;
+
+MasterControl* MasterControl::GetInstance()
+{
+    return MasterControl::instance_;
+}
+
 MasterControl::MasterControl(Context *context):
     Application(context),
     gamePhase_{GamePhase::PLAYER1PICKS}
 {
+    instance_ = this;
 }
 
 void MasterControl::Setup()
 {
     engineParameters_["WindowTitle"] = "Quatter";
     engineParameters_["LogName"] = GetSubsystem<FileSystem>()->GetAppPreferencesDir("urho3d", "logs")+"Quatter.log";
+    engineParameters_["ResourcePaths"] = "Data;CoreData;Resources";
+    engineParameters_["WindowIcon"] = "icon.png";
 //    engineParameters_["FullScreen"] = false;
 //    engineParameters_["WindowWidth"] = 960;
 //    engineParameters_["WindowHeight"] = 540;
 }
 void MasterControl::Start()
 {
-    new InputMaster(context_, this);
+    new InputMaster();
     cache_ = GetSubsystem<ResourceCache>();
 
     CreateScene();
@@ -47,7 +57,7 @@ void MasterControl::CreateScene()
 {
     world.scene = new Scene(context_);
     world.scene->CreateComponent<Octree>();
-    world.camera = new QuatterCam(context_, this);
+    world.camera = new QuatterCam();
     CreateLights();
 
     //Create table
@@ -60,11 +70,11 @@ void MasterControl::CreateScene()
     tableModel->GetMaterial()->SetShaderParameter("MatDiffColor", Vector4(0.32f, 0.40f, 0.42f, 1.0f));
 
     //Create board and pieces
-    world.board_ = new Board(context_, this);
+    world.board_ = new Board();
     tableNode->SetPosition(Vector3::DOWN * world.board_->GetHeight());
 
     for (int p = 0; p < 16; ++p){
-        Piece* newPiece = new Piece(context_, this, std::bitset<4>(p));
+        Piece* newPiece = new Piece(std::bitset<4>(p));
         world.pieces_.Push(SharedPtr<Piece>(newPiece));
         newPiece->SetPosition(Quaternion(360.0f/16 * p, Vector3::UP) * Vector3::RIGHT * 6.66f +
                               Vector3::DOWN * world.board_->GetHeight());

@@ -33,12 +33,16 @@ typedef struct GameWorld
     } cursor;
 } GameWorld;
 
+#define MC MasterControl::GetInstance()
+
 class MasterControl : public Application
 {
     URHO3D_OBJECT(MasterControl, Application);
     friend class InputMaster;
 public:
     MasterControl(Context* context);
+    static MasterControl* GetInstance();
+
     GameWorld world;
     SharedPtr<ResourceCache> cache_;
     SharedPtr<Graphics> graphics_;
@@ -54,6 +58,8 @@ public:
     void CreateLights();
     inline GamePhase GetGamePhase() const noexcept { return gamePhase_; }
 private:
+    static MasterControl* instance_;
+
     GamePhase gamePhase_;
     Node* movingLightNode_;
 
