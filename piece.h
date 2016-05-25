@@ -2,8 +2,8 @@
 #define PIECE_H
 
 #include <Urho3D/Urho3D.h>
-#include "mastercontrol.h"
 #include <bitset>
+#include "mastercontrol.h"
 
 namespace Urho3D {
 class Node;
@@ -11,7 +11,7 @@ class Node;
 
 using namespace Urho3D;
 
-enum class PieceState {FREE, SELECTED, PUT};
+enum class PieceState {FREE, SELECTED, PICKED, PUT};
 
 #define NUM_ATTRIBUTES 4
 
@@ -30,12 +30,16 @@ public:
     float GetAngle() const { return MC->AttributesToAngle(static_cast<int>(attributes_.to_ulong())); }
     void Select();
     void Deselect();
+    PieceState GetState() const noexcept { return state_; }
+    void Pick();
+    void Put(Vector3 position);
 private:
-    Node* rootNode_;
+    SharedPtr<Node> rootNode_;
     SharedPtr<StaticModel> outlineModel_;
 
     Attributes attributes_;
     PieceState state_;
+    float sinceStateChange_;
 };
 
 #endif // PIECE_H

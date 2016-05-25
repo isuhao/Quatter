@@ -1,23 +1,33 @@
 #include "quattercam.h"
+#include <initializer_list>
 
 QuatterCam::QuatterCam():
     Object(MC->GetContext()),
     distance_{12.0f},
-    dollyRotation_{Vector2::ZERO},
     targetPosition_{Vector3::ZERO},
-    lastTargetPosition_{Vector3::ZERO}
+    smoothTargetPosition_{targetPosition_}
 {
     rootNode_ = MC->world.scene->CreateChild("Camera");
+    for (bool p : {true, false}){
+        Node* pocketNode{rootNode_->CreateChild("Pocket")};
+        pocketNode->SetPosition(Vector3(p?2.0f:-2.0f, 1.5f, 3.2f));
+        pocketNode->SetRotation(Quaternion(-70.0f, Vector3::RIGHT));
+        if (p)
+            pockets_.first_ = pocketNode;
+        else
+            pockets_.second_ = pocketNode;
+    }
+
     camera_ = rootNode_->CreateComponent<Camera>();
     camera_->SetFarClip(1024.0f);
     rootNode_->SetPosition(Vector3(3.0f, 10.0f, -8.0f));
     rootNode_->LookAt(Vector3::ZERO);
 
     Zone* zone{rootNode_->CreateComponent<Zone>()};
-    zone->SetFogColor(Color(0.05f, 0.1f, 0.23f));
-    zone->SetFogStart(23.0f);
-    zone->SetFogEnd(128.0f);
-    zone->SetAmbientColor(Color(0.23f, 0.23f, 0.23f));
+    zone->SetFogColor(Color(0.20f, 0.17f, 0.13f));
+    zone->SetFogStart(50.0f);
+    zone->SetFogEnd(64.0f);
+    zone->SetAmbientColor(Color(0.2f, 0.2f, 0.2f));
 
     SetupViewport();
 
@@ -46,12 +56,20 @@ void QuatterCam::SetupViewport()
 
 void QuatterCam::HandleSceneUpdate(StringHash eventType, VariantMap& eventData)
 {
+    float t{eventData[SceneUpdate::P_TIMESTEP].GetFloat()};
     //Update distance
     Vector3 relativeToTarget{(rootNode_->GetPosition() - targetPosition_).Normalized()};
     if (relativeToTarget.Length() != distance_){
             rootNode_->SetPosition(distance_ * relativeToTarget + targetPosition_);
             camera_->SetFov(Clamp(60.0f + distance_, 23.0f, 110.0f));
     }
+    //Spin pockets
+    float spinSpeed{23.0f};
+    pockets_.first_->Rotate(Quaternion(t * spinSpeed, Vector3::UP));
+    pockets_.second_->Rotate(Quaternion(-t * spinSpeed, Vector3::UP));
+    //Reposition pockets
+    pockets_.first_->SetPosition(Vector3(-2.3f - 0.06f * (ZOOM_MAX - distance_), 1.5f, 3.2f));
+    pockets_.second_->SetPosition(Vector3(2.3f + 0.06f * (ZOOM_MAX - distance_), 1.5f, 3.2f));
 }
 
 void QuatterCam::Rotate(Vector2 rotation)

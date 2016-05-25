@@ -22,6 +22,8 @@ MasterControl::MasterControl(Context *context):
 
 void MasterControl::Setup()
 {
+    SetRandomSeed(GetSubsystem<Time>()->GetSystemTime());
+
     engineParameters_["WindowTitle"] = "Quatter";
     engineParameters_["LogName"] = GetSubsystem<FileSystem>()->GetAppPreferencesDir("urho3d", "logs")+"Quatter.log";
     engineParameters_["ResourcePaths"] = "Data;CoreData;Resources";
@@ -68,8 +70,8 @@ void MasterControl::CreateScene()
     CreateLights();
 
     //Create skybox
-    Node* skyNode = world.scene->CreateChild("Sky");
-    Skybox* skybox = skyNode->CreateComponent<Skybox>();
+    Node* skyNode{world.scene->CreateChild("Sky")};
+    Skybox* skybox{skyNode->CreateComponent<Skybox>()};
     skybox->SetModel(GetModel("Box"));
     skybox->SetMaterial(GetMaterial("LeafyKnoll"));
 
@@ -90,7 +92,7 @@ void MasterControl::CreateScene()
     for (int p{0}; p < NUM_PIECES; ++p){
         Piece* newPiece = new Piece(Piece::Attributes(p));
         world.pieces_.Push(SharedPtr<Piece>(newPiece));
-        newPiece->SetPosition(AttributesToPosition(p));
+        newPiece->SetPosition(AttributesToPosition(p) + Vector3(Random(0.23f), 0.0f, Random(0.23f)));
     }
 }
 
@@ -98,12 +100,12 @@ void MasterControl::CreateScene()
 void MasterControl::CreateLights()
 {
     //Add a directional light to the world. Enable cascaded shadows on it
-    Node* downardsLightNode = world.scene->CreateChild("DirectionalLight");
-    downardsLightNode->SetPosition(Vector3(-5.0f, 23.0f, -2.0f));
+    Node* downardsLightNode{world.scene->CreateChild("DirectionalLight")};
+    downardsLightNode->SetPosition(Vector3(2.0f, 23.0f, -3.0f));
     downardsLightNode->LookAt(Vector3(0.0f, 0.0f, 0.0f));
-    Light* downwardsLight = downardsLightNode->CreateComponent<Light>();
+    Light* downwardsLight{downardsLightNode->CreateComponent<Light>()};
     downwardsLight->SetLightType(LIGHT_DIRECTIONAL);
-    downwardsLight->SetBrightness(0.88f);
+    downwardsLight->SetBrightness(0.8f);
     downwardsLight->SetColor(Color(0.8f, 0.9f, 0.95f));
     downwardsLight->SetCastShadows(true);
     downwardsLight->SetShadowIntensity(0.23f);
@@ -111,13 +113,43 @@ void MasterControl::CreateLights()
     downwardsLight->SetShadowCascade(CascadeParameters(1.0f, 5.0f, 23.0f, 100.0f, 0.8f));
 
     //Create a point light.
-    Node* pointLightNode_ = world.scene->CreateChild("PointLight");
-    pointLightNode_->SetPosition(Vector3(0.0f, -1.0f, -13.0f));
-    Light* pointLight = pointLightNode_->CreateComponent<Light>();
+    Node* pointLightNode_{world.scene->CreateChild("PointLight")};
+    pointLightNode_->SetPosition(Vector3(-10.0f, -1.0f, 23.0f));
+    Light* pointLight{pointLightNode_->CreateComponent<Light>()};
     pointLight->SetLightType(LIGHT_POINT);
-    pointLight->SetBrightness(0.23f);
+    pointLight->SetBrightness(0.42f);
     pointLight->SetRange(42.0f);
     pointLight->SetColor(Color(0.75f, 1.0f, 0.75f));
+}
+
+Piece* MasterControl::GetSelectedPiece() const
+{
+    for (Piece* p: world.pieces_){
+        if (p->GetState() == PieceState::SELECTED){
+            return p;
+        }
+    }
+    return nullptr;
+}
+
+Piece* MasterControl::GetPickedPiece() const
+{
+    for (Piece* p: world.pieces_){
+        if (p->GetState() == PieceState::PICKED){
+            return p;
+        }
+    }
+    return nullptr;
+}
+int MasterControl::CountFreePieces()
+{
+    int count{0};
+    for (Piece* p: world.pieces_){
+        if (p->GetState() == PieceState::FREE){
+            ++count;
+        }
+    }
+    return count;
 }
 
 void MasterControl::HandleUpdate(StringHash eventType, VariantMap& eventData)
@@ -127,7 +159,7 @@ void MasterControl::HandleUpdate(StringHash eventType, VariantMap& eventData)
         for (Piece* p: world.pieces_){
             if (LucKey::Delta(CAMERA->GetYaw(), p->GetAngle(), true) < 180.0f / NUM_PIECES){
                 p->Select();
-            } else {
+            } else if (p->GetState() != PieceState::PICKED){
                 p->Deselect();
             }
         }

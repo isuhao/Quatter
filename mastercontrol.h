@@ -18,7 +18,7 @@ class InputMaster;
 class Board;
 class Piece;
 
-enum class GamePhase{PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS};
+enum class GamePhase{PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS, QUATTER};
 
 typedef struct GameWorld
 {
@@ -33,8 +33,9 @@ typedef struct GameWorld
     } cursor;
 } GameWorld;
 
-#define NUM_PIECES 16
 #define MC MasterControl::GetInstance()
+#define CAMERA MC->world.camera
+#define NUM_PIECES 16
 
 class MasterControl : public Application
 {
@@ -59,11 +60,14 @@ public:
     void CreateLights();
     inline GamePhase GetGamePhase() const noexcept { return gamePhase_; }
 
-    float AttributesToAngle(int attributes) const { return 360.0f/NUM_PIECES * attributes; }
+    float AttributesToAngle(int attributes) const { return (360.0f/NUM_PIECES * attributes) + 180.0f/NUM_PIECES + 23.5f; }
     Vector3 AttributesToPosition(int attributes) const {
         return Quaternion(AttributesToAngle(attributes), Vector3::UP) * Vector3::FORWARD * 7.0f
-                + Vector3::DOWN * 0.23f;
+                + Vector3::DOWN * 0.21f;
     }
+    Piece* GetSelectedPiece() const;
+    Piece* GetPickedPiece() const;
+    int CountFreePieces();
 
     Material* GetMaterial(String name) const { return cache_->GetResource<Material>("Materials/"+name+".xml"); }
     Model* GetModel(String name) const { return cache_->GetResource<Model>("Models/"+name+".mdl"); }

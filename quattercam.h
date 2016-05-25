@@ -1,5 +1,5 @@
-#ifndef TEMPLATECAM_H
-#define TEMPLATECAM_H
+#ifndef QUATTERCAM_H
+#define QUATTERCAM_H
 
 #include <Urho3D/Urho3D.h>
 #include "mastercontrol.h"
@@ -16,6 +16,13 @@ class Camera;
 
 using namespace Urho3D;
 
+#define PITCH_MIN 13.0f
+#define PITCH_MAX 80.0f
+#define PITCH_EDGE 5.0f
+#define ZOOM_MIN 5.0f
+#define ZOOM_MAX 23.0f
+#define ZOOM_EDGE 2.3f
+
 class QuatterCam : public Object
 {
     URHO3D_OBJECT(QuatterCam, Object);
@@ -23,11 +30,6 @@ class QuatterCam : public Object
     friend class InputMaster;
 public:
     QuatterCam();
-
-#define PITCH_MIN 13.0f
-#define PITCH_MAX 80.0f
-#define ZOOM_MIN 5.0f
-#define ZOOM_MAX 23.0f
 
     SharedPtr<Camera> camera_;
     SharedPtr<Viewport> viewport_;
@@ -37,13 +39,15 @@ public:
     float GetYaw() const { return rootNode_->GetRotation().EulerAngles().y_ + 180.0f; }
     float GetDistance() const { return distance_; }
     void Zoom(float distance);
+    Node* GetPocket(bool right) const { return right ? pockets_.second_ : pockets_.first_; }
 private:
     SharedPtr<Node> rootNode_;
+    Pair<SharedPtr<Node>,
+         SharedPtr<Node>> pockets_;
 
     float distance_;
-    Vector2 dollyRotation_;
     Vector3 targetPosition_;
-    Vector3 lastTargetPosition_;
+    Vector3 smoothTargetPosition_;
 
     void SetupViewport();
 
@@ -51,4 +55,4 @@ private:
     void HandleSceneUpdate(StringHash eventType, VariantMap& eventData);
 };
 
-#endif // TEMPLATECAM_H
+#endif // QUATTERCAM_H
