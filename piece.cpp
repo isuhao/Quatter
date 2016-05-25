@@ -1,57 +1,53 @@
 #include "piece.h"
 
-Piece::Piece(std::bitset<4> attributes): Object(MC->GetContext()),
-    state_{PieceState::FREE}
+Piece::Piece(Attributes attributes): Object(MC->GetContext()),
+    state_{PieceState::FREE},
+    attributes_{attributes}
 {
-    rootNode_ = MC->world.scene->CreateChild("Piece");
+    rootNode_ = MC->world.scene->CreateChild("Piece"+GetCodon(4));
     rootNode_->SetRotation(Quaternion(Random(360.0f), Vector3::UP));
 
-    attributes_ = attributes;
-    int attr{static_cast<int>(attributes.to_ulong())};
 
-    StaticModel* pieceModel = rootNode_->CreateComponent<StaticModel>();
+    StaticModel* pieceModel{rootNode_->CreateComponent<StaticModel>()};
     pieceModel->SetCastShadows(true);
-    switch (attr){
-    case 0: case 8: pieceModel->SetModel(MC->GetModel("Piece_SSS"));
-        break;
-    case 1: case 9: pieceModel->SetModel(MC->GetModel("Piece_SSH"));
-        break;
-    case 2: case 10: pieceModel->SetModel(MC->GetModel("Piece_SRS"));
-        break;
-    case 3: case 11: pieceModel->SetModel(MC->GetModel("Piece_SRH"));
-        break;
-    case 4: case 12: pieceModel->SetModel(MC->GetModel("Piece_TSS"));
-        break;
-    case 5: case 13: pieceModel->SetModel(MC->GetModel("Piece_TSH"));
-        break;
-    case 6: case 14: pieceModel->SetModel(MC->GetModel("Piece_TRS"));
-        break;
-    case 7: case 15: pieceModel->SetModel(MC->GetModel("Piece_TRH"));
-        break;
-    }
+    pieceModel->SetModel(MC->GetModel("Piece_"+GetCodon(3)));
     if (attributes[3]){
-        pieceModel->SetMaterial(MC->cache_->GetResource<Material>("Resources/Materials/Wood_dark.xml"));
+        pieceModel->SetMaterial(MC->cache_->GetResource<Material>("Resources/Materials/Wood_light.xml"));
     }
-    else pieceModel->SetMaterial(MC->cache_->GetResource<Material>("Resources/Materials/Wood_light.xml"));
+    else pieceModel->SetMaterial(MC->cache_->GetResource<Material>("Resources/Materials/Wood_dark.xml"));
 
 
-    StaticModel* outlineModel = rootNode_->CreateComponent<StaticModel>();
-    outlineModel->SetCastShadows(true);
-    outlineModel->SetEnabled(!attr);
-    switch(attr){
-    case 0: case 8: case 1: case 9:
-        outlineModel->SetModel(MC->GetModel("Piece_SS_outline"));
-        break;
-    case 2: case 10: case 3: case 11:
-        outlineModel->SetModel(MC->GetModel("Piece_SR_outline"));
-        break;
-    case 4: case 12: case 5: case 13:
-        outlineModel->SetModel(MC->GetModel("Piece_TS_outline"));
-        break;
-    case 6: case 14: case 7: case 15:
-        outlineModel->SetModel(MC->GetModel("Piece_TR_outline"));
-        break;
-    }
-    outlineModel->SetMaterial(MC->cache_->GetResource<Material>("Resources/Materials/Glow.xml"));
+    outlineModel_ = rootNode_->CreateComponent<StaticModel>();
+    outlineModel_->SetCastShadows(false);
+    outlineModel_->SetModel(MC->GetModel("Piece_"+GetCodon(2)+"_outline"));
+    outlineModel_->SetMaterial(MC->cache_->GetResource<Material>("Resources/Materials/Glow.xml"));
+
+    Select();
 }
 
+String Piece::GetCodon(int length) const
+{
+    if (length > attributes_.size() || length < 1)
+        length = static_cast<int>(attributes_.size());
+
+    String codon{};
+
+        codon += attributes_[0] ? "T" : "S"; //Tall  : Short
+    if (length > 1)
+        codon += attributes_[1] ? "R" : "S"; //Round : Square
+    if (length > 2)
+        codon += attributes_[2] ? "H" : "S"; //Hole  : Solid
+    if (length == NUM_ATTRIBUTES)
+        codon += attributes_[3] ? "L" : "D"; //Light : Dark
+
+    return codon;
+}
+
+void Piece::Select()
+{
+    outlineModel_->SetEnabled(true);
+}
+void Piece::Deselect()
+{
+    outlineModel_->SetEnabled(false);
+}

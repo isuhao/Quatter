@@ -33,6 +33,7 @@ typedef struct GameWorld
     } cursor;
 } GameWorld;
 
+#define NUM_PIECES 16
 #define MC MasterControl::GetInstance()
 
 class MasterControl : public Application
@@ -58,10 +59,21 @@ public:
     void CreateLights();
     inline GamePhase GetGamePhase() const noexcept { return gamePhase_; }
 
+    float AttributesToAngle(int attributes) const { return 360.0f/NUM_PIECES * attributes; }
+    Vector3 AttributesToPosition(int attributes) const {
+        return Quaternion(AttributesToAngle(attributes), Vector3::UP) * Vector3::FORWARD * 7.0f
+                + Vector3::DOWN * 0.23f;
+    }
+
     Material* GetMaterial(String name) const { return cache_->GetResource<Material>("Materials/"+name+".xml"); }
     Model* GetModel(String name) const { return cache_->GetResource<Model>("Models/"+name+".mdl"); }
+
+
+    float Sine(const float freq, const float min, const float max, const float shift = 0.0f);
+    float Cosine(const float freq, const float min, const float max, const float shift = 0.0f);
 private:
     static MasterControl* instance_;
+    InputMaster* inputMaster_;
 
     SharedPtr<SoundSource> musicSource_;
     float musicGain_;

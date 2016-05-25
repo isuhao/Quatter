@@ -1,0 +1,9 @@
+<cubemap>
+    <face name="LeafyKnoll_PosX.dds" />
+    <face name="LeafyKnoll_NegX.dds" />
+    <face name="LeafyKnoll_PosY.dds" />
+    <face name="LeafyKnoll_NegY.dds" />
+    <face name="LeafyKnoll_PosZ.dds" />
+    <face name="LeafyKnoll_NegZ.dds" />
+    <!--quality low="0" /-->
+</cubemap>

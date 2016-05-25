@@ -5,16 +5,23 @@
 
 enum class JoystickButton {SELECT, LEFTSTICK, RIGHTSTICK, START, DPAD_UP, DPAD_RIGHT, DPAD_DOWN, DPAD_LEFT, L2, R2, L1, R1, TRIANGLE, CIRCLE, CROSS, SQUARE};
 
+#define CAMERA MC->world.camera
+
 class InputMaster : public Master
 {
     URHO3D_OBJECT(InputMaster, Master);
 public:
     InputMaster();
     WeakPtr<Node> firstHit_;
+
+    bool IsIdle() const noexcept { return idle_; }
 private:
     Input* input_;
 
     float idleTime_;
+    bool idle_;
+    Vector2 smoothCamRotate_;
+    float smoothCamZoom_;
 
     HashSet<int> pressedKeys_;
     HashSet<int> pressedMouseButtons_;

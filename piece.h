@@ -13,19 +13,28 @@ using namespace Urho3D;
 
 enum class PieceState {FREE, SELECTED, PUT};
 
+#define NUM_ATTRIBUTES 4
+
+
 class Piece : public Object
 {
     URHO3D_OBJECT(Piece, Object);
 public:
-    Piece(std::bitset<4> attributes);
+    typedef std::bitset<NUM_ATTRIBUTES> Attributes;
+    Piece(Attributes);
 
     void SetPosition(Vector3 pos) { rootNode_->SetPosition(pos); }
     inline bool GetAttribute(int index) const noexcept { return attributes_[index]; }
+    inline Attributes GetAttributes() const noexcept { return attributes_; }
+    String GetCodon(int length = NUM_ATTRIBUTES) const;
+    float GetAngle() const { return MC->AttributesToAngle(static_cast<int>(attributes_.to_ulong())); }
+    void Select();
+    void Deselect();
 private:
     Node* rootNode_;
-    String modelName_;
+    SharedPtr<StaticModel> outlineModel_;
 
-    std::bitset<4> attributes_;
+    Attributes attributes_;
     PieceState state_;
 };
 

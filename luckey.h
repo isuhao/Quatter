@@ -88,6 +88,7 @@ T Cycle(T x, T min, T max){
                   : x;
 }
 
+float Delta(float lhs, float rhs, bool angle = false);
 float Distance(const Vector3 from, const Vector3 to);
 unsigned IntVector2ToHash(IntVector2 vec);
 Vector3 Scale(const Vector3 lhs, const Vector3 rhs);
@@ -97,6 +98,9 @@ float RandomSign();
 Color RandomColor();
 Color RandomSkinColor();
 Color RandomHairColor();
+
+float Sine(float x);
+float Cosine(float x);
 }
 
 #endif // LUCKEY_H

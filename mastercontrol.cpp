@@ -33,7 +33,7 @@ void MasterControl::Setup()
 }
 void MasterControl::Start()
 {
-    new InputMaster();
+    inputMaster_ = new InputMaster();
     cache_ = GetSubsystem<ResourceCache>();
 
     CreateScene();
@@ -46,6 +46,8 @@ void MasterControl::Start()
     musicSource_->SetSoundType(SOUND_MUSIC);
     musicSource_->SetGain(musicGain_);
     musicSource_->Play(music);
+
+    SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(MasterControl, HandleUpdate));
 }
 void MasterControl::Stop()
 {
@@ -53,6 +55,9 @@ void MasterControl::Stop()
 }
 void MasterControl::Exit()
 {
+    File file(context_, "Resources/Endgame.xml", FILE_WRITE);
+    world.scene->SaveXML(file);
+
     engine_->Exit();
 }
 
@@ -60,27 +65,32 @@ void MasterControl::CreateScene()
 {
     world.scene = new Scene(context_);
     world.scene->CreateComponent<Octree>();
-    world.camera = new QuatterCam();
     CreateLights();
+
+    //Create skybox
+    Node* skyNode = world.scene->CreateChild("Sky");
+    Skybox* skybox = skyNode->CreateComponent<Skybox>();
+    skybox->SetModel(GetModel("Box"));
+    skybox->SetMaterial(GetMaterial("LeafyKnoll"));
+
+    world.camera = new QuatterCam();
 
     //Create table
     Node* tableNode = world.scene->CreateChild("Table");
     tableNode->SetRotation(Quaternion(23.5f, Vector3::UP));
-    tableNode->SetScale(19.0f);
+//    tableNode->SetScale(19.0f);
     StaticModel* tableModel = tableNode->CreateComponent<StaticModel>();
-    tableModel->SetModel(cache_->GetResource<Model>("Models/Plane.mdl"));
-    tableModel->SetMaterial(cache_->GetResource<Material>("Materials/Stone.xml"));
+    tableModel->SetModel(GetModel("Table"));
+    tableModel->SetMaterial(GetMaterial("Table"));
     tableModel->GetMaterial()->SetShaderParameter("MatDiffColor", Vector4(0.32f, 0.40f, 0.42f, 1.0f));
 
     //Create board and pieces
     world.board_ = new Board();
-    tableNode->SetPosition(Vector3::DOWN * world.board_->GetHeight());
 
-    for (int p = 0; p < 16; ++p){
-        Piece* newPiece = new Piece(std::bitset<4>(p));
+    for (int p{0}; p < NUM_PIECES; ++p){
+        Piece* newPiece = new Piece(Piece::Attributes(p));
         world.pieces_.Push(SharedPtr<Piece>(newPiece));
-        newPiece->SetPosition(Quaternion(360.0f/16 * p, Vector3::UP) * Vector3::RIGHT * 6.66f +
-                              Vector3::DOWN * world.board_->GetHeight());
+        newPiece->SetPosition(AttributesToPosition(p));
     }
 }
 
@@ -110,6 +120,20 @@ void MasterControl::CreateLights()
     pointLight->SetColor(Color(0.75f, 1.0f, 0.75f));
 }
 
+void MasterControl::HandleUpdate(StringHash eventType, VariantMap& eventData)
+{
+//    float t{eventData[Update::P_TIMESTEP].GetFloat()};
+    if (!inputMaster_->IsIdle()){
+        for (Piece* p: world.pieces_){
+            if (LucKey::Delta(CAMERA->GetYaw(), p->GetAngle(), true) < 180.0f / NUM_PIECES){
+                p->Select();
+            } else {
+                p->Deselect();
+            }
+        }
+    }
+}
+
 void MasterControl::NextPhase()
 {
     switch (gamePhase_)    {
@@ -126,21 +150,24 @@ void MasterControl::NextPhase()
 
 void MasterControl::ToggleMusic()
 {
+    ValueAnimation* fade{musicSource_->GetAttributeAnimation("Gain")};
+    float fadeEndValue{-1.0f};
+    if (fade)
+        fadeEndValue = fade->GetAnimationValue(fade->GetEndTime()).GetFloat();
 
-
-    if (musicSource_->GetGain() == 0.0f){
+    if (musicSource_->GetGain() == 0.0f || fadeEndValue == 0.0f){
         ValueAnimation* fadeIn_{new ValueAnimation(context_)};
         fadeIn_->SetKeyFrame(0.0f, 0.0f);
         fadeIn_->SetKeyFrame(1.0f, 0.5f * musicGain_);
-        fadeIn_->SetKeyFrame(2.3f, musicGain_);
+        fadeIn_->SetKeyFrame(2.3f, Min(musicGain_, 0.1f));
         musicSource_->SetAttributeAnimation("Gain", fadeIn_, WM_ONCE);
     }
     else{
-        musicGain_ = musicSource_->GetGain();
+        float lastGain_{musicSource_->GetGain()};
         ValueAnimation* fadeOut_ = new ValueAnimation(context_);
-        fadeOut_->SetKeyFrame(0.0f, musicGain_);
-        fadeOut_->SetKeyFrame(1.0f, 0.5f * musicGain_);
-        fadeOut_->SetKeyFrame(2.3f, 0.1f * musicGain_);
+        fadeOut_->SetKeyFrame(0.0f, lastGain_);
+        fadeOut_->SetKeyFrame(1.0f, 0.5f * lastGain_);
+        fadeOut_->SetKeyFrame(2.3f, 0.1f * lastGain_);
         fadeOut_->SetKeyFrame(5.0f, 0.0f);
         musicSource_->SetAttributeAnimation("Gain", fadeOut_, WM_ONCE);
     }
@@ -148,7 +175,7 @@ void MasterControl::ToggleMusic()
 
 void MasterControl::MusicGainUp(float step)
 {
-    musicGain_ = Clamp(musicGain_ + step, 0.0f, 1.0f);
+    musicGain_ = Clamp(musicGain_ + step, step, 1.0f);
 
     ValueAnimation* fadeIn_{new ValueAnimation(context_)};
     fadeIn_->SetKeyFrame(0.0f, musicSource_->GetGain());
@@ -163,4 +190,17 @@ void MasterControl::MusicGainDown(float step)
     fadeOut_->SetKeyFrame(0.0f, musicSource_->GetGain());
     fadeOut_->SetKeyFrame(0.23f, musicGain_);
     musicSource_->SetAttributeAnimation("Gain", fadeOut_, WM_ONCE);
+}
+
+float MasterControl::Sine(const float freq, const float min, const float max, const float shift)
+{
+    float phase{freq * world.scene->GetElapsedTime() + shift};
+    float add{0.5f * (min + max)};
+    return LucKey::Sine(phase) * 0.5f * (max - min) + add;
+}
+float MasterControl::Cosine(const float freq, const float min, const float max, const float shift)
+{
+    float phase{freq * world.scene->GetElapsedTime() + shift};
+    float add{0.5f * (min + max)};
+    return LucKey::Cosine(phase) * 0.5f * (max - min) + add;
 }

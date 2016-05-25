@@ -1,8 +1,10 @@
 #include "inputmaster.h"
 #include "quattercam.h"
+#include "piece.h"
 
 InputMaster::InputMaster() : Master(),
-    input_{GetSubsystem<Input>()}
+    input_{GetSubsystem<Input>()},
+    idle_{false}
 {
     SubscribeToEvent(E_MOUSEBUTTONDOWN, URHO3D_HANDLER(InputMaster, HandleMouseButtonDown));
     SubscribeToEvent(E_MOUSEBUTTONUP, URHO3D_HANDLER(InputMaster, HandleMouseButtonUp));
@@ -91,11 +93,35 @@ void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
     float t{eventData[Update::P_TIMESTEP].GetFloat()};
     idleTime_ += t;
 
-    if (input_->GetMouseButtonDown(1)){
+    Vector2 camRot{};
+    float camZoom{};
+
+    float keyRotMultiplier{0.5f};
+    float keyZoomSpeed{0.1f};
+
+    if (pressedKeys_.Size()) idleTime_ = 0.0f;
+    for (int key : pressedKeys_){
+        switch (key){
+        case KEY_A:{ camRot += keyRotMultiplier * Vector2::RIGHT;
+        } break;
+        case KEY_D:{ camRot += keyRotMultiplier * Vector2::LEFT;
+        } break;
+        case KEY_W:{ camRot += keyRotMultiplier * Vector2::UP;
+        } break;
+        case KEY_S:{ camRot += keyRotMultiplier * Vector2::DOWN;
+        } break;
+        case KEY_Q:{ camZoom += keyZoomSpeed;
+        } break;
+        case KEY_E:{ camZoom += -keyZoomSpeed;
+        } break;
+        default: break;
+        }
+    }
+
+    if (input_->GetMouseButtonDown(MOUSEB_RIGHT)){
         idleTime_ = 0.0f;
         IntVector2 mouseMove = input_->GetMouseMove();
-        Vector2 rotation = Vector2(mouseMove.x_, mouseMove.y_) * 0.1f;
-        MC->world.camera->Rotate(rotation);
+        camRot += Vector2(mouseMove.x_, mouseMove.y_) * 0.1f;
     }
     //Should check whose turn it is
     JoystickState* joy0 = input_->GetJoystickByIndex(0);
@@ -103,11 +129,29 @@ void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
         Vector2 rotation{-Vector2(joy0->GetAxisPosition(2), joy0->GetAxisPosition(3))};
         if (rotation.Length()){
             idleTime_ = 0.0f;
-            MC->world.camera->Rotate(rotation);
+            camRot += rotation * t * 42.0f;
         }
+        camZoom += t * (joy0->GetAxisPosition(12) - joy0->GetAxisPosition(13));
     }
 
     float idleThreshold{5.0f};
-    if (idleTime_ > idleThreshold)
-        MC->world.camera->Rotate(Vector2::LEFT * Min((idleTime_ - idleThreshold) * 0.0023f, 0.005f));
+    float idleStartup{Min(0.5f * (idleTime_ - idleThreshold), 1.0f)};
+    if (idleTime_ > idleThreshold){
+        if (!idle_) {
+            idle_ = true;
+            for (Piece* p: MC->world.pieces_){
+                p->Deselect();
+            }
+        }
+        camRot += Vector2(t * idleStartup * -0.5f,
+                          t * idleStartup * MC->Sine(0.23f, -0.042f, 0.042f));
+    } else {
+        if (idle_) idle_ = false;
+    }
+
+    smoothCamRotate_ = 0.1f * (camRot  + smoothCamRotate_ * 9.0f);
+    smoothCamZoom_   = 0.1f * (camZoom + smoothCamZoom_   * 9.0f);
+
+    CAMERA->Rotate(smoothCamRotate_);
+    CAMERA->Zoom(smoothCamZoom_);
 }

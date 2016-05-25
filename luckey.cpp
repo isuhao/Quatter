@@ -18,6 +18,21 @@
 
 #include "luckey.h"
 
+
+float LucKey::Delta(float lhs, float rhs, bool angle)
+{
+    if (!angle)
+        return (lhs > rhs) ? Abs(lhs - rhs) : Abs(rhs - lhs);
+    else {
+        lhs = Cycle(lhs, 0.0f, 360.0f);
+        rhs = Cycle(rhs, 0.0f, 360.0f);
+        if (Delta(lhs, rhs) > 180.0f)
+            return Abs(360.0f - Delta(lhs, rhs));
+        else
+            return Delta(lhs, rhs);
+    }
+}
+
 float LucKey::Distance(const Vector3 from, const Vector3 to){
     return (to - from).Length();
 }
@@ -33,13 +48,13 @@ Urho3D::IntVector2 LucKey::Scale(const Urho3D::IntVector2 lhs, const Urho3D::Int
 }
 
 Vector2 LucKey::Rotate(const Vector2 vec2, const float angle){
-    float x = vec2.x_;
-    float y = vec2.y_;
+    float x{vec2.x_};
+    float y{vec2.y_};
 
-    float theta = M_DEGTORAD * angle;
+    float theta{M_DEGTORAD * angle};
 
-    float cs = cos(theta);
-    float sn = sin(theta);
+    float cs{cos(theta)};
+    float sn{sin(theta)};
 
     return Vector2(x * cs - y * sn, x * sn + y * cs);
 }
@@ -68,3 +83,34 @@ Color LucKey::RandomColor()
     color.FromHSV(Random(), Random(), Random());
     return color;
 }
+
+float LucKey::Sine(float x)
+{
+    if (x < -M_PI){
+        while (x < -M_PI) {
+            x += 2.0f * M_PI;
+        }
+    } else while (x > M_PI) {
+        x -= 2.0f * M_PI;
+    }
+
+
+    float sin{};
+
+    if (x < 0.0f)
+        sin = 1.27323954f * x + 0.405284735f * x * x;
+    else
+        sin = 1.27323954f * x - 0.405284735f * x * x;
+
+    if (sin < 0)
+        sin = 0.225f * (sin *-sin - sin) + sin;
+    else
+        sin = 0.225f * (sin * sin - sin) + sin;
+
+    return sin;
+}
+float LucKey::Cosine(float x)
+{
+    return Sine(x + M_PI * 0.5f);
+}
+

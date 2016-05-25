@@ -24,13 +24,19 @@ class QuatterCam : public Object
 public:
     QuatterCam();
 
+#define PITCH_MIN 13.0f
+#define PITCH_MAX 80.0f
+#define ZOOM_MIN 5.0f
+#define ZOOM_MAX 23.0f
+
     SharedPtr<Camera> camera_;
     SharedPtr<Viewport> viewport_;
     SharedPtr<RenderPath> effectRenderPath_;
 
-    Vector3 GetWorldPosition();
-    Quaternion GetRotation();
-    Vector2 GetDollyRotation();
+    float GetPitch() const { return rootNode_->GetRotation().EulerAngles().x_; }
+    float GetYaw() const { return rootNode_->GetRotation().EulerAngles().y_ + 180.0f; }
+    float GetDistance() const { return distance_; }
+    void Zoom(float distance);
 private:
     SharedPtr<Node> rootNode_;
 
@@ -42,9 +48,7 @@ private:
     void SetupViewport();
 
     void Rotate(Vector2 rotation);
-//    void SetDollyRotation(Vector2 dollyRotation){ dollyRotation_ = dollyRotation;}
-//    void Rotate(Vector2 rotation){ SetDollyRotation(GetDollyRotation() + rotation);
-//    void Focus(Vector3 targetPosition, float distance, float duration);
+    void HandleSceneUpdate(StringHash eventType, VariantMap& eventData);
 };
 
 #endif // TEMPLATECAM_H
