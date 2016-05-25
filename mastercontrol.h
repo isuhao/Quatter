@@ -71,6 +71,7 @@ public:
 
     Material* GetMaterial(String name) const { return cache_->GetResource<Material>("Materials/"+name+".xml"); }
     Model* GetModel(String name) const { return cache_->GetResource<Model>("Models/"+name+".mdl"); }
+    Texture* GetTexture(String name) const { return cache_->GetResource<Texture>("Textures/"+name+".png"); }
 
 
     float Sine(const float freq, const float min, const float max, const float shift = 0.0f);
@@ -78,6 +79,8 @@ public:
 private:
     static MasterControl* instance_;
     InputMaster* inputMaster_;
+    SharedPtr<Node> leafyLightNode_;
+    SharedPtr<Light> leafyLight_;
 
     SharedPtr<SoundSource> musicSource_;
     float musicGain_;

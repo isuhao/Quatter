@@ -6,5 +6,5 @@
 		<texture unit="environment" name="Textures/LeafyKnoll.xml" />
 		<parameter name="MatDiffColor" value="1.0 0.0 0.0 1" />
 		<parameter name="MatEnvMapColor" value="0.08 0.1 0.08" />
-    <parameter name="MatSpecColor" value="0.08 0.08 0.13 10" />
+    <parameter name="MatSpecColor" value="0.23 0.23 0.27 23" />
 </material>

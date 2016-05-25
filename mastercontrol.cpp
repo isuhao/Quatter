@@ -2,6 +2,7 @@
 #include "inputmaster.h"
 #include "quattercam.h"
 #include "board.h"
+#include <Urho3D/Graphics/Texture2D.h>
 
 URHO3D_DEFINE_APPLICATION_MAIN(MasterControl);
 
@@ -85,6 +86,7 @@ void MasterControl::CreateScene()
     tableModel->SetModel(GetModel("Table"));
     tableModel->SetMaterial(GetMaterial("Table"));
     tableModel->GetMaterial()->SetShaderParameter("MatDiffColor", Vector4(0.32f, 0.40f, 0.42f, 1.0f));
+    tableModel->SetCastShadows(true);
 
     //Create board and pieces
     world.board_ = new Board();
@@ -99,27 +101,44 @@ void MasterControl::CreateScene()
 
 void MasterControl::CreateLights()
 {
-    //Add a directional light to the world. Enable cascaded shadows on it
+    //Add main light source
     Node* downardsLightNode{world.scene->CreateChild("DirectionalLight")};
-    downardsLightNode->SetPosition(Vector3(2.0f, 23.0f, -3.0f));
+    downardsLightNode->SetPosition(Vector3(2.0f, 23.0f, 3.0f));
     downardsLightNode->LookAt(Vector3(0.0f, 0.0f, 0.0f));
     Light* downwardsLight{downardsLightNode->CreateComponent<Light>()};
     downwardsLight->SetLightType(LIGHT_DIRECTIONAL);
-    downwardsLight->SetBrightness(0.8f);
+    downwardsLight->SetBrightness(0.5f);
     downwardsLight->SetColor(Color(0.8f, 0.9f, 0.95f));
     downwardsLight->SetCastShadows(true);
     downwardsLight->SetShadowIntensity(0.23f);
     downwardsLight->SetShadowBias(BiasParameters(0.000025f, 0.5f));
-    downwardsLight->SetShadowCascade(CascadeParameters(1.0f, 5.0f, 23.0f, 100.0f, 0.8f));
+    downwardsLight->SetShadowCascade(CascadeParameters(5.0f, 7.0f, 23.0f, 42.0f, 0.8f));
+
+    //Add a directional light to the world. Enable cascaded shadows on it
+    leafyLightNode_ = world.scene->CreateChild("DirectionalLight");
+    leafyLightNode_->SetPosition(Vector3(6.0f, 96.0f, 9.0f));
+    leafyLightNode_->LookAt(Vector3(0.0f, 0.0f, 0.0f));
+    leafyLight_ = leafyLightNode_->CreateComponent<Light>();
+    leafyLight_->SetLightType(LIGHT_SPOT);
+//    leafyLight_->SetBrightness(1.0f);
+    leafyLight_->SetRange(180.0f);
+    leafyLight_->SetFov(34.0f);
+    leafyLight_->SetCastShadows(true);
+    leafyLight_->SetShapeTexture(static_cast<Texture*>(cache_->GetResource<Texture2D>("Textures/LeafyMask.png")));
+    leafyLight_->SetShadowBias(BiasParameters(0.0000025f, 0.5f));
+    leafyLight_->SetShadowCascade(CascadeParameters(5.0f, 7.0f, 23.0f, 42.0f, 0.8f));
+    leafyLight_->SetShadowCascade(CascadeParameters(64.0f, 86.0f, 128.0f, 192.0f, 0.8f));
 
     //Create a point light.
     Node* pointLightNode_{world.scene->CreateChild("PointLight")};
-    pointLightNode_->SetPosition(Vector3(-10.0f, -1.0f, 23.0f));
+    pointLightNode_->SetPosition(Vector3(-10.0f, 5.0f, -23.0f));
     Light* pointLight{pointLightNode_->CreateComponent<Light>()};
     pointLight->SetLightType(LIGHT_POINT);
     pointLight->SetBrightness(0.42f);
     pointLight->SetRange(42.0f);
     pointLight->SetColor(Color(0.75f, 1.0f, 0.75f));
+    pointLight->SetCastShadows(true);
+    pointLight->SetShadowIntensity(0.8f);
 }
 
 Piece* MasterControl::GetSelectedPiece() const
@@ -164,6 +183,10 @@ void MasterControl::HandleUpdate(StringHash eventType, VariantMap& eventData)
             }
         }
     }
+    //Wave leafy light
+    leafyLightNode_->SetRotation(Quaternion(Sine(Sine(0.1f, 0.05f, 0.23f), -0.23f, 0.23f) + 90.0f, Vector3::RIGHT) *
+                                 Quaternion(Sine(0.23f, 178.0f, 182.0f), Vector3::FORWARD));
+    leafyLight_->SetBrightness(Sine(0.011f, 0.05f, 0.5f) + Sine(0.02f, 0.13f, 0.34f));
 }
 
 void MasterControl::NextPhase()

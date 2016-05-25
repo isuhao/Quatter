@@ -45,8 +45,8 @@ void QuatterCam::SetupViewport()
     effectRenderPath_->Append(MC->cache_->GetResource<XMLFile>("PostProcess/FXAA3.xml"));
     effectRenderPath_->SetEnabled("FXAA3", true);
     effectRenderPath_->Append(MC->cache_->GetResource<XMLFile>("PostProcess/BloomHDR.xml"));
-    effectRenderPath_->SetShaderParameter("BloomHDRThreshold", 0.42f);
-    effectRenderPath_->SetShaderParameter("BloomHDRMix", Vector2(1.0f, 1.0f));
+    effectRenderPath_->SetShaderParameter("BloomHDRThreshold", 0.4f);
+    effectRenderPath_->SetShaderParameter("BloomHDRMix", Vector2(1.0f, 1.25f));
     effectRenderPath_->SetEnabled("BloomHDR", true);
 
     Renderer* renderer{GetSubsystem<Renderer>()};
@@ -68,8 +68,8 @@ void QuatterCam::HandleSceneUpdate(StringHash eventType, VariantMap& eventData)
     pockets_.first_->Rotate(Quaternion(t * spinSpeed, Vector3::UP));
     pockets_.second_->Rotate(Quaternion(-t * spinSpeed, Vector3::UP));
     //Reposition pockets
-    pockets_.first_->SetPosition(Vector3(-2.3f - 0.06f * (ZOOM_MAX - distance_), 1.5f, 3.2f));
-    pockets_.second_->SetPosition(Vector3(2.3f + 0.06f * (ZOOM_MAX - distance_), 1.5f, 3.2f));
+    pockets_.first_->SetPosition(Vector3(-2.2f - 0.06f * (ZOOM_MAX - distance_), 1.4f, 3.2f));
+    pockets_.second_->SetPosition(Vector3(2.2f + 0.06f * (ZOOM_MAX - distance_), 1.4f, 3.2f));
 }
 
 void QuatterCam::Rotate(Vector2 rotation)
