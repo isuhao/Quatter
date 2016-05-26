@@ -19,6 +19,7 @@ public:
 
     void SetIdle();
 
+    JoystickState* GetActiveJoystick();
 private:
     Input* input_;
 
@@ -47,6 +48,7 @@ private:
     void HandleDownArrowPressed();
     void HandleRightArrowPressed();
     void HandleLeftArrowPressed();
+    bool CorrectTurn(int joystickId);
 };
 
 #endif // INPUTMASTER_H

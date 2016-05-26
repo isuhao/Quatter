@@ -107,6 +107,35 @@ void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventDat
     if (pressedMouseButtons_.Contains(button)) pressedMouseButtons_.Erase(button);
 }
 
+bool InputMaster::CorrectTurn(int joystickId)
+{
+    return
+            (joystickId == 0 && (MC->GetGameState() == GameState::PLAYER1PICKS ||
+                                 MC->GetGameState() == GameState::PLAYER1PUTS))||
+            (joystickId == 1 && (MC->GetGameState() == GameState::PLAYER2PICKS ||
+                                 MC->GetGameState() == GameState::PLAYER2PUTS)) ;
+}
+JoystickState* InputMaster::GetActiveJoystick()
+{
+    if (input_->GetJoystickByIndex(0)){
+        if (input_->GetJoystickByIndex(1)){
+            if (MC->GetGameState() == GameState::PLAYER1PICKS ||
+                MC->GetGameState() == GameState::PLAYER1PUTS)
+            {
+                return input_->GetJoystickByIndex(0);
+
+            } else if (MC->GetGameState() == GameState::PLAYER2PICKS ||
+                       MC->GetGameState() == GameState::PLAYER2PUTS)
+            {
+                return input_->GetJoystickByIndex(1);
+            }
+        } else {
+            return input_->GetJoystickByIndex(0);
+        }
+    }
+    return nullptr;
+}
+
 void InputMaster::HandleJoystickButtonDown(StringHash eventType, VariantMap &eventData)
 {
     ResetIdle();
@@ -115,6 +144,9 @@ void InputMaster::HandleJoystickButtonDown(StringHash eventType, VariantMap &eve
     int joystickId{eventData[P_JOYSTICKID].GetInt()};
     int button{eventData[P_BUTTON].GetInt()};
 
+    if (   input_->GetJoystickByIndex(0)
+        && input_->GetJoystickByIndex(1)
+        && !CorrectTurn(joystickId)) return;
 
     switch (button){
     case JB_CROSS:{
@@ -238,15 +270,15 @@ void InputMaster::HandleCameraMovement(float t)
         camRot += Vector2(mouseMove.x_, mouseMove.y_) * 0.1f;
     }
     ///Should check whose turn it is when two joysticks are connected
-    JoystickState* joy0{input_->GetJoystickByIndex(0)};
-    if (joy0){
-        Vector2 rotation{-Vector2(joy0->GetAxisPosition(0), joy0->GetAxisPosition(1))
-                         -Vector2(joy0->GetAxisPosition(2), joy0->GetAxisPosition(3))};
+    JoystickState* joy{GetActiveJoystick()};
+    if (joy){
+        Vector2 rotation{-Vector2(joy->GetAxisPosition(0), joy->GetAxisPosition(1))
+                         -Vector2(joy->GetAxisPosition(2), joy->GetAxisPosition(3))};
         if (rotation.Length()){
             ResetIdle();
             camRot += rotation * t * joyRotMultiplier;
         }
-        camZoom += t * joyZoomSpeed * (joy0->GetAxisPosition(13) - joy0->GetAxisPosition(12));
+        camZoom += t * joyZoomSpeed * (joy->GetAxisPosition(13) - joy->GetAxisPosition(12));
     }
 
     //Slowly spin camera when there hasn't been any input for a while
