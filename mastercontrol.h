@@ -15,6 +15,7 @@ using namespace Urho3D;
 
 class QuatterCam;
 class InputMaster;
+class EffectMaster;
 class Board;
 class Piece;
 
@@ -45,6 +46,7 @@ public:
     MasterControl(Context* context);
     static MasterControl* GetInstance();
 
+    EffectMaster* effectMaster_;
     GameWorld world;
     SharedPtr<ResourceCache> cache_;
     SharedPtr<Graphics> graphics_;
@@ -76,6 +78,8 @@ public:
 
     float Sine(const float freq, const float min, const float max, const float shift = 0.0f);
     float Cosine(const float freq, const float min, const float max, const float shift = 0.0f);
+
+    void Quatter();
 private:
     static MasterControl* instance_;
     InputMaster* inputMaster_;

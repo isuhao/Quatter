@@ -100,12 +100,17 @@ void InputMaster::HandleActionButtonPressed()
         if (selectedPiece){
             selectedPiece->Pick();
             MC->NextPhase();
+            MC->world.board_->SelectNearestFreeSquare(CAMERA->GetPosition());
         }
     } else if (MC->GetGamePhase() == GamePhase::PLAYER1PUTS ||
                MC->GetGamePhase() == GamePhase::PLAYER2PUTS )
     {
-        MC->world.board_->PutPiece(MC->GetPickedPiece());
-        MC->NextPhase();
+        Square* selectedSquare{MC->world.board_->GetSelectedSquare()};
+        if (selectedSquare && selectedSquare->free_){
+            MC->world.board_->PutPiece(MC->GetPickedPiece());
+            if (MC->GetGamePhase() != GamePhase::QUATTER)
+                MC->NextPhase();
+        }
     }
 }
 
@@ -139,9 +144,9 @@ void InputMaster::HandleCameraMovement(float t)
         } break;
         case KEY_S:{ camRot += keyRotMultiplier * Vector2::DOWN;
         } break;
-        case KEY_Q:{ camZoom += keyZoomSpeed;
+        case KEY_Q:{ camZoom -= keyZoomSpeed;
         } break;
-        case KEY_E:{ camZoom += -keyZoomSpeed;
+        case KEY_E:{ camZoom +=  keyZoomSpeed;
         } break;
         default: break;
         }
@@ -161,7 +166,7 @@ void InputMaster::HandleCameraMovement(float t)
             idleTime_ = 0.0f;
             camRot += rotation * t * joyRotMultiplier;
         }
-        camZoom += t * joyZoomSpeed * (joy0->GetAxisPosition(12) - joy0->GetAxisPosition(13));
+        camZoom += t * joyZoomSpeed * (joy0->GetAxisPosition(13) - joy0->GetAxisPosition(12));
     }
 
     float idleThreshold{5.0f};
@@ -202,8 +207,8 @@ void InputMaster::SmoothCameraMovement(float camZoom, Vector2 camRot)
         if (pitchLeft < PITCH_EDGE)
             pitchBrake = pitchLeft / PITCH_EDGE;
     }
-    camRot.y_ *= pitchBrake;
-    smoothCamRotate_.y_ *= pitchBrake;
+    camRot.y_ *= pitchBrake * pitchBrake;
+//    smoothCamRotate_.y_ *= pitchBrake;
     //Slow down zooming when nearing extremes
     float zoomBrake{1.0f};
     if (Sign(camZoom) < 0.0f){
@@ -216,7 +221,7 @@ void InputMaster::SmoothCameraMovement(float camZoom, Vector2 camRot)
             zoomBrake = zoomLeft / ZOOM_EDGE;
     }
     camZoom *= zoomBrake;
-    smoothCamZoom_ *= zoomBrake;
+//    smoothCamZoom_ *= zoomBrake;
 
     smoothCamRotate_ = 0.0666f * (camRot  + smoothCamRotate_ * 14.0f);
     smoothCamZoom_   = 0.05f * (camZoom + smoothCamZoom_   * 19.0f);

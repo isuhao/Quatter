@@ -1,5 +1,6 @@
 #include "mastercontrol.h"
 #include "inputmaster.h"
+#include "effectmaster.h"
 #include "quattercam.h"
 #include "board.h"
 #include <Urho3D/Graphics/Texture2D.h>
@@ -30,13 +31,14 @@ void MasterControl::Setup()
     engineParameters_["ResourcePaths"] = "Data;CoreData;Resources";
     engineParameters_["WindowIcon"] = "icon.png";
 
-//    engineParameters_["FullScreen"] = false;
+    engineParameters_["FullScreen"] = false;
 //    engineParameters_["WindowWidth"] = 960;
 //    engineParameters_["WindowHeight"] = 540;
 }
 void MasterControl::Start()
 {
     inputMaster_ = new InputMaster();
+    effectMaster_ = new EffectMaster();
     cache_ = GetSubsystem<ResourceCache>();
 
     CreateScene();
@@ -94,51 +96,56 @@ void MasterControl::CreateScene()
     for (int p{0}; p < NUM_PIECES; ++p){
         Piece* newPiece = new Piece(Piece::Attributes(p));
         world.pieces_.Push(SharedPtr<Piece>(newPiece));
-        newPiece->SetPosition(AttributesToPosition(p) + Vector3(Random(0.23f), 0.0f, Random(0.23f)));
+        newPiece->SetPosition(AttributesToPosition(p) + Vector3(Random(0.05f), 0.0f, Random(0.05f)));
     }
 }
 
 
 void MasterControl::CreateLights()
 {
-    //Add main light source
-    Node* downardsLightNode{world.scene->CreateChild("DirectionalLight")};
-    downardsLightNode->SetPosition(Vector3(2.0f, 23.0f, 3.0f));
-    downardsLightNode->LookAt(Vector3(0.0f, 0.0f, 0.0f));
-    Light* downwardsLight{downardsLightNode->CreateComponent<Light>()};
-    downwardsLight->SetLightType(LIGHT_DIRECTIONAL);
-    downwardsLight->SetBrightness(0.5f);
-    downwardsLight->SetColor(Color(0.8f, 0.9f, 0.95f));
-    downwardsLight->SetCastShadows(true);
-    downwardsLight->SetShadowIntensity(0.23f);
-    downwardsLight->SetShadowBias(BiasParameters(0.000025f, 0.5f));
-    downwardsLight->SetShadowCascade(CascadeParameters(5.0f, 7.0f, 23.0f, 42.0f, 0.8f));
 
-    //Add a directional light to the world. Enable cascaded shadows on it
+    //Add main light source
     leafyLightNode_ = world.scene->CreateChild("DirectionalLight");
     leafyLightNode_->SetPosition(Vector3(6.0f, 96.0f, 9.0f));
     leafyLightNode_->LookAt(Vector3(0.0f, 0.0f, 0.0f));
     leafyLight_ = leafyLightNode_->CreateComponent<Light>();
     leafyLight_->SetLightType(LIGHT_SPOT);
-//    leafyLight_->SetBrightness(1.0f);
     leafyLight_->SetRange(180.0f);
     leafyLight_->SetFov(34.0f);
-    leafyLight_->SetCastShadows(true);
+    leafyLight_->SetCastShadows(false);
+    leafyLight_->SetShadowIntensity(0.23f);
     leafyLight_->SetShapeTexture(static_cast<Texture*>(cache_->GetResource<Texture2D>("Textures/LeafyMask.png")));
-    leafyLight_->SetShadowBias(BiasParameters(0.0000025f, 0.5f));
+    leafyLight_->SetShadowBias(BiasParameters(0.000025f, 0.5f));
     leafyLight_->SetShadowCascade(CascadeParameters(5.0f, 7.0f, 23.0f, 42.0f, 0.8f));
-    leafyLight_->SetShadowCascade(CascadeParameters(64.0f, 86.0f, 128.0f, 192.0f, 0.8f));
+//    leafyLight_->SetShadowCascade(CascadeParameters(64.0f, 86.0f, 128.0f, 192.0f, 0.8f));
+//    leafyLight_->SetShadowCascade(CascadeParameters(5.0f, 7.0f, 23.0f, 42.0f, 0.8f));
 
-    //Create a point light.
-    Node* pointLightNode_{world.scene->CreateChild("PointLight")};
-    pointLightNode_->SetPosition(Vector3(-10.0f, 5.0f, -23.0f));
-    Light* pointLight{pointLightNode_->CreateComponent<Light>()};
-    pointLight->SetLightType(LIGHT_POINT);
-    pointLight->SetBrightness(0.42f);
-    pointLight->SetRange(42.0f);
-    pointLight->SetColor(Color(0.75f, 1.0f, 0.75f));
-    pointLight->SetCastShadows(true);
-    pointLight->SetShadowIntensity(0.8f);
+    //Add a directional light to the world. Enable cascaded shadows on it
+    Node* downardsLightNode{world.scene->CreateChild("DirectionalLight")};
+    downardsLightNode->SetPosition(Vector3(2.0f, 23.0f, 3.0f));
+    downardsLightNode->LookAt(Vector3(0.0f, 0.0f, 0.0f));
+    Light* downwardsLight{downardsLightNode->CreateComponent<Light>()};
+    downwardsLight->SetLightType(LIGHT_DIRECTIONAL);
+    downwardsLight->SetBrightness(0.34f);
+    downwardsLight->SetColor(Color(0.8f, 0.9f, 0.95f));
+    downwardsLight->SetCastShadows(true);
+//    downwardsLight->SetShadowIntensity(0.23f);
+    downwardsLight->SetShadowBias(BiasParameters(0.000025f, 0.5f));
+    downwardsLight->SetShadowCascade(CascadeParameters(5.0f, 7.0f, 23.0f, 42.0f, 0.8f));
+
+    //Create a point lights.
+    for (Vector3 pos : {Vector3(-10.0f, 8.0f, -23.0f), Vector3(-20.0f, -8.0f, 23.0f), Vector3(20.0f, -7.0f, 23.0f)}){
+        Node* pointLightNode_{world.scene->CreateChild("PointLight")};
+        pointLightNode_->SetPosition(pos);
+        Light* pointLight{pointLightNode_->CreateComponent<Light>()};
+        pointLight->SetLightType(LIGHT_POINT);
+        pointLight->SetBrightness(0.42f);
+        pointLight->SetRange(42.0f);
+        pointLight->SetColor(Color(0.75f, 1.0f, 0.75f));
+        pointLight->SetCastShadows(true);
+        pointLight->SetShadowResolution(0.25f);
+        pointLight->SetShadowIntensity(0.6f);
+    }
 }
 
 Piece* MasterControl::GetSelectedPiece() const
@@ -186,7 +193,7 @@ void MasterControl::HandleUpdate(StringHash eventType, VariantMap& eventData)
     //Wave leafy light
     leafyLightNode_->SetRotation(Quaternion(Sine(Sine(0.1f, 0.05f, 0.23f), -0.23f, 0.23f) + 90.0f, Vector3::RIGHT) *
                                  Quaternion(Sine(0.23f, 178.0f, 182.0f), Vector3::FORWARD));
-    leafyLight_->SetBrightness(Sine(0.011f, 0.05f, 0.5f) + Sine(0.02f, 0.13f, 0.34f));
+    leafyLight_->SetBrightness(0.34f + Sine(0.011f, 0.05f, 0.23f) + Sine(0.02f, 0.05f, 0.13f));
 }
 
 void MasterControl::NextPhase()
@@ -194,13 +201,17 @@ void MasterControl::NextPhase()
     switch (gamePhase_)    {
     case GamePhase::PLAYER1PICKS: gamePhase_ = GamePhase::PLAYER2PUTS;
         break;
-    case GamePhase::PLAYER2PUTS: gamePhase_ = GamePhase::PLAYER2PICKS;
+    case GamePhase::PLAYER2PUTS:  gamePhase_ = GamePhase::PLAYER2PICKS;
         break;
     case GamePhase::PLAYER2PICKS: gamePhase_ = GamePhase::PLAYER1PUTS;
         break;
-    case GamePhase::PLAYER1PUTS: gamePhase_ = GamePhase::PLAYER1PICKS;
+    case GamePhase::PLAYER1PUTS:  gamePhase_ = GamePhase::PLAYER1PICKS;
         break;
     }
+}
+void MasterControl::Quatter()
+{
+    gamePhase_ = GamePhase::QUATTER;
 }
 
 void MasterControl::ToggleMusic()

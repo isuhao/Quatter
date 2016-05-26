@@ -15,7 +15,6 @@ public:
     bool IsIdle() const noexcept { return idle_; }
 
     void HandleActionButtonPressed();
-
 private:
     Input* input_;
 
@@ -26,7 +25,7 @@ private:
 
     HashSet<int> pressedKeys_;
     HashSet<int> pressedMouseButtons_;
-    HashMap< int, HashSet<int> > pressedJoystickButtons_;
+    HashMap<int, HashSet<int>> pressedJoystickButtons_;
 
     void HandleKeyDown(StringHash eventType, VariantMap &eventData);
     void HandleKeyUp(StringHash eventType, VariantMap &eventData);

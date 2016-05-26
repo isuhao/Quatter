@@ -18,10 +18,10 @@ using namespace Urho3D;
 
 #define PITCH_MIN 13.0f
 #define PITCH_MAX 80.0f
-#define PITCH_EDGE 5.0f
+#define PITCH_EDGE 10.0f
 #define ZOOM_MIN 5.0f
 #define ZOOM_MAX 23.0f
-#define ZOOM_EDGE 2.3f
+#define ZOOM_EDGE 7.0f
 
 class QuatterCam : public Object
 {
@@ -38,6 +38,7 @@ public:
     float GetPitch() const { return rootNode_->GetRotation().EulerAngles().x_; }
     float GetYaw() const { return rootNode_->GetRotation().EulerAngles().y_ + 180.0f; }
     float GetDistance() const { return distance_; }
+    Vector3 GetPosition() const { return rootNode_->GetPosition(); }
     void Zoom(float distance);
     Node* GetPocket(bool right) const { return right ? pockets_.second_ : pockets_.first_; }
 private:

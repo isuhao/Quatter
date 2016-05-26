@@ -23,7 +23,8 @@ SOURCES += \
     quattercam.cpp \
     board.cpp \
     piece.cpp \
-    master.cpp
+    master.cpp \
+    effectmaster.cpp
 
 HEADERS += \
     luckey.h \
@@ -32,4 +33,5 @@ HEADERS += \
     quattercam.h \
     board.h \
     piece.h \
-    master.h
+    master.h \
+    effectmaster.h

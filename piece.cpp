@@ -1,11 +1,11 @@
 #include "quattercam.h"
+#include "effectmaster.h"
 #include "board.h"
 #include "piece.h"
 
 Piece::Piece(Attributes attributes): Object(MC->GetContext()),
-    state_{PieceState::FREE },
     attributes_{attributes},
-    sinceStateChange_{0.0f}
+    state_{PieceState::FREE }
 {
     rootNode_ = MC->world.scene->CreateChild("Piece"+GetCodon(4));
     rootNode_->SetRotation(Quaternion(Random(360.0f), Vector3::UP));
@@ -18,13 +18,19 @@ Piece::Piece(Attributes attributes): Object(MC->GetContext()),
     }
     else pieceModel->SetMaterial(MC->GetMaterial("Wood_dark"));
 
-
     outlineModel_ = rootNode_->CreateComponent<StaticModel>();
     outlineModel_->SetCastShadows(false);
     outlineModel_->SetModel(MC->GetModel("Piece_"+GetCodon(2)+"_outline"));
     outlineModel_->SetMaterial(MC->GetMaterial("Glow")->Clone());
     outlineModel_->GetMaterial()->SetShaderParameter("MatDiffColor", Color(0.0f, 0.0f, 0.0f));
     outlineModel_->SetEnabled(false);
+
+    Node* lightNode{rootNode_->CreateChild("Light")};
+    lightNode->SetPosition(Vector3::UP * 0.5f);
+    light_ = lightNode->CreateComponent<Light>();
+    light_->SetColor(Color(0.0f, 0.8f, 0.5f));
+    light_->SetBrightness(0.0f);
+    light_->SetRange(3.0f);
 }
 
 String Piece::GetCodon(int length) const
@@ -53,15 +59,9 @@ void Piece::Select()
         outlineModel_->SetEnabled(true);
         if (state_ == PieceState::FREE){
             state_ = PieceState::SELECTED;
-            Material* glow{outlineModel_->GetMaterial()};
-            Material* originalGlow{MC->GetMaterial("Glow")};
-            Color glowColor{glow->GetShaderParameter("MatDiffColor").GetColor()};
-            Color originalGlowColor{originalGlow->GetShaderParameter("MatDiffColor").GetColor()};
-            ValueAnimation* fadeIn_{new ValueAnimation(context_)};
-            fadeIn_->SetKeyFrame(0.0f, glowColor);
-            fadeIn_->SetKeyFrame(0.23f, originalGlowColor);
-            glow->SetShaderParameterAnimation("MatDiffColor", fadeIn_, WM_ONCE);
-            outlineModel_->SetEnabled(true);
+            MC->effectMaster_->FadeTo(outlineModel_->GetMaterial(),
+                                      MC->GetMaterial("Glow")->GetShaderParameter("MatDiffColor").GetColor());
+            MC->effectMaster_->FadeTo(light_, 0.666f);
         }
     }
 }
@@ -69,17 +69,10 @@ void Piece::Deselect()
 {
     if (state_ == PieceState::SELECTED){
         state_ = PieceState::FREE;
-        Material* glow{outlineModel_->GetMaterial()};
-        Color glowColor{glow->GetShaderParameter("MatDiffColor").GetColor()};
-        ValueAnimation* fadeOut_{new ValueAnimation(context_)};
-        fadeOut_->SetKeyFrame(0.0f, glowColor);
-        fadeOut_->SetKeyFrame(0.23f, glowColor * 0.0f);
-        glow->SetShaderParameterAnimation("MatDiffColor", fadeOut_, WM_ONCE);
+        MC->effectMaster_->FadeOut(outlineModel_->GetMaterial());
+        MC->effectMaster_->FadeOut(light_);
     }
-
-//    outlineModel_->SetEnabled(false);
 }
-
 void Piece::Pick()
 {
     if (state_ == PieceState::SELECTED){
@@ -99,16 +92,10 @@ void Piece::Pick()
         intoPocketRot->SetKeyFrame(1.0f, Quaternion(10.0f, Vector3(1.0f, 0.0f, 0.5f)));
         rootNode_->SetAttributeAnimation("Rotation", intoPocketRot, WM_ONCE);
 
-        //Fade out outline
-        Material* glow{outlineModel_->GetMaterial()};
-        Color glowColor{glow->GetShaderParameter("MatDiffColor").GetColor()};
-        ValueAnimation* fadeOut{new ValueAnimation(context_)};
-        fadeOut->SetKeyFrame(0.0f, glowColor);
-        fadeOut->SetKeyFrame(0.23f, glowColor * 0.0f);
-        glow->SetShaderParameterAnimation("MatDiffColor", fadeOut, WM_ONCE);
+        MC->effectMaster_->FadeOut(outlineModel_->GetMaterial());
+        MC->effectMaster_->FadeOut(light_);
     }
 }
-
 void Piece::Put(Vector3 position)
 {
     if (state_ == PieceState::PICKED){

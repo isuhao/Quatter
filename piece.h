@@ -15,7 +15,6 @@ enum class PieceState {FREE, SELECTED, PICKED, PUT};
 
 #define NUM_ATTRIBUTES 4
 
-
 class Piece : public Object
 {
     URHO3D_OBJECT(Piece, Object);
@@ -24,8 +23,8 @@ public:
     Piece(Attributes);
 
     void SetPosition(Vector3 pos) { rootNode_->SetPosition(pos); }
-    inline bool GetAttribute(int index) const noexcept { return attributes_[index]; }
-    inline Attributes GetAttributes() const noexcept { return attributes_; }
+    bool GetAttribute(int index) const { return attributes_[index]; }
+    Attributes GetAttributes() const { return Attributes(attributes_.to_ulong()); }
     String GetCodon(int length = NUM_ATTRIBUTES) const;
     float GetAngle() const { return MC->AttributesToAngle(static_cast<int>(attributes_.to_ulong())); }
     void Select();
@@ -36,10 +35,14 @@ public:
 private:
     SharedPtr<Node> rootNode_;
     SharedPtr<StaticModel> outlineModel_;
+    SharedPtr<Light> light_;
 
     Attributes attributes_;
     PieceState state_;
-    float sinceStateChange_;
+//    void FadeInOutline();
+//    void FadeOutOutline();
+//    void FadeInLight();
+//    void FadeOutLight();
 };
 
 #endif // PIECE_H
