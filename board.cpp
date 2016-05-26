@@ -20,8 +20,8 @@ Board::Board(): Object(MC->GetContext()),
     model_->SetCastShadows(true);
 
     //Fill board with squares
-    for (int i{0}; i < BOARD_HEIGHT; ++i)
-        for (int j{0}; j < BOARD_WIDTH; ++j){
+    for (int i{0}; i < BOARD_WIDTH; ++i)
+        for (int j{0}; j < BOARD_HEIGHT; ++j){
             Square* square{new Square};
             square->coords_ = IntVector2(i, j);
             square->node_ = rootNode_->CreateChild("Square");
@@ -38,12 +38,11 @@ Board::Board(): Object(MC->GetContext()),
 
             Node* lightNode{slotNode->CreateChild("Light")};
             lightNode->SetPosition(Vector3::UP * 0.23f);
-            square->light_ = square->node_->CreateComponent<Light>();
+            square->light_ = lightNode->CreateComponent<Light>();
             square->light_->SetColor(Color(0.0f, 0.8f, 0.5f));
-            square->light_->SetBrightness(0.1f);
+            square->light_->SetBrightness(0.05f);
             square->light_->SetRange(2.0f);
-            square->light_->SetCastShadows(true);
-
+            square->light_->SetCastShadows(false);
 
             squares_[square->coords_] = square;
 //            square->node_->SetEnabledRecursive(false);
@@ -261,7 +260,7 @@ void Board::Deselect(Square* square)
     square->selected_ = false;
 
     MC->effectMaster_->FadeOut(square->slot_->GetMaterial());
-    MC->effectMaster_->FadeTo(square->light_, 0.1f);
+    MC->effectMaster_->FadeTo(square->light_, 0.05f);
 }
 void Board::DeselectAll()
 {

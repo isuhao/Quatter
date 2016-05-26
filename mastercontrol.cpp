@@ -17,7 +17,9 @@ MasterControl* MasterControl::GetInstance()
 MasterControl::MasterControl(Context *context):
     Application(context),
     musicGain_{1.0f},
-    gameState_{GameState::PLAYER1PICKS}
+    gameState_{GameState::PLAYER1PICKS},
+    musicState_{MUSIC_SONG1},
+    previousMusicState_{MUSIC_OFF}
 {
     instance_ = this;
 }
@@ -44,13 +46,19 @@ void MasterControl::Start()
     CreateScene();
 
     //Play music
-    Sound* music{cache_->GetResource<Sound>("Resources/Music/Angelight - The Knowledge River.ogg")};
-    music->SetLooped(true);
+    Sound* song1{GetMusic("Angelight - The Knowledge River")};
+    Sound* song2{GetMusic("Cao Sao Vang - Days Of Yore")};
     Node* musicNode{world.scene->CreateChild("Music")};
-    musicSource_ = musicNode->CreateComponent<SoundSource>();
-    musicSource_->SetSoundType(SOUND_MUSIC);
-    musicSource_->SetGain(musicGain_);
-    musicSource_->Play(music);
+
+    musicSource1_ = musicNode->CreateComponent<SoundSource>();
+    musicSource1_->SetSoundType(SOUND_MUSIC);
+    musicSource1_->SetGain(musicGain_);
+    musicSource1_->Play(song1);
+
+    musicSource2_ = musicNode->CreateComponent<SoundSource>();
+    musicSource2_->SetSoundType(SOUND_MUSIC);
+    musicSource2_->SetGain(0.0f);
+    musicSource2_->Play(song2);
 
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(MasterControl, HandleUpdate));
 }
@@ -83,7 +91,6 @@ void MasterControl::CreateScene()
     //Create table
     Node* tableNode = world.scene->CreateChild("Table");
     tableNode->SetRotation(Quaternion(23.5f, Vector3::UP));
-//    tableNode->SetScale(19.0f);
     StaticModel* tableModel = tableNode->CreateComponent<StaticModel>();
     tableModel->SetModel(GetModel("Table"));
     tableModel->SetMaterial(GetMaterial("Table"));
@@ -103,8 +110,7 @@ void MasterControl::CreateScene()
 
 void MasterControl::CreateLights()
 {
-
-    //Add main light source
+    //Add leafy light source
     leafyLightNode_ = world.scene->CreateChild("DirectionalLight");
     leafyLightNode_->SetPosition(Vector3(6.0f, 96.0f, 9.0f));
     leafyLightNode_->LookAt(Vector3(0.0f, 0.0f, 0.0f));
@@ -113,12 +119,7 @@ void MasterControl::CreateLights()
     leafyLight_->SetRange(180.0f);
     leafyLight_->SetFov(34.0f);
     leafyLight_->SetCastShadows(false);
-    leafyLight_->SetShadowIntensity(0.23f);
     leafyLight_->SetShapeTexture(static_cast<Texture*>(cache_->GetResource<Texture2D>("Textures/LeafyMask.png")));
-    leafyLight_->SetShadowBias(BiasParameters(0.000025f, 0.5f));
-    leafyLight_->SetShadowCascade(CascadeParameters(5.0f, 7.0f, 23.0f, 42.0f, 0.8f));
-//    leafyLight_->SetShadowCascade(CascadeParameters(64.0f, 86.0f, 128.0f, 192.0f, 0.8f));
-//    leafyLight_->SetShadowCascade(CascadeParameters(5.0f, 7.0f, 23.0f, 42.0f, 0.8f));
 
     //Add a directional light to the world. Enable cascaded shadows on it
     Node* downardsLightNode{world.scene->CreateChild("DirectionalLight")};
@@ -129,11 +130,10 @@ void MasterControl::CreateLights()
     downwardsLight->SetBrightness(0.34f);
     downwardsLight->SetColor(Color(0.8f, 0.9f, 0.95f));
     downwardsLight->SetCastShadows(true);
-//    downwardsLight->SetShadowIntensity(0.23f);
     downwardsLight->SetShadowBias(BiasParameters(0.000025f, 0.5f));
     downwardsLight->SetShadowCascade(CascadeParameters(5.0f, 7.0f, 23.0f, 42.0f, 0.8f));
 
-    //Create a point lights.
+    //Create point lights
     for (Vector3 pos : {Vector3(-10.0f, 8.0f, -23.0f), Vector3(-20.0f, -8.0f, 23.0f), Vector3(20.0f, -7.0f, 23.0f)}){
         Node* pointLightNode_{world.scene->CreateChild("PointLight")};
         pointLightNode_->SetPosition(pos);
@@ -178,9 +178,21 @@ int MasterControl::CountFreePieces()
     return count;
 }
 
+Sound* MasterControl::GetMusic(String name) const {
+    Sound* song{cache_->GetResource<Sound>("Music/"+name+".ogg")};
+    song->SetLooped(true);
+    return song;
+}
+
+Sound*MasterControl::GetSample(String name) const {
+    Sound* sample{cache_->GetResource<Sound>("Samples/"+name+".ogg")};
+    sample->SetLooped(false);
+    return sample;
+}
+
 void MasterControl::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
-//    float t{eventData[Update::P_TIMESTEP].GetFloat()};
+    //    float t{eventData[Update::P_TIMESTEP].GetFloat()};
 
     UpdateSelectedPiece();
     //Wave leafy light
@@ -250,28 +262,37 @@ void MasterControl::Reset()
     gameState_ = GameState::PLAYER1PICKS;
 }
 
-void MasterControl::ToggleMusic()
+void MasterControl::NextMusicState()
 {
-    ValueAnimation* fade{musicSource_->GetAttributeAnimation("Gain")};
-    float fadeEndValue{-1.0f};
-    if (fade)
-        fadeEndValue = fade->GetAnimationValue(fade->GetEndTime()).GetFloat();
 
-    if (musicSource_->GetGain() == 0.0f || fadeEndValue == 0.0f){
-        ValueAnimation* fadeIn_{new ValueAnimation(context_)};
-        fadeIn_->SetKeyFrame(0.0f, 0.0f);
-        fadeIn_->SetKeyFrame(1.0f, 0.5f * musicGain_);
-        fadeIn_->SetKeyFrame(2.3f, Min(musicGain_, 0.1f));
-        musicSource_->SetAttributeAnimation("Gain", fadeIn_, WM_ONCE);
+    if (musicState_ == MUSIC_SONG1){
+        effectMaster_->FadeOut(musicSource1_);
+    } else if (musicState_ == MUSIC_SONG2){
+        effectMaster_->FadeOut(musicSource2_);
     }
-    else{
-        float lastGain_{musicSource_->GetGain()};
-        ValueAnimation* fadeOut_ = new ValueAnimation(context_);
-        fadeOut_->SetKeyFrame(0.0f, lastGain_);
-        fadeOut_->SetKeyFrame(1.0f, 0.5f * lastGain_);
-        fadeOut_->SetKeyFrame(2.3f, 0.1f * lastGain_);
-        fadeOut_->SetKeyFrame(5.0f, 0.0f);
-        musicSource_->SetAttributeAnimation("Gain", fadeOut_, WM_ONCE);
+
+    switch (musicState_) {
+    case MUSIC_SONG1: case MUSIC_SONG2:{
+        previousMusicState_ = musicState_;
+        musicState_ = MUSIC_OFF;
+    } break;
+    case MUSIC_OFF: {
+        if (previousMusicState_ == MUSIC_SONG1)
+            musicState_ = MUSIC_SONG2;
+        else if (previousMusicState_ == MUSIC_SONG2)
+            musicState_ = MUSIC_SONG1;
+        previousMusicState_ = MUSIC_OFF;
+    } break;
+    default: {
+        previousMusicState_ = MUSIC_OFF;
+        musicState_ = MUSIC_SONG1;
+    } break;
+    }
+
+    if (musicState_ == MUSIC_SONG1){
+        effectMaster_->FadeTo(musicSource1_, musicGain_);
+    } else if (musicState_ == MUSIC_SONG2){
+        effectMaster_->FadeTo(musicSource2_, musicGain_);
     }
 }
 
@@ -279,19 +300,19 @@ void MasterControl::MusicGainUp(float step)
 {
     musicGain_ = Clamp(musicGain_ + step, step, 1.0f);
 
-    ValueAnimation* fadeIn_{new ValueAnimation(context_)};
-    fadeIn_->SetKeyFrame(0.0f, musicSource_->GetGain());
-    fadeIn_->SetKeyFrame(0.23f, musicGain_);
-    musicSource_->SetAttributeAnimation("Gain", fadeIn_, WM_ONCE);
+    if (musicState_ == MUSIC_SONG1)
+        effectMaster_->FadeTo(musicSource1_, musicGain_, 0.23f);
+    else if (musicState_ == MUSIC_SONG2)
+        effectMaster_->FadeTo(musicSource2_, musicGain_, 0.23f);
 }
 void MasterControl::MusicGainDown(float step)
 {
     musicGain_ = Clamp(musicGain_ - step, 0.0f, 1.0f);
 
-    ValueAnimation* fadeOut_{new ValueAnimation(context_)};
-    fadeOut_->SetKeyFrame(0.0f, musicSource_->GetGain());
-    fadeOut_->SetKeyFrame(0.23f, musicGain_);
-    musicSource_->SetAttributeAnimation("Gain", fadeOut_, WM_ONCE);
+    if (musicState_ == MUSIC_SONG1)
+        effectMaster_->FadeTo(musicSource1_, musicGain_, 0.23f);
+    else if (musicState_ == MUSIC_SONG2)
+        effectMaster_->FadeTo(musicSource2_, musicGain_, 0.23f);
 }
 
 float MasterControl::Sine(const float freq, const float min, const float max, const float shift)

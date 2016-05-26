@@ -48,7 +48,7 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
         Screenshot();
     } break;
     case KEY_M: {
-        MC->ToggleMusic();
+        MC->NextMusicState();
     } break;
     case KEY_KP_PLUS: {
         MC->MusicGainUp(volumeStep);

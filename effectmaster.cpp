@@ -24,6 +24,26 @@ void EffectMaster::FadeTo(Light* light, float brightness, float duration)
     light->SetAttributeAnimation("Brightness Multiplier", fade, WM_ONCE);
 }
 
+void EffectMaster::FadeTo(SoundSource* soundSource, float gain, float duration)
+{
+    ValueAnimation* fade{new ValueAnimation(context_)};
+    fade->SetKeyFrame(0.0f, soundSource->GetGain());
+    fade->SetKeyFrame(0.42f * duration, Lerp(soundSource->GetGain(), gain, 0.5f));
+    fade->SetKeyFrame(duration, gain);
+    soundSource->SetAttributeAnimation("Gain", fade, WM_ONCE);
+}
+void EffectMaster::FadeOut(SoundSource* soundSource, float duration)
+{
+    float lastGain{soundSource->GetGain()};
+
+    ValueAnimation* fade{new ValueAnimation(context_)};
+    fade->SetKeyFrame(0.0f, lastGain);
+    fade->SetKeyFrame(0.2f * duration, 0.5f * lastGain);
+    fade->SetKeyFrame(0.46f * duration, 0.1f * lastGain);
+    fade->SetKeyFrame(duration, 0.0f);
+    soundSource->SetAttributeAnimation("Gain", fade, WM_ONCE);
+}
+
 void EffectMaster::TransformTo(Node* node, Vector3 pos, Quaternion rot, float duration)
 {
     ValueAnimation* posAnim{new ValueAnimation(context_)};

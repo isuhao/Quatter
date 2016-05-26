@@ -20,6 +20,7 @@ class Board;
 class Piece;
 
 enum class GameState{PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS, QUATTER};
+enum MusicState{MUSIC_SONG1, MUSIC_SONG2, MUSIC_OFF};
 
 typedef struct GameWorld
 {
@@ -73,6 +74,8 @@ public:
     Material* GetMaterial(String name) const { return cache_->GetResource<Material>("Materials/"+name+".xml"); }
     Model* GetModel(String name) const { return cache_->GetResource<Model>("Models/"+name+".mdl"); }
     Texture* GetTexture(String name) const { return cache_->GetResource<Texture>("Textures/"+name+".png"); }
+    Sound* GetMusic(String name) const;
+    Sound* GetSample(String name) const;
 
     float Sine(const float freq, const float min, const float max, const float shift = 0.0f);
     float Cosine(const float freq, const float min, const float max, const float shift = 0.0f);
@@ -80,23 +83,26 @@ public:
     void Quatter();
     void DeselectPiece();
 
+    void NextMusicState();
 private:
     static MasterControl* instance_;
     InputMaster* inputMaster_;
     SharedPtr<Node> leafyLightNode_;
     SharedPtr<Light> leafyLight_;
 
-    SharedPtr<SoundSource> musicSource_;
+    SharedPtr<SoundSource> musicSource1_;
+    SharedPtr<SoundSource> musicSource2_;
     float musicGain_;
 
     GameState gameState_;
+    MusicState musicState_;
+    MusicState previousMusicState_;
 
     Piece* selectedPiece_;
     Piece* pickedPiece_;
 
     void CreateScene();
     void NextPhase();
-    void ToggleMusic();
     void MusicGainUp(float step);
     void MusicGainDown(float step);
 
