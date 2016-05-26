@@ -19,7 +19,7 @@ class EffectMaster;
 class Board;
 class Piece;
 
-enum class GamePhase{PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS, QUATTER};
+enum class GameState{PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS, QUATTER};
 
 typedef struct GameWorld
 {
@@ -51,20 +51,19 @@ public:
     SharedPtr<ResourceCache> cache_;
     SharedPtr<Graphics> graphics_;
 
-    /// Setup before engine initialization. Modifies the engine paramaters.
     virtual void Setup();
-    /// Setup after engine initialization.
     virtual void Start();
-    /// Cleanup after the main loop. Called by Application.
     virtual void Stop();
 
     void Exit();
     void CreateLights();
-    inline GamePhase GetGamePhase() const noexcept { return gamePhase_; }
+    inline GameState GetGameState() const noexcept { return gameState_; }
+    inline bool InPickState() const noexcept { return gameState_ == GameState::PLAYER1PICKS || gameState_ == GameState::PLAYER2PICKS; }
+    inline bool InPutState() const noexcept { return gameState_ == GameState::PLAYER1PUTS || gameState_ == GameState::PLAYER2PUTS; }
 
     float AttributesToAngle(int attributes) const { return (360.0f/NUM_PIECES * attributes) + 180.0f/NUM_PIECES + 23.5f; }
     Vector3 AttributesToPosition(int attributes) const {
-        return Quaternion(AttributesToAngle(attributes), Vector3::UP) * Vector3::FORWARD * 7.0f
+        return Quaternion(AttributesToAngle(attributes), Vector3::UP) * Vector3::BACK * 7.0f
                 + Vector3::DOWN * 0.21f;
     }
     Piece* GetSelectedPiece() const;
@@ -75,11 +74,12 @@ public:
     Model* GetModel(String name) const { return cache_->GetResource<Model>("Models/"+name+".mdl"); }
     Texture* GetTexture(String name) const { return cache_->GetResource<Texture>("Textures/"+name+".png"); }
 
-
     float Sine(const float freq, const float min, const float max, const float shift = 0.0f);
     float Cosine(const float freq, const float min, const float max, const float shift = 0.0f);
 
     void Quatter();
+    void DeselectPiece();
+
 private:
     static MasterControl* instance_;
     InputMaster* inputMaster_;
@@ -89,8 +89,10 @@ private:
     SharedPtr<SoundSource> musicSource_;
     float musicGain_;
 
-    GamePhase gamePhase_;
-    Node* movingLightNode_;
+    GameState gameState_;
+
+    Piece* selectedPiece_;
+    Piece* pickedPiece_;
 
     void CreateScene();
     void NextPhase();
@@ -99,6 +101,8 @@ private:
     void MusicGainDown(float step);
 
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
+    void Reset();
+    void UpdateSelectedPiece();
 };
 
 #endif // MASTERCONTROL_H

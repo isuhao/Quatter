@@ -17,7 +17,7 @@ MasterControl* MasterControl::GetInstance()
 MasterControl::MasterControl(Context *context):
     Application(context),
     musicGain_{1.0f},
-    gamePhase_{GamePhase::PLAYER1PICKS}
+    gameState_{GameState::PLAYER1PICKS}
 {
     instance_ = this;
 }
@@ -31,7 +31,7 @@ void MasterControl::Setup()
     engineParameters_["ResourcePaths"] = "Data;CoreData;Resources";
     engineParameters_["WindowIcon"] = "icon.png";
 
-    engineParameters_["FullScreen"] = false;
+//    engineParameters_["FullScreen"] = false;
 //    engineParameters_["WindowWidth"] = 960;
 //    engineParameters_["WindowHeight"] = 540;
 }
@@ -181,37 +181,73 @@ int MasterControl::CountFreePieces()
 void MasterControl::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
 //    float t{eventData[Update::P_TIMESTEP].GetFloat()};
-    if (!inputMaster_->IsIdle()){
-        for (Piece* p: world.pieces_){
-            if (LucKey::Delta(CAMERA->GetYaw(), p->GetAngle(), true) < 180.0f / NUM_PIECES){
-                p->Select();
-            } else if (p->GetState() != PieceState::PICKED){
-                p->Deselect();
-            }
-        }
-    }
+
+    UpdateSelectedPiece();
     //Wave leafy light
     leafyLightNode_->SetRotation(Quaternion(Sine(Sine(0.1f, 0.05f, 0.23f), -0.23f, 0.23f) + 90.0f, Vector3::RIGHT) *
                                  Quaternion(Sine(0.23f, 178.0f, 182.0f), Vector3::FORWARD));
     leafyLight_->SetBrightness(0.34f + Sine(0.011f, 0.05f, 0.23f) + Sine(0.02f, 0.05f, 0.13f));
 }
+void MasterControl::UpdateSelectedPiece()
+{
+    if (!inputMaster_->IsIdle()){
+        Piece* nearest{selectedPiece_};
+        for (Piece* p: world.pieces_){
+            if (!nearest) {
+                nearest = p;
+            } else if (LucKey::Distance(CAMERA->GetPosition(), p->GetPosition()) <
+                       LucKey::Distance(CAMERA->GetPosition(), nearest->GetPosition())
+                       && (p->GetState() == PieceState::FREE || p->GetState() == PieceState::SELECTED))
+            {
+                nearest = p;
+            }
+        }
+        if (nearest != selectedPiece_ || nearest->GetState() != PieceState::SELECTED){
+            if (selectedPiece_)
+                selectedPiece_->Deselect();
+
+            selectedPiece_ = nearest;
+            nearest->Select();
+        }
+    }
+}
+
+void MasterControl::DeselectPiece()
+{
+    if (selectedPiece_){
+        selectedPiece_->Deselect();
+    }
+    selectedPiece_ = nullptr;
+}
 
 void MasterControl::NextPhase()
 {
-    switch (gamePhase_)    {
-    case GamePhase::PLAYER1PICKS: gamePhase_ = GamePhase::PLAYER2PUTS;
+    DeselectPiece();
+
+    switch (gameState_)    {
+    case GameState::PLAYER1PICKS: gameState_ = GameState::PLAYER2PUTS;
         break;
-    case GamePhase::PLAYER2PUTS:  gamePhase_ = GamePhase::PLAYER2PICKS;
+    case GameState::PLAYER2PUTS:  gameState_ = GameState::PLAYER2PICKS;
         break;
-    case GamePhase::PLAYER2PICKS: gamePhase_ = GamePhase::PLAYER1PUTS;
+    case GameState::PLAYER2PICKS: gameState_ = GameState::PLAYER1PUTS;
         break;
-    case GamePhase::PLAYER1PUTS:  gamePhase_ = GamePhase::PLAYER1PICKS;
+    case GameState::PLAYER1PUTS:  gameState_ = GameState::PLAYER1PICKS;
         break;
+    default: break;
     }
 }
 void MasterControl::Quatter()
 {
-    gamePhase_ = GamePhase::QUATTER;
+    gameState_ = GameState::QUATTER;
+}
+void MasterControl::Reset()
+{
+    for (Piece* p: world.pieces_){
+        p->Reset();
+    }
+    world.board_->Reset();
+
+    gameState_ = GameState::PLAYER1PICKS;
 }
 
 void MasterControl::ToggleMusic()

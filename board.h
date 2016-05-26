@@ -40,11 +40,15 @@ public:
     void PutPiece(Piece* piece, Square* square);
     void PutPiece(Piece* piece) { PutPiece(piece, GetSelectedSquare()); }
 
-    Square*GetNearestFreeSquare(Vector3 pos);
+    void Step(IntVector2 step);
+    Square*GetNearestSquare(Vector3 pos, bool free = true);
     Square* GetSelectedSquare() const { return selectedSquare_; }
     void Select(Square* square);
+    void Deselect(Square* square);
+    void SelectNearestSquare(Vector3 pos);
     void SelectNearestFreeSquare(Vector3 pos);
     void DeselectAll();
+    void Reset();
 private:
     SharedPtr<Node> rootNode_;
     StaticModel* model_;
@@ -52,7 +56,6 @@ private:
     HashMap<IntVector2, SharedPtr<Square>> squares_;
     Square* selectedSquare_;
     Vector3 SquarePosition(IntVector2 coords);
-    void Deselect(Square* square);
     void HandleSceneUpdate(StringHash eventType, VariantMap& eventData);
 };
 

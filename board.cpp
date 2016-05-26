@@ -1,5 +1,6 @@
 #include "board.h"
 #include "effectmaster.h"
+#include "quattercam.h"
 
 namespace Urho3D {
 template <> unsigned MakeHash(const IntVector2& value)
@@ -39,16 +40,25 @@ Board::Board(): Object(MC->GetContext()),
             lightNode->SetPosition(Vector3::UP * 0.23f);
             square->light_ = square->node_->CreateComponent<Light>();
             square->light_->SetColor(Color(0.0f, 0.8f, 0.5f));
-            square->light_->SetBrightness(0.0f);
+            square->light_->SetBrightness(0.1f);
             square->light_->SetRange(2.0f);
             square->light_->SetCastShadows(true);
 
 
             squares_[square->coords_] = square;
-            square->node_->SetEnabledRecursive(false);
+//            square->node_->SetEnabledRecursive(false);
         }
 
     SubscribeToEvent(E_SCENEUPDATE, URHO3D_HANDLER(Board, HandleSceneUpdate));
+}
+void Board::Reset()
+{
+    for (Square* s: squares_.Values()){
+        s->free_ = true;
+        s->piece_ = nullptr;
+        s->light_->SetEnabled(true);
+    }
+    DeselectAll();
 }
 
 Vector3 Board::SquarePosition(IntVector2 coords)
@@ -67,6 +77,8 @@ void Board::HandleSceneUpdate(StringHash eventType, VariantMap& eventData)
 
 bool Board::CheckQuatter()
 {
+    bool checkBlocks{true};
+
     //Check rows
     for (int i{0}; i < BOARD_WIDTH; ++i){
         Piece::Attributes matching{};
@@ -153,32 +165,34 @@ bool Board::CheckQuatter()
         }
     }
     //Check 2x2 blocks
-    for (int k{0}; k < BOARD_WIDTH - 1; ++k){
-        for (int l{0}; l < BOARD_HEIGHT - 1; ++l){
-            Piece::Attributes matching{};
-            matching.flip();
-            Piece::Attributes first{};
-            for (int m : {0, 1}) for (int n : {0, 1}){
-                IntVector2 coords(k + m, l + n);
-                Piece* piece{squares_[coords].Get()->piece_};
-                if (piece){
-                    Piece::Attributes attributes(piece->GetAttributes());
-                    if (m == 0 && n == 0) {
-                        first = attributes;
+    if (checkBlocks){
+        for (int k{0}; k < BOARD_WIDTH - 1; ++k){
+            for (int l{0}; l < BOARD_HEIGHT - 1; ++l){
+                Piece::Attributes matching{};
+                matching.flip();
+                Piece::Attributes first{};
+                for (int m : {0, 1}) for (int n : {0, 1}){
+                    IntVector2 coords(k + m, l + n);
+                    Piece* piece{squares_[coords].Get()->piece_};
+                    if (piece){
+                        Piece::Attributes attributes(piece->GetAttributes());
+                        if (m == 0 && n == 0) {
+                            first = attributes;
+                        } else {
+                            for (int a{0}; a < NUM_ATTRIBUTES; ++a)
+                                if (first[a] != attributes[a])
+                                    matching[a] = false;
+                        }
+                        //Full block required
                     } else {
-                        for (int a{0}; a < NUM_ATTRIBUTES; ++a)
-                            if (first[a] != attributes[a])
-                                matching[a] = false;
+                        matching.reset();
+                        break;
                     }
-                    //Full block required
-                } else {
-                    matching.reset();
-                    break;
                 }
-            }
-            //Quatter!
-            if (matching.any()){
-                return true;
+                //Quatter!
+                if (matching.any()){
+                    return true;
+                }
             }
         }
     }
@@ -191,6 +205,7 @@ void Board::PutPiece(Piece* piece, Square* square)
 {
     square->piece_ = piece;
     square->free_ = false;
+    square->light_->SetEnabled(false);
 
     piece->Put(square->node_->GetWorldPosition()
                + Vector3(Random(-0.05f, 0.05f),
@@ -200,21 +215,26 @@ void Board::PutPiece(Piece* piece, Square* square)
     if (CheckQuatter())
         MC->Quatter();
 }
-Square* Board::GetNearestFreeSquare(Vector3 pos)
+Square* Board::GetNearestSquare(Vector3 pos, bool free)
 {
     Square* nearest{};
     for (Square* s : squares_.Values()){
         if (!nearest ||
             LucKey::Distance(s->node_->GetWorldPosition(), pos) <
             LucKey::Distance(nearest->node_->GetWorldPosition(), pos))
-            if (s->free_)
+            if (s->free_ || !free)
                 nearest = s;
     }
     return nearest;
 }
 void Board::SelectNearestFreeSquare(Vector3 pos)
 {
-    Square* square{GetNearestFreeSquare(pos)};
+    Square* square{GetNearestSquare(pos, true)};
+    if (square) Select(square);
+}
+void Board::SelectNearestSquare(Vector3 pos)
+{
+    Square* square{GetNearestSquare(pos, false)};
     if (square) Select(square);
 }
 void Board::Select(Square* square)
@@ -223,24 +243,9 @@ void Board::Select(Square* square)
         Deselect(selectedSquare_);
 
     selectedSquare_ = square;
+    square->selected_ = true;
 
     square->node_->SetEnabledRecursive(true);
-
-//    Material* glow{square->slot_->GetMaterial()};
-//    Color glowColor{glow->GetShaderParameter("MatDiffColor").GetColor()};
-
-//    Material* originalGlow{MC->GetMaterial("Glow")};
-//    Color originalGlowColor{originalGlow->GetShaderParameter("MatDiffColor").GetColor()};
-
-//    ValueAnimation* diffFadeIn{new ValueAnimation(context_)};
-//    diffFadeIn->SetKeyFrame(0.0f, glowColor);
-//    diffFadeIn->SetKeyFrame(0.23f, originalGlowColor);
-//    glow->SetShaderParameterAnimation("MatDiffColor", diffFadeIn, WM_ONCE);
-
-//    ValueAnimation* lightFadeIn{new ValueAnimation(context_)};
-//    lightFadeIn->SetKeyFrame(0.0f, square->light_->GetBrightness());
-//    lightFadeIn->SetKeyFrame(0.23f, 0.5f);
-//    square->light_->SetAttributeAnimation("Brightness Multiplier", lightFadeIn, WM_ONCE);
 
     MC->effectMaster_->FadeTo(square->slot_->GetMaterial(),
                               MC->GetMaterial("Glow")->GetShaderParameter("MatDiffColor").GetColor());
@@ -256,23 +261,23 @@ void Board::Deselect(Square* square)
     square->selected_ = false;
 
     MC->effectMaster_->FadeOut(square->slot_->GetMaterial());
-    MC->effectMaster_->FadeOut(square->light_);
-//    Material* glow{square->slot_->GetMaterial()};
-//    Color glowColor{glow->GetShaderParameter("MatDiffColor").GetColor()};
-
-//    ValueAnimation* diffFadeOut{new ValueAnimation(context_)};
-//    diffFadeOut->SetKeyFrame(0.0f, glowColor);
-//    diffFadeOut->SetKeyFrame(0.23f, glowColor * 0.0f);
-//    glow->SetShaderParameterAnimation("MatDiffColor", diffFadeOut, WM_ONCE);
-
-//    ValueAnimation* lightFadeOut{new ValueAnimation(context_)};
-//    lightFadeOut->SetKeyFrame(0.0f, square->light_->GetBrightness());
-//    lightFadeOut->SetKeyFrame(0.23f, 0.0f);
-//    square->light_->SetAttributeAnimation("Brightness Multiplier", lightFadeOut, WM_ONCE);
+    MC->effectMaster_->FadeTo(square->light_, 0.1f);
 }
 void Board::DeselectAll()
 {
     for (Square* s: squares_.Values()){
         Deselect(s);
+    }
+}
+
+void Board::Step(IntVector2 step)
+{
+    if (selectedSquare_){
+        IntVector2 newCoords{selectedSquare_->coords_ + step};
+        if (squares_.Contains(newCoords)){
+            Select(squares_[newCoords].Get());
+        }
+    } else {
+        SelectNearestFreeSquare(CAMERA->GetPosition());
     }
 }

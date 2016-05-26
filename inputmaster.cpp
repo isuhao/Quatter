@@ -18,6 +18,8 @@ InputMaster::InputMaster() : Master(),
 
 void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
 {
+    ResetIdle();
+
     int key{eventData[KeyDown::P_KEY].GetInt()};
     pressedKeys_.Insert(key);
 
@@ -27,9 +29,19 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
     case KEY_SPACE:{
         HandleActionButtonPressed();
     } break;
+    case KEY_UP:{ Step(Vector3::FORWARD);
+    } break;
+    case KEY_DOWN:{ Step(Vector3::BACK);
+    } break;
+    case KEY_RIGHT:{ Step(Vector3::RIGHT);
+    } break;
+    case KEY_LEFT:{ Step(Vector3::LEFT);
+    } break;
     //Exit when ESC is pressed
     case KEY_ESC:{
-        MC->Exit();
+        if (MC->GetGameState() == GameState::QUATTER){
+            MC->Reset();
+        } else MC->Exit();
     } break;
         //Take screenshot when 9 is pressed
     case KEY_9:{
@@ -47,8 +59,30 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
     default: break;
     }
 }
+void InputMaster::Step(Vector3 step)
+{
+    if (MC->InPutState()){
+        float quadrant{0.0f};
+        for (float angle: {90.0f, 180.0f, 270.0f}){
+            if (LucKey::Delta(CAMERA->GetYaw(), angle, true) <
+                    LucKey::Delta(CAMERA->GetYaw(), quadrant, true))
+            {
+                quadrant = angle;
+            }
+        }
+        Vector3 finalStep{Quaternion(quadrant, Vector3::UP) * step};
+        Board* board{MC->world.board_};
+        Square* selectedSquare{board->GetSelectedSquare()};
+        if (selectedSquare)
+            board->SelectNearestSquare(selectedSquare->node_->GetPosition() + finalStep);
+        else board->SelectNearestFreeSquare(CAMERA->GetPosition());
+    }
+}
+
 void InputMaster::HandleKeyUp(StringHash eventType, VariantMap &eventData)
 {
+    ResetIdle();
+
     using namespace KeyUp;
     int key{eventData[P_KEY].GetInt()};
     if (pressedKeys_.Contains(key)) pressedKeys_.Erase(key);
@@ -56,6 +90,8 @@ void InputMaster::HandleKeyUp(StringHash eventType, VariantMap &eventData)
 
 void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventData)
 {
+    ResetIdle();
+
     using namespace MouseButtonDown;
     int button{eventData[P_BUTTON].GetInt()};
     pressedMouseButtons_.Insert(button);
@@ -64,6 +100,8 @@ void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventD
 
 void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventData)
 {
+    ResetIdle();
+
     using namespace MouseButtonUp;
     int button{eventData[P_BUTTON].GetInt()};
     if (pressedMouseButtons_.Contains(button)) pressedMouseButtons_.Erase(button);
@@ -71,12 +109,28 @@ void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventDat
 
 void InputMaster::HandleJoystickButtonDown(StringHash eventType, VariantMap &eventData)
 {
+    ResetIdle();
+
     using namespace JoystickButtonDown;
     int joystickId{eventData[P_JOYSTICKID].GetInt()};
     int button{eventData[P_BUTTON].GetInt()};
+
+
     switch (button){
-    case 14: HandleActionButtonPressed();
-        break;
+    case JB_CROSS:{
+        HandleActionButtonPressed();
+    } break;
+    case JB_DPAD_UP:{ Step(Vector3::FORWARD);
+    } break;
+    case JB_DPAD_DOWN:{ Step(Vector3::BACK);
+    } break;
+    case JB_DPAD_RIGHT:{ Step(Vector3::RIGHT);
+    } break;
+    case JB_DPAD_LEFT:{ Step(Vector3::LEFT);
+    } break;
+    case JB_START:{ if (MC->GetGameState() == GameState::QUATTER)
+            MC->Reset();
+    } break;
     default: break;
     }
 
@@ -93,8 +147,7 @@ void InputMaster::HandleJoystickButtonUp(StringHash eventType, VariantMap &event
 
 void InputMaster::HandleActionButtonPressed()
 {
-    if (MC->GetGamePhase() == GamePhase::PLAYER1PICKS ||
-        MC->GetGamePhase() == GamePhase::PLAYER2PICKS )
+    if (MC->InPickState())
     {
         Piece* selectedPiece{MC->GetSelectedPiece()};
         if (selectedPiece){
@@ -102,13 +155,12 @@ void InputMaster::HandleActionButtonPressed()
             MC->NextPhase();
             MC->world.board_->SelectNearestFreeSquare(CAMERA->GetPosition());
         }
-    } else if (MC->GetGamePhase() == GamePhase::PLAYER1PUTS ||
-               MC->GetGamePhase() == GamePhase::PLAYER2PUTS )
+    } else if (MC->InPutState() )
     {
         Square* selectedSquare{MC->world.board_->GetSelectedSquare()};
         if (selectedSquare && selectedSquare->free_){
             MC->world.board_->PutPiece(MC->GetPickedPiece());
-            if (MC->GetGamePhase() != GamePhase::QUATTER)
+            if (MC->GetGameState() != GameState::QUATTER)
                 MC->NextPhase();
         }
     }
@@ -119,7 +171,35 @@ void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
     float t{eventData[Update::P_TIMESTEP].GetFloat()};
     idleTime_ += t;
 
+    if (idleTime_ > IDLE_THRESHOLD){
+        SetIdle();
+    }
+
     HandleCameraMovement(t);
+}
+
+void InputMaster::SetIdle()
+{
+    if (!idle_) {
+        idle_ = true;
+
+        if (MC->GetSelectedPiece())
+            MC->DeselectPiece();
+
+        Square* selectedSquare{MC->world.board_->GetSelectedSquare()};
+        if (selectedSquare)
+            MC->world.board_->Deselect(selectedSquare);
+    }
+}
+void InputMaster::ResetIdle()
+{
+    if (idle_) {
+        idle_ = false;
+        if (MC->InPutState())
+            MC->world.board_->SelectNearestFreeSquare(CAMERA->GetPosition());
+    }
+
+    idleTime_ = 0.0f;
 }
 
 void InputMaster::HandleCameraMovement(float t)
@@ -131,7 +211,7 @@ void InputMaster::HandleCameraMovement(float t)
     float keyZoomSpeed{0.1f};
 
     float joyRotMultiplier{80.0f};
-    float joyZoomSpeed{3.4f};
+    float joyZoomSpeed{7.0f};
 
     if (pressedKeys_.Size()) idleTime_ = 0.0f;
     for (int key : pressedKeys_){
@@ -153,7 +233,7 @@ void InputMaster::HandleCameraMovement(float t)
     }
 
     if (pressedMouseButtons_.Contains(MOUSEB_RIGHT)){
-        idleTime_ = 0.0f;
+        ResetIdle();
         IntVector2 mouseMove = input_->GetMouseMove();
         camRot += Vector2(mouseMove.x_, mouseMove.y_) * 0.1f;
     }
@@ -163,25 +243,17 @@ void InputMaster::HandleCameraMovement(float t)
         Vector2 rotation{-Vector2(joy0->GetAxisPosition(0), joy0->GetAxisPosition(1))
                          -Vector2(joy0->GetAxisPosition(2), joy0->GetAxisPosition(3))};
         if (rotation.Length()){
-            idleTime_ = 0.0f;
+            ResetIdle();
             camRot += rotation * t * joyRotMultiplier;
         }
         camZoom += t * joyZoomSpeed * (joy0->GetAxisPosition(13) - joy0->GetAxisPosition(12));
     }
 
-    float idleThreshold{5.0f};
-    float idleStartup{Min(0.5f * (idleTime_ - idleThreshold), 1.0f)};
-    if (idleTime_ > idleThreshold){
-        if (!idle_) {
-            idle_ = true;
-            for (Piece* p: MC->world.pieces_){
-                p->Deselect();
-            }
-        }
+    //Slowly spin camera when there hasn't been any input for a while
+    if (idle_){
+        float idleStartup{Min(0.5f * (idleTime_ - IDLE_THRESHOLD), 1.0f)};
         camRot += Vector2(t * idleStartup * -0.5f,
                           t * idleStartup * MC->Sine(0.23f, -0.042f, 0.042f));
-    } else {
-        if (idle_) idle_ = false;
     }
     //Speed up camera movement when shift key is held down
     if (pressedKeys_.Contains(KEY_SHIFT)){
@@ -208,7 +280,6 @@ void InputMaster::SmoothCameraMovement(float camZoom, Vector2 camRot)
             pitchBrake = pitchLeft / PITCH_EDGE;
     }
     camRot.y_ *= pitchBrake * pitchBrake;
-//    smoothCamRotate_.y_ *= pitchBrake;
     //Slow down zooming when nearing extremes
     float zoomBrake{1.0f};
     if (Sign(camZoom) < 0.0f){
@@ -221,7 +292,6 @@ void InputMaster::SmoothCameraMovement(float camZoom, Vector2 camRot)
             zoomBrake = zoomLeft / ZOOM_EDGE;
     }
     camZoom *= zoomBrake;
-//    smoothCamZoom_ *= zoomBrake;
 
     smoothCamRotate_ = 0.0666f * (camRot  + smoothCamRotate_ * 14.0f);
     smoothCamZoom_   = 0.05f * (camZoom + smoothCamZoom_   * 19.0f);

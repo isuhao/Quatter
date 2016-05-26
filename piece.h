@@ -23,6 +23,7 @@ public:
     Piece(Attributes);
 
     void SetPosition(Vector3 pos) { rootNode_->SetPosition(pos); }
+    Vector3 GetPosition() const { return rootNode_->GetPosition(); }
     bool GetAttribute(int index) const { return attributes_[index]; }
     Attributes GetAttributes() const { return Attributes(attributes_.to_ulong()); }
     String GetCodon(int length = NUM_ATTRIBUTES) const;
@@ -32,6 +33,7 @@ public:
     PieceState GetState() const noexcept { return state_; }
     void Pick();
     void Put(Vector3 position);
+    void Reset();
 private:
     SharedPtr<Node> rootNode_;
     SharedPtr<StaticModel> outlineModel_;
@@ -39,10 +41,6 @@ private:
 
     Attributes attributes_;
     PieceState state_;
-//    void FadeInOutline();
-//    void FadeOutOutline();
-//    void FadeInLight();
-//    void FadeOutLight();
 };
 
 #endif // PIECE_H

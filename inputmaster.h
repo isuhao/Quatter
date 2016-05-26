@@ -3,7 +3,9 @@
 
 #include "master.h"
 
-enum class JoystickButton {SELECT, LEFTSTICK, RIGHTSTICK, START, DPAD_UP, DPAD_RIGHT, DPAD_DOWN, DPAD_LEFT, L2, R2, L1, R1, TRIANGLE, CIRCLE, CROSS, SQUARE};
+enum JoystickButton {SELECT, LEFTSTICK, RIGHTSTICK, JB_START, JB_DPAD_UP, JB_DPAD_RIGHT, JB_DPAD_DOWN, JB_DPAD_LEFT, L2, R2, L1, R1, TRIANGLE, CIRCLE, JB_CROSS, SQUARE};
+
+#define IDLE_THRESHOLD 5.0f
 
 class InputMaster : public Master
 {
@@ -13,8 +15,10 @@ public:
     WeakPtr<Node> firstHit_;
 
     bool IsIdle() const noexcept { return idle_; }
+    void ResetIdle();
 
-    void HandleActionButtonPressed();
+    void SetIdle();
+
 private:
     Input* input_;
 
@@ -38,6 +42,11 @@ private:
     void HandleCameraMovement(float t);
 
     void Screenshot();
+    void HandleActionButtonPressed();
+    void Step(Vector3 step);
+    void HandleDownArrowPressed();
+    void HandleRightArrowPressed();
+    void HandleLeftArrowPressed();
 };
 
 #endif // INPUTMASTER_H

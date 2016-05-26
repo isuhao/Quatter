@@ -36,7 +36,7 @@ public:
     SharedPtr<RenderPath> effectRenderPath_;
 
     float GetPitch() const { return rootNode_->GetRotation().EulerAngles().x_; }
-    float GetYaw() const { return rootNode_->GetRotation().EulerAngles().y_ + 180.0f; }
+    float GetYaw() const { return rootNode_->GetRotation().EulerAngles().y_; }
     float GetDistance() const { return distance_; }
     Vector3 GetPosition() const { return rootNode_->GetPosition(); }
     void Zoom(float distance);

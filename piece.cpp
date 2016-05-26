@@ -32,6 +32,19 @@ Piece::Piece(Attributes attributes): Object(MC->GetContext()),
     light_->SetBrightness(0.0f);
     light_->SetRange(3.0f);
 }
+void Piece::Reset()
+{
+    if (MC->GetSelectedPiece() == this){
+        MC->DeselectPiece();
+    }else Deselect();
+
+    if (state_ != PieceState::FREE){
+        state_ = PieceState::FREE;
+        MC->effectMaster_->TransformTo(rootNode_,
+                                       MC->AttributesToPosition(static_cast<int>(attributes_.to_ulong())),
+                                       Quaternion(Random(360.0f), Vector3::UP));
+    }
+}
 
 String Piece::GetCodon(int length) const
 {
@@ -53,8 +66,8 @@ String Piece::GetCodon(int length) const
 
 void Piece::Select()
 {
-    if (MC->GetGamePhase() == GamePhase::PLAYER1PICKS ||
-        MC->GetGamePhase() == GamePhase::PLAYER2PICKS )
+    if (MC->GetGameState() == GameState::PLAYER1PICKS ||
+        MC->GetGameState() == GameState::PLAYER2PICKS )
     {
         outlineModel_->SetEnabled(true);
         if (state_ == PieceState::FREE){
@@ -77,20 +90,12 @@ void Piece::Pick()
 {
     if (state_ == PieceState::SELECTED){
         state_ = PieceState::PICKED;
-        if (MC->GetGamePhase() == GamePhase::PLAYER1PICKS)
+        if (MC->GetGameState() == GameState::PLAYER1PICKS)
             rootNode_->SetParent(CAMERA->GetPocket(false));
-        if (MC->GetGamePhase() == GamePhase::PLAYER2PICKS)
+        if (MC->GetGameState() == GameState::PLAYER2PICKS)
             rootNode_->SetParent(CAMERA->GetPocket(true));
 
-        ValueAnimation* intoPocketPos{new ValueAnimation(context_)};
-        intoPocketPos->SetKeyFrame(0.0f, rootNode_->GetPosition());
-        intoPocketPos->SetKeyFrame(1.0f, Vector3::DOWN);
-        rootNode_->SetAttributeAnimation("Position", intoPocketPos, WM_ONCE);
-
-        ValueAnimation* intoPocketRot{new ValueAnimation(context_)};
-        intoPocketRot->SetKeyFrame(0.0f, rootNode_->GetRotation());
-        intoPocketRot->SetKeyFrame(1.0f, Quaternion(10.0f, Vector3(1.0f, 0.0f, 0.5f)));
-        rootNode_->SetAttributeAnimation("Rotation", intoPocketRot, WM_ONCE);
+        MC->effectMaster_->TransformTo(rootNode_, Vector3::DOWN, Quaternion(10.0f, Vector3(1.0f, 0.0f, 0.5f)));
 
         MC->effectMaster_->FadeOut(outlineModel_->GetMaterial());
         MC->effectMaster_->FadeOut(light_);
@@ -103,14 +108,6 @@ void Piece::Put(Vector3 position)
 
         rootNode_->SetParent(MC->world.scene);
 
-        ValueAnimation* intoBoardPos{new ValueAnimation(context_)};
-        intoBoardPos->SetKeyFrame(0.0f, rootNode_->GetPosition());
-        intoBoardPos->SetKeyFrame(1.0f, position);
-        rootNode_->SetAttributeAnimation("Position", intoBoardPos, WM_ONCE);
-
-        ValueAnimation* intoBoardRot{new ValueAnimation(context_)};
-        intoBoardRot->SetKeyFrame(0.0f, rootNode_->GetRotation());
-        intoBoardRot->SetKeyFrame(1.0f, Quaternion(Random(-13.0f, 13.0f), Vector3::UP));
-        rootNode_->SetAttributeAnimation("Rotation", intoBoardRot, WM_ONCE);
+        MC->effectMaster_->TransformTo(rootNode_, position, Quaternion(Random(-13.0f, 13.0f), Vector3::UP));
     }
 }
