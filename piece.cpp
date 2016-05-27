@@ -7,7 +7,7 @@ Piece::Piece(Attributes attributes): Object(MC->GetContext()),
     attributes_{attributes},
     state_{PieceState::FREE }
 {
-    rootNode_ = MC->world.scene->CreateChild("Piece"+GetCodon(4));
+    rootNode_ = MC->world_.scene_->CreateChild("Piece"+GetCodon(4));
     rootNode_->SetRotation(Quaternion(Random(360.0f), Vector3::UP));
 
     StaticModel* pieceModel{rootNode_->CreateComponent<StaticModel>()};
@@ -34,15 +34,17 @@ Piece::Piece(Attributes attributes): Object(MC->GetContext()),
 }
 void Piece::Reset()
 {
+    rootNode_->SetParent(MC->world_.scene_);
+
     if (MC->GetSelectedPiece() == this){
         MC->DeselectPiece();
-    }else Deselect();
+    } else Deselect();
 
     if (state_ != PieceState::FREE){
         state_ = PieceState::FREE;
-        MC->effectMaster_->TransformTo(rootNode_,
-                                       MC->AttributesToPosition(static_cast<int>(attributes_.to_ulong())),
-                                       Quaternion(Random(360.0f), Vector3::UP));
+        FX->TransformTo(rootNode_,
+                        MC->AttributesToPosition(static_cast<int>(attributes_.to_ulong())),
+                        Quaternion(Random(360.0f), Vector3::UP));
     }
 }
 
@@ -66,15 +68,15 @@ String Piece::GetCodon(int length) const
 
 void Piece::Select()
 {
-    if (MC->GetGameState() == GameState::PLAYER1PICKS ||
-        MC->GetGameState() == GameState::PLAYER2PICKS )
+    if ((MC->GetGameState() == GameState::PLAYER1PICKS ||
+         MC->GetGameState() == GameState::PLAYER2PICKS))
     {
         outlineModel_->SetEnabled(true);
         if (state_ == PieceState::FREE){
             state_ = PieceState::SELECTED;
-            MC->effectMaster_->FadeTo(outlineModel_->GetMaterial(),
-                                      MC->GetMaterial("Glow")->GetShaderParameter("MatDiffColor").GetColor());
-            MC->effectMaster_->FadeTo(light_, 0.666f);
+            FX->FadeTo(outlineModel_->GetMaterial(),
+                                      COLOR_GLOW);
+            FX->FadeTo(light_, 0.666f);
         }
     }
 }
@@ -82,8 +84,8 @@ void Piece::Deselect()
 {
     if (state_ == PieceState::SELECTED){
         state_ = PieceState::FREE;
-        MC->effectMaster_->FadeOut(outlineModel_->GetMaterial());
-        MC->effectMaster_->FadeOut(light_);
+        FX->FadeOut(outlineModel_->GetMaterial());
+        FX->FadeOut(light_);
     }
 }
 void Piece::Pick()
@@ -95,10 +97,10 @@ void Piece::Pick()
         if (MC->GetGameState() == GameState::PLAYER2PICKS)
             rootNode_->SetParent(CAMERA->GetPocket(true));
 
-        MC->effectMaster_->TransformTo(rootNode_, Vector3::DOWN, Quaternion(10.0f, Vector3(1.0f, 0.0f, 0.5f)));
+        FX->TransformTo(rootNode_, Vector3::DOWN, Quaternion(10.0f, Vector3(1.0f, 0.0f, 0.5f)));
 
-        MC->effectMaster_->FadeOut(outlineModel_->GetMaterial());
-        MC->effectMaster_->FadeOut(light_);
+        FX->FadeOut(outlineModel_->GetMaterial());
+        FX->FadeOut(light_);
     }
 }
 void Piece::Put(Vector3 position)
@@ -106,8 +108,8 @@ void Piece::Put(Vector3 position)
     if (state_ == PieceState::PICKED){
         state_ = PieceState::PUT;
 
-        rootNode_->SetParent(MC->world.scene);
+        rootNode_->SetParent(MC->world_.scene_);
 
-        MC->effectMaster_->TransformTo(rootNode_, position, Quaternion(Random(-13.0f, 13.0f), Vector3::UP));
+        FX->TransformTo(rootNode_, position, Quaternion(Random(-13.0f, 13.0f), Vector3::UP));
     }
 }

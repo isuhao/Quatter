@@ -4,10 +4,10 @@
 QuatterCam::QuatterCam():
     Object(MC->GetContext()),
     distance_{12.0f},
-    targetPosition_{Vector3::ZERO},
+    targetPosition_{Vector3::UP * 0.42f},
     smoothTargetPosition_{targetPosition_}
 {
-    rootNode_ = MC->world.scene->CreateChild("Camera");
+    rootNode_ = MC->world_.scene_->CreateChild("Camera");
     for (bool p : {true, false}){
         Node* pocketNode{rootNode_->CreateChild("Pocket")};
         pocketNode->SetPosition(Vector3(p?2.0f:-2.0f, 1.5f, 3.2f));
@@ -37,7 +37,7 @@ QuatterCam::QuatterCam():
 void QuatterCam::SetupViewport()
 {
     //Set up a viewport to the Renderer subsystem so that the 3D scene can be seen
-    SharedPtr<Viewport> viewport(new Viewport(context_, MC->world.scene, camera_));
+    SharedPtr<Viewport> viewport(new Viewport(context_, MC->world_.scene_, camera_));
     viewport_ = viewport;
 
     //Add anti-asliasing and bloom

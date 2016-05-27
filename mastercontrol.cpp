@@ -19,7 +19,8 @@ MasterControl::MasterControl(Context *context):
     musicGain_{1.0f},
     gameState_{GameState::PLAYER1PICKS},
     musicState_{MUSIC_SONG1},
-    previousMusicState_{MUSIC_OFF}
+    previousMusicState_{MUSIC_OFF},
+    lastReset_{RESET_DURATION}
 {
     instance_ = this;
 }
@@ -30,7 +31,7 @@ void MasterControl::Setup()
 
     engineParameters_["WindowTitle"] = "Quatter";
     engineParameters_["LogName"] = GetSubsystem<FileSystem>()->GetAppPreferencesDir("urho3d", "logs")+"Quatter.log";
-    engineParameters_["ResourcePaths"] = "Data;CoreData;Resources";
+    engineParameters_["ResourcePaths"] = "Resources";
     engineParameters_["WindowIcon"] = "icon.png";
 
 //    engineParameters_["FullScreen"] = false;
@@ -48,7 +49,7 @@ void MasterControl::Start()
     //Play music
     Sound* song1{GetMusic("Angelight - The Knowledge River")};
     Sound* song2{GetMusic("Cao Sao Vang - Days Of Yore")};
-    Node* musicNode{world.scene->CreateChild("Music")};
+    Node* musicNode{world_.scene_->CreateChild("Music")};
 
     musicSource1_ = musicNode->CreateComponent<SoundSource>();
     musicSource1_->SetSoundType(SOUND_MUSIC);
@@ -69,27 +70,27 @@ void MasterControl::Stop()
 void MasterControl::Exit()
 {
     File file(context_, "Resources/Endgame.xml", FILE_WRITE);
-    world.scene->SaveXML(file);
+    world_.scene_->SaveXML(file);
 
     engine_->Exit();
 }
 
 void MasterControl::CreateScene()
 {
-    world.scene = new Scene(context_);
-    world.scene->CreateComponent<Octree>();
+    world_.scene_ = new Scene(context_);
+    world_.scene_->CreateComponent<Octree>();
     CreateLights();
 
     //Create skybox
-    Node* skyNode{world.scene->CreateChild("Sky")};
+    Node* skyNode{world_.scene_->CreateChild("Sky")};
     Skybox* skybox{skyNode->CreateComponent<Skybox>()};
     skybox->SetModel(GetModel("Box"));
     skybox->SetMaterial(GetMaterial("LeafyKnoll"));
 
-    world.camera = new QuatterCam();
+    world_.camera_ = new QuatterCam();
 
     //Create table
-    Node* tableNode = world.scene->CreateChild("Table");
+    Node* tableNode{world_.scene_->CreateChild("Table")};
     tableNode->SetRotation(Quaternion(23.5f, Vector3::UP));
     StaticModel* tableModel = tableNode->CreateComponent<StaticModel>();
     tableModel->SetModel(GetModel("Table"));
@@ -98,12 +99,15 @@ void MasterControl::CreateScene()
     tableModel->SetCastShadows(true);
 
     //Create board and pieces
-    world.board_ = new Board();
-
+    world_.board_ = new Board();
     for (int p{0}; p < NUM_PIECES; ++p){
+
         Piece* newPiece = new Piece(Piece::Attributes(p));
-        world.pieces_.Push(SharedPtr<Piece>(newPiece));
-        newPiece->SetPosition(AttributesToPosition(p) + Vector3(Random(0.05f), 0.0f, Random(0.05f)));
+        world_.pieces_.Push(SharedPtr<Piece>(newPiece));
+        newPiece->SetPosition(AttributesToPosition(newPiece->ToInt())
+                              + Vector3(Random(0.05f),
+                                        0.0f,
+                                        Random(0.05f)));
     }
 }
 
@@ -111,7 +115,7 @@ void MasterControl::CreateScene()
 void MasterControl::CreateLights()
 {
     //Add leafy light source
-    leafyLightNode_ = world.scene->CreateChild("DirectionalLight");
+    leafyLightNode_ = world_.scene_->CreateChild("DirectionalLight");
     leafyLightNode_->SetPosition(Vector3(6.0f, 96.0f, 9.0f));
     leafyLightNode_->LookAt(Vector3(0.0f, 0.0f, 0.0f));
     leafyLight_ = leafyLightNode_->CreateComponent<Light>();
@@ -122,7 +126,7 @@ void MasterControl::CreateLights()
     leafyLight_->SetShapeTexture(static_cast<Texture*>(cache_->GetResource<Texture2D>("Textures/LeafyMask.png")));
 
     //Add a directional light to the world. Enable cascaded shadows on it
-    Node* downardsLightNode{world.scene->CreateChild("DirectionalLight")};
+    Node* downardsLightNode{world_.scene_->CreateChild("DirectionalLight")};
     downardsLightNode->SetPosition(Vector3(2.0f, 23.0f, 3.0f));
     downardsLightNode->LookAt(Vector3(0.0f, 0.0f, 0.0f));
     Light* downwardsLight{downardsLightNode->CreateComponent<Light>()};
@@ -135,7 +139,7 @@ void MasterControl::CreateLights()
 
     //Create point lights
     for (Vector3 pos : {Vector3(-10.0f, 8.0f, -23.0f), Vector3(-20.0f, -8.0f, 23.0f), Vector3(20.0f, -7.0f, 23.0f)}){
-        Node* pointLightNode_{world.scene->CreateChild("PointLight")};
+        Node* pointLightNode_{world_.scene_->CreateChild("PointLight")};
         pointLightNode_->SetPosition(pos);
         Light* pointLight{pointLightNode_->CreateComponent<Light>()};
         pointLight->SetLightType(LIGHT_POINT);
@@ -150,7 +154,7 @@ void MasterControl::CreateLights()
 
 Piece* MasterControl::GetSelectedPiece() const
 {
-    for (Piece* p: world.pieces_){
+    for (Piece* p: world_.pieces_){
         if (p->GetState() == PieceState::SELECTED){
             return p;
         }
@@ -160,7 +164,7 @@ Piece* MasterControl::GetSelectedPiece() const
 
 Piece* MasterControl::GetPickedPiece() const
 {
-    for (Piece* p: world.pieces_){
+    for (Piece* p: world_.pieces_){
         if (p->GetState() == PieceState::PICKED){
             return p;
         }
@@ -170,7 +174,7 @@ Piece* MasterControl::GetPickedPiece() const
 int MasterControl::CountFreePieces()
 {
     int count{0};
-    for (Piece* p: world.pieces_){
+    for (Piece* p: world_.pieces_){
         if (p->GetState() == PieceState::FREE){
             ++count;
         }
@@ -194,39 +198,84 @@ void MasterControl::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
     //    float t{eventData[Update::P_TIMESTEP].GetFloat()};
 
-    UpdateSelectedPiece();
+    if (!selectionMode_ && !inputMaster_->IsIdle())
+        CameraSelectPiece();
+
     //Wave leafy light
     leafyLightNode_->SetRotation(Quaternion(Sine(Sine(0.1f, 0.05f, 0.23f), -0.23f, 0.23f) + 90.0f, Vector3::RIGHT) *
                                  Quaternion(Sine(0.23f, 178.0f, 182.0f), Vector3::FORWARD));
     leafyLight_->SetBrightness(0.34f + Sine(0.011f, 0.05f, 0.23f) + Sine(0.02f, 0.05f, 0.13f));
 }
-void MasterControl::UpdateSelectedPiece()
+void MasterControl::SelectPiece(Piece* piece)
 {
-    if (!inputMaster_->IsIdle()){
-        Piece* nearest{selectedPiece_};
-        for (Piece* p: world.pieces_){
-            if (!nearest) {
-                nearest = p;
-            } else if (LucKey::Distance(CAMERA->GetPosition(), p->GetPosition()) <
-                       LucKey::Distance(CAMERA->GetPosition(), nearest->GetPosition())
-                       && (p->GetState() == PieceState::FREE || p->GetState() == PieceState::SELECTED))
-            {
-                nearest = p;
+    DeselectPiece();
+
+    selectedPiece_ = piece;
+    piece->Select();
+}
+
+void MasterControl::CameraSelectPiece()
+{
+    if (Lame())
+        return;
+
+    Piece* nearest{selectedPiece_};
+    for (Piece* piece: world_.pieces_){
+        if (!nearest) {
+            nearest = piece;
+        } else if ((piece->GetState() == PieceState::FREE || piece->GetState() == PieceState::SELECTED) &&
+                   LucKey::Distance(CAMERA->GetPosition(), piece->GetPosition())    <
+                   LucKey::Distance(CAMERA->GetPosition(), nearest->GetPosition()))
+        {
+            nearest = piece;
+        }
+    }
+    if (nearest != selectedPiece_){
+        SelectPiece(nearest);
+    }
+}
+
+bool MasterControl::SelectLastPiece()
+{
+    if (lastSelectedPiece_){
+        SelectPiece(lastSelectedPiece_);
+        return true;
+    } else
+        return false;
+}
+
+void MasterControl::StepSelectPiece(bool next)
+{
+    selectionMode_ = SM_STEP;
+
+    if (selectedPiece_){
+        int selectInt{selectedPiece_->ToInt()};
+
+        while (world_.pieces_.At(selectInt)->GetState() != PieceState::FREE){
+
+            if (next){
+
+                selectInt -= 1;
+                if (selectInt < 0) selectInt = NUM_PIECES - 1;
+
+            } else {
+
+                selectInt += 1;
+                if (selectInt > NUM_PIECES - 1) selectInt = 0;
+
             }
         }
-        if (nearest != selectedPiece_ || nearest->GetState() != PieceState::SELECTED){
-            if (selectedPiece_)
-                selectedPiece_->Deselect();
 
-            selectedPiece_ = nearest;
-            nearest->Select();
-        }
+        SelectPiece(world_.pieces_.At(selectInt));
+    } else if (!SelectLastPiece()){
+        CameraSelectPiece();
     }
 }
 
 void MasterControl::DeselectPiece()
 {
     if (selectedPiece_){
+        lastSelectedPiece_ = selectedPiece_;
         selectedPiece_->Deselect();
     }
     selectedPiece_ = nullptr;
@@ -234,17 +283,24 @@ void MasterControl::DeselectPiece()
 
 void MasterControl::NextPhase()
 {
-    DeselectPiece();
+    if (gameState_ == GameState::QUATTER)
+        return;
 
     switch (gameState_)    {
-    case GameState::PLAYER1PICKS: gameState_ = GameState::PLAYER2PUTS;
-        break;
-    case GameState::PLAYER2PUTS:  gameState_ = GameState::PLAYER2PICKS;
-        break;
-    case GameState::PLAYER2PICKS: gameState_ = GameState::PLAYER1PUTS;
-        break;
-    case GameState::PLAYER1PUTS:  gameState_ = GameState::PLAYER1PICKS;
-        break;
+    case GameState::PLAYER1PICKS: {
+        gameState_ = GameState::PLAYER2PUTS;
+    } break;
+    case GameState::PLAYER2PUTS: {
+        gameState_ = GameState::PLAYER2PICKS;
+        CameraSelectPiece();
+    } break;
+    case GameState::PLAYER2PICKS: {
+        gameState_ = GameState::PLAYER1PUTS;
+    } break;
+    case GameState::PLAYER1PUTS: {
+        gameState_ = GameState::PLAYER1PICKS;
+        CameraSelectPiece();
+    } break;
     default: break;
     }
 }
@@ -254,21 +310,23 @@ void MasterControl::Quatter()
 }
 void MasterControl::Reset()
 {
-    for (Piece* p: world.pieces_){
+    lastReset_ = GetSubsystem<Time>()->GetElapsedTime();
+
+    for (Piece* p: world_.pieces_){
         p->Reset();
     }
-    world.board_->Reset();
+    world_.board_->Reset();
+    selectionMode_ = SM_CAMERA;
 
     gameState_ = GameState::PLAYER1PICKS;
 }
 
 void MasterControl::NextMusicState()
 {
-
     if (musicState_ == MUSIC_SONG1){
-        effectMaster_->FadeOut(musicSource1_);
+        FX->FadeOut(musicSource1_);
     } else if (musicState_ == MUSIC_SONG2){
-        effectMaster_->FadeOut(musicSource2_);
+        FX->FadeOut(musicSource2_);
     }
 
     switch (musicState_) {
@@ -290,9 +348,9 @@ void MasterControl::NextMusicState()
     }
 
     if (musicState_ == MUSIC_SONG1){
-        effectMaster_->FadeTo(musicSource1_, musicGain_);
+        FX->FadeTo(musicSource1_, musicGain_);
     } else if (musicState_ == MUSIC_SONG2){
-        effectMaster_->FadeTo(musicSource2_, musicGain_);
+        FX->FadeTo(musicSource2_, musicGain_);
     }
 }
 
@@ -301,29 +359,41 @@ void MasterControl::MusicGainUp(float step)
     musicGain_ = Clamp(musicGain_ + step, step, 1.0f);
 
     if (musicState_ == MUSIC_SONG1)
-        effectMaster_->FadeTo(musicSource1_, musicGain_, 0.23f);
+        FX->FadeTo(musicSource1_, musicGain_, 0.23f);
     else if (musicState_ == MUSIC_SONG2)
-        effectMaster_->FadeTo(musicSource2_, musicGain_, 0.23f);
+        FX->FadeTo(musicSource2_, musicGain_, 0.23f);
 }
 void MasterControl::MusicGainDown(float step)
 {
     musicGain_ = Clamp(musicGain_ - step, 0.0f, 1.0f);
 
     if (musicState_ == MUSIC_SONG1)
-        effectMaster_->FadeTo(musicSource1_, musicGain_, 0.23f);
+        FX->FadeTo(musicSource1_, musicGain_, 0.23f);
     else if (musicState_ == MUSIC_SONG2)
-        effectMaster_->FadeTo(musicSource2_, musicGain_, 0.23f);
+        FX->FadeTo(musicSource2_, musicGain_, 0.23f);
 }
 
 float MasterControl::Sine(const float freq, const float min, const float max, const float shift)
 {
-    float phase{freq * world.scene->GetElapsedTime() + shift};
+    float phase{freq * world_.scene_->GetElapsedTime() + shift};
     float add{0.5f * (min + max)};
     return LucKey::Sine(phase) * 0.5f * (max - min) + add;
 }
 float MasterControl::Cosine(const float freq, const float min, const float max, const float shift)
 {
-    float phase{freq * world.scene->GetElapsedTime() + shift};
+    float phase{freq * world_.scene_->GetElapsedTime() + shift};
     float add{0.5f * (min + max)};
     return LucKey::Cosine(phase) * 0.5f * (max - min) + add;
+}
+
+void MasterControl::TakeScreenshot()
+{
+    Graphics* graphics{GetSubsystem<Graphics>()};
+    Image screenshot{context_};
+    graphics->TakeScreenShot(screenshot);
+    //Here we save in the Screenshots folder with date and time appended
+    String fileName{GetSubsystem<FileSystem>()->GetProgramDir() + "Screenshots/Screenshot_" +
+                Time::GetTimeStamp().Replaced(':', '_').Replaced('.', '_').Replaced(' ', '_')+".png"};
+    Log::Write(1, fileName);
+    screenshot.SavePNG(fileName);
 }

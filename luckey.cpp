@@ -114,3 +114,33 @@ float LucKey::Cosine(float x)
     return Sine(x + M_PI * 0.5f);
 }
 
+int LucKey::Cycle(int x, int min, int max)
+{
+    if (min > max){ int temp{min};
+        min = max; max = temp;
+    }
+
+    int range{max - min + 1};
+
+    return (x < min) ? x +
+                range * abs((min - x) / range)
+         : (x > max) ? x -
+                range * abs((x - max) / range)
+         :  x;
+}
+
+float LucKey::Cycle(float x, float min, float max)
+{
+    if (min > max){ float temp{min};
+        min = max; max = temp;
+    }
+
+    int range{max - min};
+
+    return (x < min) ? x +
+                range * abs(ceil((min - x) / range))
+         : (x > max) ? x -
+                range * abs(ceil((x - max) / range))
+         :  x;
+}
+

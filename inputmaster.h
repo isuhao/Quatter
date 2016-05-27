@@ -3,9 +3,10 @@
 
 #include "master.h"
 
-enum JoystickButton {SELECT, LEFTSTICK, RIGHTSTICK, JB_START, JB_DPAD_UP, JB_DPAD_RIGHT, JB_DPAD_DOWN, JB_DPAD_LEFT, L2, R2, L1, R1, TRIANGLE, CIRCLE, JB_CROSS, SQUARE};
-
+#define VOLUME_STEP 0.1f
 #define IDLE_THRESHOLD 5.0f
+#define STEP_INTERVAL 0.23f
+#define DEADZONE 0.34f
 
 class InputMaster : public Master
 {
@@ -20,8 +21,11 @@ public:
     void SetIdle();
 
     JoystickState* GetActiveJoystick();
+    bool MultipleJoysticks();
 private:
     Input* input_;
+
+    IntVector2 mousePos_;
 
     float idleTime_;
     bool idle_;
@@ -31,6 +35,8 @@ private:
     HashSet<int> pressedKeys_;
     HashSet<int> pressedMouseButtons_;
     HashMap<int, HashSet<int>> pressedJoystickButtons_;
+    float sinceStep_;
+    bool actionDone_;
 
     void HandleKeyDown(StringHash eventType, VariantMap &eventData);
     void HandleKeyUp(StringHash eventType, VariantMap &eventData);
@@ -39,8 +45,9 @@ private:
     void HandleJoystickButtonDown(StringHash eventType, VariantMap &eventData);
     void HandleJoystickButtonUp(StringHash eventType, VariantMap &eventData);
     void HandleUpdate(StringHash eventType, VariantMap &eventData);
-    void SmoothCameraMovement(float camZoom, Vector2 camRot);
+    void SmoothCameraMovement(Vector2 camRot, float camZoom);
     void HandleCameraMovement(float t);
+    void HandleJoystickButtons();
 
     void Screenshot();
     void HandleActionButtonPressed();
@@ -48,7 +55,8 @@ private:
     void HandleDownArrowPressed();
     void HandleRightArrowPressed();
     void HandleLeftArrowPressed();
-    bool CorrectTurn(int joystickId);
+    bool CorrectJoystickId(int joystickId);
+    void HandleKeys();
 };
 
 #endif // INPUTMASTER_H

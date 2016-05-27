@@ -37,25 +37,38 @@ public:
     float GetThickness() const { return model_->GetBoundingBox().Size().y_; }
 
     bool CheckQuatter();
-    void PutPiece(Piece* piece, Square* square);
-    void PutPiece(Piece* piece) { PutPiece(piece, GetSelectedSquare()); }
+    bool PutPiece(Piece* piece, Square* square);
+    bool PutPiece(Piece* piece) {
+        if (!selectedSquare_){
+            SelectLast();
+            return false;
+        } else
+            return PutPiece(piece, selectedSquare_);
+    }
 
     void Step(IntVector2 step);
-    Square*GetNearestSquare(Vector3 pos, bool free = true);
+    Square* GetNearestSquare(Vector3 pos, bool free = true);
     Square* GetSelectedSquare() const { return selectedSquare_; }
+    Square* GetLastSelectedSquare() const { return lastSelectedSquare_; }
     void Select(Square* square);
     void Deselect(Square* square);
+    void Deselect() { Deselect(selectedSquare_); }
     void SelectNearestSquare(Vector3 pos);
     void SelectNearestFreeSquare(Vector3 pos);
+    bool SelectLast();
     void DeselectAll();
     void Reset();
+    void Refuse();
+
+    bool IsEmpty() const;
 private:
     SharedPtr<Node> rootNode_;
     StaticModel* model_;
 
     HashMap<IntVector2, SharedPtr<Square>> squares_;
     Square* selectedSquare_;
-    Vector3 SquarePosition(IntVector2 coords);
+    Square* lastSelectedSquare_;
+    Vector3 CoordsToPosition(IntVector2 coords);
     void HandleSceneUpdate(StringHash eventType, VariantMap& eventData);
 };
 

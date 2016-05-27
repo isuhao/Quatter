@@ -25,15 +25,17 @@ public:
     void SetPosition(Vector3 pos) { rootNode_->SetPosition(pos); }
     Vector3 GetPosition() const { return rootNode_->GetPosition(); }
     bool GetAttribute(int index) const { return attributes_[index]; }
-    Attributes GetAttributes() const { return Attributes(attributes_.to_ulong()); }
+    Attributes GetAttributes() const { return attributes_; }
     String GetCodon(int length = NUM_ATTRIBUTES) const;
-    float GetAngle() const { return MC->AttributesToAngle(static_cast<int>(attributes_.to_ulong())); }
+    float GetAngle() const { return MC->AttributesToAngle(ToInt()); }
     void Select();
     void Deselect();
     PieceState GetState() const noexcept { return state_; }
     void Pick();
     void Put(Vector3 position);
     void Reset();
+
+    int ToInt() const { return static_cast<int>(attributes_.to_ulong()); }
 private:
     SharedPtr<Node> rootNode_;
     SharedPtr<StaticModel> outlineModel_;
