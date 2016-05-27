@@ -40,7 +40,7 @@ Board::Board(): Object(MC->GetContext()),
         Node* lightNode{slotNode->CreateChild("Light")};
         lightNode->SetPosition(Vector3::UP * 0.23f);
         square->light_ = lightNode->CreateComponent<Light>();
-        square->light_->SetColor(COLOR_GLOW/*Color(0.0f, 0.8f, 0.5f)*/);
+        square->light_->SetColor(COLOR_GLOW);
         square->light_->SetBrightness(0.05f);
         square->light_->SetRange(2.0f);
         square->light_->SetCastShadows(false);

@@ -69,8 +69,8 @@ void MasterControl::Stop()
 }
 void MasterControl::Exit()
 {
-    File file(context_, "Resources/Endgame.xml", FILE_WRITE);
-    world_.scene_->SaveXML(file);
+//    File file(context_, "Resources/Endgame.xml", FILE_WRITE);
+//    world_.scene_->SaveXML(file);
 
     engine_->Exit();
 }
