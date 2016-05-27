@@ -4,7 +4,7 @@
 	<attribute name="Time Scale" value="1" />
 	<attribute name="Smoothing Constant" value="50" />
 	<attribute name="Snap Threshold" value="5" />
-	<attribute name="Elapsed Time" value="166.776" />
+	<attribute name="Elapsed Time" value="1.66548" />
 	<attribute name="Next Replicated Node ID" value="94" />
 	<attribute name="Next Replicated Component ID" value="94" />
 	<attribute name="Next Local Node ID" value="16777216" />
@@ -17,12 +17,12 @@
 		<attribute name="Name" value="DirectionalLight" />
 		<attribute name="Tags" />
 		<attribute name="Position" value="6 96 9" />
-		<attribute name="Rotation" value="-0.0075815 -0.00755115 -0.705647 0.708483" />
+		<attribute name="Rotation" value="-0.00460312 -0.00460782 -0.707452 0.706731" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="Light" id="2">
 			<attribute name="Light Type" value="Spot" />
-			<attribute name="Brightness Multiplier" value="0.649243" />
+			<attribute name="Brightness Multiplier" value="0.572945" />
 			<attribute name="Range" value="180" />
 			<attribute name="Spot FOV" value="34" />
 			<attribute name="Light Shape Texture" value="Texture2D;Textures/LeafyMask.png" />
@@ -116,8 +116,8 @@
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="Camera" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="9.70135 7.12681 2.21414" />
-		<attribute name="Rotation" value="0.596283 0.182187 -0.747706 0.228453" />
+		<attribute name="Position" value="7.13543 5.69591 -8.07777" />
+		<attribute name="Rotation" value="0.911151 0.211044 -0.344799 0.0798637" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="Camera" id="8">
@@ -136,7 +136,7 @@
 			<attribute name="Name" value="Pocket" />
 			<attribute name="Tags" />
 			<attribute name="Position" value="-2.86 1.4 3.2" />
-			<attribute name="Rotation" value="-0.383549 0.26856 0.723814 -0.506813" />
+			<attribute name="Rotation" value="0.773808 -0.541827 0.268757 -0.188186" />
 			<attribute name="Scale" value="1 1 1" />
 			<attribute name="Variables" />
 		</node>
@@ -145,7 +145,7 @@
 			<attribute name="Name" value="Pocket" />
 			<attribute name="Tags" />
 			<attribute name="Position" value="2.86 1.4 3.2" />
-			<attribute name="Rotation" value="-0.383549 0.26856 -0.723814 0.506813" />
+			<attribute name="Rotation" value="0.773808 -0.541827 -0.268757 0.188186" />
 			<attribute name="Scale" value="1 1 1" />
 			<attribute name="Variables" />
 		</node>
@@ -199,7 +199,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="15">
 					<attribute name="Is Enabled" value="true" />
@@ -240,7 +240,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="18">
 					<attribute name="Is Enabled" value="true" />
@@ -281,7 +281,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="21">
 					<attribute name="Is Enabled" value="true" />
@@ -322,7 +322,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="24">
 					<attribute name="Is Enabled" value="true" />
@@ -363,7 +363,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="27">
 					<attribute name="Is Enabled" value="true" />
@@ -404,7 +404,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="30">
 					<attribute name="Is Enabled" value="true" />
@@ -445,7 +445,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="33">
 					<attribute name="Is Enabled" value="true" />
@@ -486,7 +486,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="36">
 					<attribute name="Is Enabled" value="true" />
@@ -527,7 +527,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="39">
 					<attribute name="Is Enabled" value="true" />
@@ -568,7 +568,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="42">
 					<attribute name="Is Enabled" value="true" />
@@ -609,7 +609,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="45">
 					<attribute name="Is Enabled" value="true" />
@@ -650,7 +650,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="48">
 					<attribute name="Is Enabled" value="true" />
@@ -691,7 +691,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="51">
 					<attribute name="Is Enabled" value="true" />
@@ -732,7 +732,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="54">
 					<attribute name="Is Enabled" value="true" />
@@ -773,7 +773,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="57">
 					<attribute name="Is Enabled" value="true" />
@@ -814,7 +814,7 @@
 					<attribute name="Animation States">
 						<variant type="Int" value="0" />
 					</attribute>
-					<attribute name="Morphs" value="137" />
+					<attribute name="Morphs" value="51" />
 				</component>
 				<node id="60">
 					<attribute name="Is Enabled" value="true" />
@@ -834,12 +834,114 @@
 			</node>
 		</node>
 	</node>
+	<node id="61">
+		<attribute name="Is Enabled" value="true" />
+		<attribute name="Name" value="PieceSSSD" />
+		<attribute name="Tags" />
+		<attribute name="Position" value="-3.97509 -0.21 -5.71544" />
+		<attribute name="Rotation" value="-0.535782 0 0.844357 0" />
+		<attribute name="Scale" value="1 1 1" />
+		<attribute name="Variables" />
+		<component type="StaticModel" id="44">
+			<attribute name="Model" value="Model;Models/Piece_SSS.mdl" />
+			<attribute name="Material" value="Material;Materials/Wood_dark.xml" />
+			<attribute name="Cast Shadows" value="true" />
+		</component>
+		<component type="StaticModel" id="45">
+			<attribute name="Is Enabled" value="false" />
+			<attribute name="Model" value="Model;Models/Piece_SS_outline.mdl" />
+			<attribute name="Material" value="Material;" />
+		</component>
+		<node id="62">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="Light" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="0 0.5 0" />
+			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Scale" value="1 1 1" />
+			<attribute name="Variables" />
+			<component type="Light" id="46">
+				<attribute name="Color" value="0 0.8 0.5 1" />
+				<attribute name="Brightness Multiplier" value="0" />
+				<attribute name="Range" value="3" />
+				<attribute name="Light Shape Texture" value="TextureCube;" />
+			</component>
+		</node>
+	</node>
+	<node id="63">
+		<attribute name="Is Enabled" value="true" />
+		<attribute name="Name" value="PieceTSSD" />
+		<attribute name="Tags" />
+		<attribute name="Position" value="-5.85775 -0.21 -3.77142" />
+		<attribute name="Rotation" value="-0.758384 0 0.651809 0" />
+		<attribute name="Scale" value="1 1 1" />
+		<attribute name="Variables" />
+		<component type="StaticModel" id="47">
+			<attribute name="Model" value="Model;Models/Piece_TSS.mdl" />
+			<attribute name="Material" value="Material;Materials/Wood_dark.xml" />
+			<attribute name="Cast Shadows" value="true" />
+		</component>
+		<component type="StaticModel" id="48">
+			<attribute name="Is Enabled" value="false" />
+			<attribute name="Model" value="Model;Models/Piece_TS_outline.mdl" />
+			<attribute name="Material" value="Material;" />
+		</component>
+		<node id="64">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="Light" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="0 0.5 0" />
+			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Scale" value="1 1 1" />
+			<attribute name="Variables" />
+			<component type="Light" id="49">
+				<attribute name="Color" value="0 0.8 0.5 1" />
+				<attribute name="Brightness Multiplier" value="0" />
+				<attribute name="Range" value="3" />
+				<attribute name="Light Shape Texture" value="TextureCube;" />
+			</component>
+		</node>
+	</node>
+	<node id="65">
+		<attribute name="Is Enabled" value="true" />
+		<attribute name="Name" value="PieceSRSD" />
+		<attribute name="Tags" />
+		<attribute name="Position" value="-6.88302 -0.21 -1.21532" />
+		<attribute name="Rotation" value="0.660455 0 0.750866 0" />
+		<attribute name="Scale" value="1 1 1" />
+		<attribute name="Variables" />
+		<component type="StaticModel" id="50">
+			<attribute name="Model" value="Model;Models/Piece_SRS.mdl" />
+			<attribute name="Material" value="Material;Materials/Wood_dark.xml" />
+			<attribute name="Cast Shadows" value="true" />
+		</component>
+		<component type="StaticModel" id="51">
+			<attribute name="Is Enabled" value="false" />
+			<attribute name="Model" value="Model;Models/Piece_SR_outline.mdl" />
+			<attribute name="Material" value="Material;" />
+		</component>
+		<node id="66">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="Light" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="0 0.5 0" />
+			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Scale" value="1 1 1" />
+			<attribute name="Variables" />
+			<component type="Light" id="52">
+				<attribute name="Color" value="0 0.8 0.5 1" />
+				<attribute name="Brightness Multiplier" value="0" />
+				<attribute name="Range" value="3" />
+				<attribute name="Light Shape Texture" value="TextureCube;" />
+			</component>
+		</node>
+	</node>
 	<node id="67">
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="PieceTRSD" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="-6.84025 -0.21 1.51185" />
-		<attribute name="Rotation" value="0.507482 0 -0.861662 0" />
+		<attribute name="Position" value="-6.80331 -0.21 1.50112" />
+		<attribute name="Rotation" value="-0.583363 0 0.812211 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="StaticModel" id="53">
@@ -848,6 +950,7 @@
 			<attribute name="Cast Shadows" value="true" />
 		</component>
 		<component type="StaticModel" id="54">
+			<attribute name="Is Enabled" value="false" />
 			<attribute name="Model" value="Model;Models/Piece_TR_outline.mdl" />
 			<attribute name="Material" value="Material;" />
 		</component>
@@ -871,8 +974,8 @@
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="PieceSSHD" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="-5.71523 -0.21 3.99566" />
-		<attribute name="Rotation" value="0.61112 0 0.791538 0" />
+		<attribute name="Position" value="-5.7452 -0.21 4.0214" />
+		<attribute name="Rotation" value="-0.487271 0 0.873251 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="StaticModel" id="56">
@@ -881,6 +984,7 @@
 			<attribute name="Cast Shadows" value="true" />
 		</component>
 		<component type="StaticModel" id="57">
+			<attribute name="Is Enabled" value="false" />
 			<attribute name="Model" value="Model;Models/Piece_SS_outline.mdl" />
 			<attribute name="Material" value="Material;" />
 		</component>
@@ -904,8 +1008,8 @@
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="PieceTSHD" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="-3.76958 -0.21 5.91193" />
-		<attribute name="Rotation" value="0.889349 0 -0.457229 0" />
+		<attribute name="Position" value="-3.76989 -0.21 5.91479" />
+		<attribute name="Rotation" value="0.54063 0 0.841261 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="StaticModel" id="59">
@@ -914,6 +1018,7 @@
 			<attribute name="Cast Shadows" value="true" />
 		</component>
 		<component type="StaticModel" id="60">
+			<attribute name="Is Enabled" value="false" />
 			<attribute name="Model" value="Model;Models/Piece_TS_outline.mdl" />
 			<attribute name="Material" value="Material;" />
 		</component>
@@ -937,8 +1042,8 @@
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="PieceSRHD" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="-1.22053 -0.21 6.91295" />
-		<attribute name="Rotation" value="0.110559 0 0.99387 0" />
+		<attribute name="Position" value="-1.23055 -0.21 6.91711" />
+		<attribute name="Rotation" value="0.581024 0 0.813886 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="StaticModel" id="62">
@@ -971,8 +1076,8 @@
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="PieceTRHD" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="1.52717 -0.21 6.87486" />
-		<attribute name="Rotation" value="0.966163 0 -0.257931 0" />
+		<attribute name="Position" value="1.50643 -0.21 6.8608" />
+		<attribute name="Rotation" value="-0.899592 0 0.436732 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="StaticModel" id="65">
@@ -1005,8 +1110,8 @@
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="PieceSSSL" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="3.99045 -0.21 5.7568" />
-		<attribute name="Rotation" value="0.999722 0 0.0235835 0" />
+		<attribute name="Position" value="4.00684 -0.21 5.76096" />
+		<attribute name="Rotation" value="-0.996904 0 0.0786333 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="StaticModel" id="68">
@@ -1039,8 +1144,8 @@
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="PieceTSSL" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="5.91985 -0.21 3.79765" />
-		<attribute name="Rotation" value="0.869275 0 0.494329 0" />
+		<attribute name="Position" value="5.91112 -0.21 3.83616" />
+		<attribute name="Rotation" value="-0.884924 0 0.465735 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="StaticModel" id="71">
@@ -1073,8 +1178,8 @@
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="PieceSRSL" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="6.89472 -0.21 1.2498" />
-		<attribute name="Rotation" value="-0.430555 0 0.902564 0" />
+		<attribute name="Position" value="6.90518 -0.21 1.27268" />
+		<attribute name="Rotation" value="0.996555 0 0.0829339 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="StaticModel" id="74">
@@ -1083,6 +1188,7 @@
 			<attribute name="Cast Shadows" value="true" />
 		</component>
 		<component type="StaticModel" id="75">
+			<attribute name="Is Enabled" value="false" />
 			<attribute name="Model" value="Model;Models/Piece_SR_outline.mdl" />
 			<attribute name="Material" value="Material;" />
 		</component>
@@ -1096,7 +1202,7 @@
 			<attribute name="Variables" />
 			<component type="Light" id="76">
 				<attribute name="Color" value="0 0.8 0.5 1" />
-				<attribute name="Brightness Multiplier" value="0.666" />
+				<attribute name="Brightness Multiplier" value="0" />
 				<attribute name="Range" value="3" />
 				<attribute name="Light Shape Texture" value="TextureCube;" />
 			</component>
@@ -1106,8 +1212,8 @@
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="PieceTRSL" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="6.88354 -0.21 -1.47859" />
-		<attribute name="Rotation" value="-0.147067 0 0.989127 0" />
+		<attribute name="Position" value="6.86727 -0.21 -1.44789" />
+		<attribute name="Rotation" value="-0.97077 0 0.24001 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="StaticModel" id="77">
@@ -1116,6 +1222,7 @@
 			<attribute name="Cast Shadows" value="true" />
 		</component>
 		<component type="StaticModel" id="78">
+			<attribute name="Is Enabled" value="false" />
 			<attribute name="Model" value="Model;Models/Piece_TR_outline.mdl" />
 			<attribute name="Material" value="Material;" />
 		</component>
@@ -1135,36 +1242,46 @@
 			</component>
 		</node>
 	</node>
-	<node id="93">
+	<node id="85">
 		<attribute name="Is Enabled" value="true" />
-		<attribute name="Name" value="Music" />
+		<attribute name="Name" value="PieceSSHL" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="0 0 0" />
-		<attribute name="Rotation" value="1 0 0 0" />
+		<attribute name="Position" value="5.7539 -0.21 -3.96365" />
+		<attribute name="Rotation" value="-0.961962 0 0.273183 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
-		<component type="SoundSource" id="92">
-			<attribute name="Sound" value="Sound;Music/Angelight - The Knowledge River.ogg" />
-			<attribute name="Type" value="Music" />
-			<attribute name="Frequency" value="44100" />
-			<attribute name="Is Playing" value="true" />
-			<attribute name="Play Position" value="24096240" />
+		<component type="StaticModel" id="80">
+			<attribute name="Model" value="Model;Models/Piece_SSH.mdl" />
+			<attribute name="Material" value="Material;Materials/Wood_light.xml" />
+			<attribute name="Cast Shadows" value="true" />
 		</component>
-		<component type="SoundSource" id="93">
-			<attribute name="Sound" value="Sound;Music/Cao Sao Vang - Days Of Yore.ogg" />
-			<attribute name="Type" value="Music" />
-			<attribute name="Frequency" value="44100" />
-			<attribute name="Gain" value="0" />
-			<attribute name="Is Playing" value="true" />
-			<attribute name="Play Position" value="4614448" />
+		<component type="StaticModel" id="81">
+			<attribute name="Is Enabled" value="false" />
+			<attribute name="Model" value="Model;Models/Piece_SS_outline.mdl" />
+			<attribute name="Material" value="Material;" />
 		</component>
+		<node id="86">
+			<attribute name="Is Enabled" value="true" />
+			<attribute name="Name" value="Light" />
+			<attribute name="Tags" />
+			<attribute name="Position" value="0 0.5 0" />
+			<attribute name="Rotation" value="1 0 0 0" />
+			<attribute name="Scale" value="1 1 1" />
+			<attribute name="Variables" />
+			<component type="Light" id="82">
+				<attribute name="Color" value="0 0.8 0.5 1" />
+				<attribute name="Brightness Multiplier" value="0" />
+				<attribute name="Range" value="3" />
+				<attribute name="Light Shape Texture" value="TextureCube;" />
+			</component>
+		</node>
 	</node>
 	<node id="87">
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="PieceTSHL" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="3.78682 -0.21 -5.88728" />
-		<attribute name="Rotation" value="0.533432 0 0.845843 0" />
+		<attribute name="Position" value="3.79475 -0.21 -5.83766" />
+		<attribute name="Rotation" value="0.994137 0 0.108129 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="StaticModel" id="83">
@@ -1186,7 +1303,7 @@
 			<attribute name="Variables" />
 			<component type="Light" id="85">
 				<attribute name="Color" value="0 0.8 0.5 1" />
-				<attribute name="Brightness Multiplier" value="0" />
+				<attribute name="Brightness Multiplier" value="0.666" />
 				<attribute name="Range" value="3" />
 				<attribute name="Light Shape Texture" value="TextureCube;" />
 			</component>
@@ -1196,8 +1313,8 @@
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="PieceSRHL" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="1.2456 -0.21 -6.88829" />
-		<attribute name="Rotation" value="-0.0484468 0 0.998826 0" />
+		<attribute name="Position" value="1.27842 -0.21 -6.87015" />
+		<attribute name="Rotation" value="-0.458806 0 0.888536 0" />
 		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="StaticModel" id="86">
@@ -1225,145 +1342,13 @@
 			</component>
 		</node>
 	</node>
-	<node id="61">
-		<attribute name="Is Enabled" value="true" />
-		<attribute name="Name" value="PieceSSSD" />
-		<attribute name="Tags" />
-		<attribute name="Position" value="-3.98998 -0.21 -5.75153" />
-		<attribute name="Rotation" value="0.267783 0 0.963479 0" />
-		<attribute name="Scale" value="1 1 1" />
-		<attribute name="Variables" />
-		<component type="StaticModel" id="44">
-			<attribute name="Model" value="Model;Models/Piece_SSS.mdl" />
-			<attribute name="Material" value="Material;Materials/Wood_dark.xml" />
-			<attribute name="Cast Shadows" value="true" />
-		</component>
-		<component type="StaticModel" id="45">
-			<attribute name="Model" value="Model;Models/Piece_SS_outline.mdl" />
-			<attribute name="Material" value="Material;" />
-		</component>
-		<node id="62">
-			<attribute name="Is Enabled" value="true" />
-			<attribute name="Name" value="Light" />
-			<attribute name="Tags" />
-			<attribute name="Position" value="0 0.5 0" />
-			<attribute name="Rotation" value="1 0 0 0" />
-			<attribute name="Scale" value="1 1 1" />
-			<attribute name="Variables" />
-			<component type="Light" id="46">
-				<attribute name="Color" value="0 0.8 0.5 1" />
-				<attribute name="Brightness Multiplier" value="0" />
-				<attribute name="Range" value="3" />
-				<attribute name="Light Shape Texture" value="TextureCube;" />
-			</component>
-		</node>
-	</node>
-	<node id="65">
-		<attribute name="Is Enabled" value="true" />
-		<attribute name="Name" value="PieceSRSD" />
-		<attribute name="Tags" />
-		<attribute name="Position" value="-6.88829 -0.21 -1.2456" />
-		<attribute name="Rotation" value="0.986291 0 0.165013 0" />
-		<attribute name="Scale" value="1 1 1" />
-		<attribute name="Variables" />
-		<component type="StaticModel" id="50">
-			<attribute name="Model" value="Model;Models/Piece_SRS.mdl" />
-			<attribute name="Material" value="Material;Materials/Wood_dark.xml" />
-			<attribute name="Cast Shadows" value="true" />
-		</component>
-		<component type="StaticModel" id="51">
-			<attribute name="Model" value="Model;Models/Piece_SR_outline.mdl" />
-			<attribute name="Material" value="Material;" />
-		</component>
-		<node id="66">
-			<attribute name="Is Enabled" value="true" />
-			<attribute name="Name" value="Light" />
-			<attribute name="Tags" />
-			<attribute name="Position" value="0 0.5 0" />
-			<attribute name="Rotation" value="1 0 0 0" />
-			<attribute name="Scale" value="1 1 1" />
-			<attribute name="Variables" />
-			<component type="Light" id="52">
-				<attribute name="Color" value="0 0.8 0.5 1" />
-				<attribute name="Brightness Multiplier" value="0" />
-				<attribute name="Range" value="3" />
-				<attribute name="Light Shape Texture" value="TextureCube;" />
-			</component>
-		</node>
-	</node>
-	<node id="85">
-		<attribute name="Is Enabled" value="true" />
-		<attribute name="Name" value="PieceSSHL" />
-		<attribute name="Tags" />
-		<attribute name="Position" value="5.75153 -0.21 -3.98998" />
-		<attribute name="Rotation" value="0.97227 0 -0.233862 0" />
-		<attribute name="Scale" value="1 1 0.999999" />
-		<attribute name="Variables" />
-		<component type="StaticModel" id="80">
-			<attribute name="Model" value="Model;Models/Piece_SSH.mdl" />
-			<attribute name="Material" value="Material;Materials/Wood_light.xml" />
-			<attribute name="Cast Shadows" value="true" />
-		</component>
-		<component type="StaticModel" id="81">
-			<attribute name="Model" value="Model;Models/Piece_SS_outline.mdl" />
-			<attribute name="Material" value="Material;" />
-		</component>
-		<node id="86">
-			<attribute name="Is Enabled" value="true" />
-			<attribute name="Name" value="Light" />
-			<attribute name="Tags" />
-			<attribute name="Position" value="0 0.5 0" />
-			<attribute name="Rotation" value="1 0 0 0" />
-			<attribute name="Scale" value="1 1 1" />
-			<attribute name="Variables" />
-			<component type="Light" id="82">
-				<attribute name="Color" value="0 0.8 0.5 1" />
-				<attribute name="Brightness Multiplier" value="0" />
-				<attribute name="Range" value="3" />
-				<attribute name="Light Shape Texture" value="TextureCube;" />
-			</component>
-		</node>
-	</node>
-	<node id="63">
-		<attribute name="Is Enabled" value="true" />
-		<attribute name="Name" value="PieceTSSD" />
-		<attribute name="Tags" />
-		<attribute name="Position" value="-5.88727 -0.21 -3.78682" />
-		<attribute name="Rotation" value="0.762927 0 0.646485 0" />
-		<attribute name="Scale" value="1 1 1" />
-		<attribute name="Variables" />
-		<component type="StaticModel" id="47">
-			<attribute name="Model" value="Model;Models/Piece_TSS.mdl" />
-			<attribute name="Material" value="Material;Materials/Wood_dark.xml" />
-			<attribute name="Cast Shadows" value="true" />
-		</component>
-		<component type="StaticModel" id="48">
-			<attribute name="Model" value="Model;Models/Piece_TS_outline.mdl" />
-			<attribute name="Material" value="Material;" />
-		</component>
-		<node id="64">
-			<attribute name="Is Enabled" value="true" />
-			<attribute name="Name" value="Light" />
-			<attribute name="Tags" />
-			<attribute name="Position" value="0 0.5 0" />
-			<attribute name="Rotation" value="1 0 0 0" />
-			<attribute name="Scale" value="1 1 1" />
-			<attribute name="Variables" />
-			<component type="Light" id="49">
-				<attribute name="Color" value="0 0.8 0.5 1" />
-				<attribute name="Brightness Multiplier" value="0" />
-				<attribute name="Range" value="3" />
-				<attribute name="Light Shape Texture" value="TextureCube;" />
-			</component>
-		</node>
-	</node>
 	<node id="91">
 		<attribute name="Is Enabled" value="true" />
 		<attribute name="Name" value="PieceTRHL" />
 		<attribute name="Tags" />
-		<attribute name="Position" value="-1.48525 -0.21 -6.84062" />
-		<attribute name="Rotation" value="0.995872 0 0.090766 0" />
-		<attribute name="Scale" value="0.999999 1 0.999999" />
+		<attribute name="Position" value="-1.47677 -0.21 -6.82766" />
+		<attribute name="Rotation" value="0.99996 0 0.00891642 0" />
+		<attribute name="Scale" value="1 1 1" />
 		<attribute name="Variables" />
 		<component type="StaticModel" id="89">
 			<attribute name="Model" value="Model;Models/Piece_TRH.mdl" />
@@ -1371,6 +1356,7 @@
 			<attribute name="Cast Shadows" value="true" />
 		</component>
 		<component type="StaticModel" id="90">
+			<attribute name="Is Enabled" value="false" />
 			<attribute name="Model" value="Model;Models/Piece_TR_outline.mdl" />
 			<attribute name="Material" value="Material;" />
 		</component>
@@ -1389,5 +1375,29 @@
 				<attribute name="Light Shape Texture" value="TextureCube;" />
 			</component>
 		</node>
+	</node>
+	<node id="93">
+		<attribute name="Is Enabled" value="true" />
+		<attribute name="Name" value="Music" />
+		<attribute name="Tags" />
+		<attribute name="Position" value="0 0 0" />
+		<attribute name="Rotation" value="1 0 0 0" />
+		<attribute name="Scale" value="1 1 1" />
+		<attribute name="Variables" />
+		<component type="SoundSource" id="92">
+			<attribute name="Sound" value="Sound;Music/Angelight - The Knowledge River.ogg" />
+			<attribute name="Type" value="Music" />
+			<attribute name="Frequency" value="44100" />
+			<attribute name="Is Playing" value="true" />
+			<attribute name="Play Position" value="24096752" />
+		</component>
+		<component type="SoundSource" id="93">
+			<attribute name="Sound" value="Sound;Music/Cao Sao Vang - Days Of Yore.ogg" />
+			<attribute name="Type" value="Music" />
+			<attribute name="Frequency" value="44100" />
+			<attribute name="Gain" value="0" />
+			<attribute name="Is Playing" value="true" />
+			<attribute name="Play Position" value="4614960" />
+		</component>
 	</node>
 </scene>
