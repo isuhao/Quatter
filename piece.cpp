@@ -46,7 +46,7 @@ void Piece::Reset()
                    MC->AttributesToPosition(ToInt()),
                    Quaternion(Random(360.0f), Vector3::UP),
                    attributes_[0] ? 2.0f : 1.3f + attributes_[1] ? 0.5f : 1.0f + Random(0.23f),
-                   RESET_DURATION, true);
+                   RESET_DURATION, Random(0.42f) + 0.23f * (ToInt()/NUM_PIECES));
     }
 }
 

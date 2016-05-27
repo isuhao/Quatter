@@ -56,12 +56,11 @@ void EffectMaster::TransformTo(Node* node, Vector3 pos, Quaternion rot, float du
     node->SetAttributeAnimation("Rotation", rotAnim, WM_ONCE);
 }
 
-void EffectMaster::ArchTo(Node* node, Vector3 pos, Quaternion rot, float archHeight, float duration, bool stall)
+void EffectMaster::ArchTo(Node* node, Vector3 pos, Quaternion rot, float archHeight, float duration, float delay)
 {
     ValueAnimation* posAnim{new ValueAnimation(context_)};
     posAnim->SetKeyFrame(0.0f, node->GetPosition());
-    float delay{Random(0.42f) * stall};
-    if (stall)
+    if (delay != 0.0f)
         posAnim->SetKeyFrame(0.5f * delay, node->GetPosition());
 
     for (int i{1}; i < WAYPOINTS - 1; ++i){
@@ -74,7 +73,7 @@ void EffectMaster::ArchTo(Node* node, Vector3 pos, Quaternion rot, float archHei
 
     ValueAnimation* rotAnim{new ValueAnimation(context_)};
     rotAnim->SetKeyFrame(0.0f, node->GetRotation());
-    if (stall)
+    if (delay != 0.0f)
         rotAnim->SetKeyFrame(delay, node->GetRotation());
     rotAnim->SetKeyFrame(duration, rot);
     node->SetAttributeAnimation("Rotation", rotAnim, WM_ONCE);

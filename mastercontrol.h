@@ -129,7 +129,7 @@ private:
     bool SelectLastPiece();
 
     float lastReset_;
-    bool Lame() { return GetSubsystem<Time>()->GetElapsedTime() - lastReset_ < RESET_DURATION; }
+    bool Lame() { return GetSubsystem<Time>()->GetElapsedTime() - lastReset_ < (RESET_DURATION + 0.23f); }
 };
 
 #endif // MASTERCONTROL_H
