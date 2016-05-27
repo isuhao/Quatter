@@ -1,3 +1,21 @@
+/* Quatter
+// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
 #include "inputmaster.h"
 #include "quattercam.h"
 #include "board.h"
@@ -140,7 +158,7 @@ void InputMaster::Step(Vector3 step)
             BOARD->SelectLast();
             sinceStep_ = 0.0f;
         } else {
-            BOARD->SelectNearestFreeSquare(CAMERA->GetPosition());
+            BOARD->SelectNearestFreeSquare();
             sinceStep_ = 0.0f;
         }
     }
@@ -203,7 +221,10 @@ void InputMaster::HandleJoystickButtons()
             case LucKey::SB_DPAD_LEFT:{ Step(Vector3::LEFT);
             } break;
             case LucKey::SB_SELECT:{
-                MC->selectionMode_ = SM_CAMERA;
+                if (MC->InPickState())
+                    MC->selectionMode_ = SM_CAMERA;
+                else if (MC->InPutState())
+                    BOARD->SelectNearestFreeSquare();
             } break;
             default: break;
             }
@@ -278,7 +299,7 @@ void InputMaster::HandleActionButtonPressed()
 
             selectedPiece->Pick();
             MC->NextPhase();
-            BOARD->SelectNearestFreeSquare(CAMERA->GetPosition());
+            BOARD->SelectNearestFreeSquare();
         } else if (MC->selectionMode_ == SM_STEP)
             MC->SelectLastPiece();
         else if (MC->selectionMode_ == SM_CAMERA)
@@ -314,7 +335,7 @@ void InputMaster::ResetIdle()
         idle_ = false;
         if (MC->InPutState()){
             if (!BOARD->SelectLast())
-                BOARD->SelectNearestFreeSquare(CAMERA->GetPosition());
+                BOARD->SelectNearestFreeSquare();
 
         } else if (MC->InPickState()){
             if (!MC->SelectLastPiece())
