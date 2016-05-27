@@ -62,7 +62,7 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
 
     switch (key){
     case KEY_ESC:{
-        if (!BOARD->IsEmpty()){
+        if (!BOARD->IsEmpty() || MC->GetSelectedPiece() || MC->GetPickedPiece()){
             MC->Reset();
         } else MC->Exit();
     } break;

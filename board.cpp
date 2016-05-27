@@ -41,7 +41,7 @@ Board::Board(): Object(MC->GetContext()),
         lightNode->SetPosition(Vector3::UP * 0.23f);
         square->light_ = lightNode->CreateComponent<Light>();
         square->light_->SetColor(COLOR_GLOW);
-        square->light_->SetBrightness(0.05f);
+        square->light_->SetBrightness(0.023f);
         square->light_->SetRange(2.0f);
         square->light_->SetCastShadows(false);
 
@@ -311,7 +311,7 @@ void Board::Deselect(Square* square)
 
     //Fade out slot and light
     FX->FadeOut(square->slot_->GetMaterial());
-    FX->FadeTo(square->light_, 0.05f);
+    FX->FadeTo(square->light_, 0.023f);
 }
 void Board::DeselectAll()
 {

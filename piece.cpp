@@ -42,9 +42,11 @@ void Piece::Reset()
 
     if (state_ != PieceState::FREE){
         state_ = PieceState::FREE;
-        FX->TransformTo(rootNode_,
-                        MC->AttributesToPosition(static_cast<int>(attributes_.to_ulong())),
-                        Quaternion(Random(360.0f), Vector3::UP));
+        FX->ArchTo(rootNode_,
+                   MC->AttributesToPosition(ToInt()),
+                   Quaternion(Random(360.0f), Vector3::UP),
+                   attributes_[0] ? 2.0f : 1.3f + attributes_[1] ? 0.5f : 1.0f + Random(0.23f),
+                   RESET_DURATION, true);
     }
 }
 
@@ -97,7 +99,7 @@ void Piece::Pick()
         if (MC->GetGameState() == GameState::PLAYER2PICKS)
             rootNode_->SetParent(CAMERA->GetPocket(true));
 
-        FX->TransformTo(rootNode_, Vector3::DOWN, Quaternion(10.0f, Vector3(1.0f, 0.0f, 0.5f)));
+        FX->ArchTo(rootNode_, Vector3::DOWN, Quaternion(10.0f, Vector3(1.0f, 0.0f, 0.5f)), 1.0f, 0.8f);
 
         FX->FadeOut(outlineModel_->GetMaterial());
         FX->FadeOut(light_);
@@ -110,6 +112,6 @@ void Piece::Put(Vector3 position)
 
         rootNode_->SetParent(MC->world_.scene_);
 
-        FX->TransformTo(rootNode_, position, Quaternion(Random(-13.0f, 13.0f), Vector3::UP));
+        FX->ArchTo(rootNode_, position, Quaternion(Random(-13.0f, 13.0f), Vector3::UP), 2.3f, 0.42f);
     }
 }
