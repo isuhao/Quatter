@@ -135,7 +135,7 @@ float LucKey::Cycle(float x, float min, float max)
         min = max; max = temp;
     }
 
-    int range{max - min};
+    float range{max - min};
 
     return (x < min) ? x +
                 range * abs(ceil((min - x) / range))

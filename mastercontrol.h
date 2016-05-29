@@ -84,6 +84,7 @@ public:
     void Exit();
     void CreateLights();
     inline GameState GetGameState() const noexcept { return gameState_; }
+    inline GameState GetPreviousGameState() const noexcept { return previousGameState_; }
     inline bool InPickState() const noexcept { return gameState_ == GameState::PLAYER1PICKS || gameState_ == GameState::PLAYER2PICKS; }
     inline bool InPutState() const noexcept { return gameState_ == GameState::PLAYER1PUTS || gameState_ == GameState::PLAYER2PUTS; }
     inline bool InPlayer1State() const noexcept { return gameState_ == GameState::PLAYER1PICKS || gameState_ == GameState::PLAYER1PUTS; }
@@ -123,6 +124,7 @@ private:
     float musicGain_;
 
     GameState gameState_;
+    GameState previousGameState_;
     MusicState musicState_;
     MusicState previousMusicState_;
 

@@ -173,6 +173,7 @@ void MasterControl::CreateLights()
 Piece* MasterControl::GetSelectedPiece() const
 {
     for (Piece* p: world_.pieces_){
+
         if (p->GetState() == PieceState::SELECTED){
             return p;
         }
@@ -183,6 +184,7 @@ Piece* MasterControl::GetSelectedPiece() const
 Piece* MasterControl::GetPickedPiece() const
 {
     for (Piece* p: world_.pieces_){
+
         if (p->GetState() == PieceState::PICKED){
             return p;
         }
@@ -193,6 +195,7 @@ int MasterControl::CountFreePieces()
 {
     int count{0};
     for (Piece* p: world_.pieces_){
+
         if (p->GetState() == PieceState::FREE){
             ++count;
         }
@@ -304,6 +307,8 @@ void MasterControl::NextPhase()
     if (gameState_ == GameState::QUATTER)
         return;
 
+    previousGameState_ = gameState_;
+
     switch (gameState_)    {
     case GameState::PLAYER1PICKS: {
         gameState_ = GameState::PLAYER2PUTS;
@@ -324,6 +329,8 @@ void MasterControl::NextPhase()
 }
 void MasterControl::Quatter()
 {
+    previousGameState_ = gameState_;
+
     gameState_ = GameState::QUATTER;
 }
 void MasterControl::Reset()

@@ -239,18 +239,27 @@ JoystickState* InputMaster::GetActiveJoystick()
 {
     if (MultipleJoysticks()) {
 
-        if (MC->GetGameState() == GameState::PLAYER1PICKS ||
-            MC->GetGameState() == GameState::PLAYER1PUTS)
+        if (MC->InPlayer1State())
         {
             return input_->GetJoystickByIndex(0);
 
-        } else if (MC->GetGameState() == GameState::PLAYER2PICKS ||
-                   MC->GetGameState() == GameState::PLAYER2PUTS)
+        } else if (MC->InPlayer2State())
         {
             return input_->GetJoystickByIndex(1);
+        } else if (MC->GetGameState() == GameState::QUATTER) {
+            if (MC->GetPreviousGameState() == GameState::PLAYER1PICKS ||
+                MC->GetPreviousGameState() == GameState::PLAYER1PUTS)
+            {
+                return input_->GetJoystickByIndex(0);
+
+            } else if (MC->GetPreviousGameState() == GameState::PLAYER2PICKS ||
+                       MC->GetPreviousGameState() == GameState::PLAYER2PUTS)
+            {
+                return input_->GetJoystickByIndex(1);
+            }
         }
 
-    } else if (input_->GetJoystickByIndex(0)){
+    } else if (input_->GetJoystickByIndex(0)) {
 
         return input_->GetJoystickByIndex(0);
 
@@ -267,9 +276,7 @@ void InputMaster::HandleJoystickButtonDown(StringHash eventType, VariantMap &eve
     int joystickId{eventData[P_JOYSTICKID].GetInt()};
     int button{eventData[P_BUTTON].GetInt()};
 
-    if (   input_->GetJoystickByIndex(0)
-        && input_->GetJoystickByIndex(1)
-        && !CorrectJoystickId(joystickId)) return;
+    if (MultipleJoysticks() && !CorrectJoystickId(joystickId) && MC->GetGameState() != GameState::QUATTER) return;
 
     pressedJoystickButtons_[joystickId].Insert(button);
 }
