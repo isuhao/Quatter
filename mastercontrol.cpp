@@ -36,9 +36,15 @@ MasterControl::MasterControl(Context *context):
     Application(context),
     musicGain_{1.0f},
     gameState_{GameState::PLAYER1PICKS},
+    previousGameState_{},
     musicState_{MUSIC_SONG1},
     previousMusicState_{MUSIC_OFF},
-    lastReset_{0.0f}
+    selectionMode_{SM_CAMERA},
+    lastReset_{0.0f},
+
+    selectedPiece_{nullptr},
+    lastSelectedPiece_{nullptr},
+    pickedPiece_{nullptr}
 {
     instance_ = this;
 }
