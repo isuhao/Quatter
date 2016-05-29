@@ -34,27 +34,32 @@ Board::Board(): Object(MC->GetContext()),
 {
     rootNode_ = MC->world_.scene_->CreateChild("Board");
     model_ = rootNode_->CreateComponent<StaticModel>();
-    model_->SetModel(MC->cache_->GetResource<Model>("Resources/Models/Board.mdl"));
-    model_->SetMaterial(MC->cache_->GetResource<Material>("Resources/Materials/Board.xml"));
+    model_->SetModel(MC->GetModel("Board"));
+    model_->SetMaterial(MC->GetMaterial("Board"));
     model_->SetCastShadows(true);
 
     //Fill board with squares
     for (int i{0}; i < BOARD_WIDTH; ++i) for (int j{0}; j < BOARD_HEIGHT; ++j){
-
+        //Create base
         Square* square{new Square};
         square->coords_ = IntVector2(i, j);
         square->node_ = rootNode_->CreateChild("Square");
+        StringVector tag{}; tag.Push(String("Square"));
+        square->node_->SetTags(tag);
         square->node_->SetPosition(CoordsToPosition(square->coords_));
+        StaticModel* touchPlane{square->node_->CreateComponent<StaticModel>()};
+        touchPlane->SetModel(MC->GetModel("Plane"));
+        touchPlane->SetMaterial(MC->GetMaterial("Invisible"));
         square->free_ = true;
         square->piece_ = nullptr;
-
+        //Create slot
         Node* slotNode{square->node_->CreateChild("Slot")};
         slotNode->SetPosition(Vector3::UP * 0.05f);
         square->slot_ = slotNode->CreateComponent<AnimatedModel>();
         square->slot_->SetModel(MC->GetModel("Slot"));
         square->slot_->SetMaterial(MC->GetMaterial("Glow")->Clone());
         square->slot_->GetMaterial()->SetShaderParameter("MatDiffColor", Color(0.0f, 0.0f, 0.0f, 0.0f));
-
+        //Create light
         Node* lightNode{slotNode->CreateChild("Light")};
         lightNode->SetPosition(Vector3::UP * 0.23f);
         square->light_ = lightNode->CreateComponent<Light>();
@@ -101,6 +106,13 @@ bool Board::IsEmpty() const
 
     return true;
 }
+bool Board::IsFull() const
+{
+    for (Square* s: squares_.Values())
+        if (s->free_) return false;
+
+    return true;
+}
 
 Vector3 Board::CoordsToPosition(IntVector2 coords)
 {
@@ -120,6 +132,10 @@ void Board::HandleSceneUpdate(StringHash eventType, VariantMap& eventData)
 
 bool Board::PutPiece(Piece* piece, Square* square)
 {
+    if (!square){
+        return PutPiece(piece);
+    }
+
     if (piece && square->free_){
 
         MC->DeselectPiece();
@@ -136,9 +152,13 @@ bool Board::PutPiece(Piece* piece, Square* square)
         if (CheckQuatter())
             MC->Quatter();
 
+        MC->NextPhase();
         return true;
 
-    } else return false;
+    } else {
+        Refuse();
+        return false;
+    }
 }
 
 bool Board::CheckQuatter()
@@ -294,6 +314,8 @@ bool Board::SelectLast()
     if (lastSelectedSquare_ && lastSelectedSquare_ != selectedSquare_) {
         Select(lastSelectedSquare_);
         return true;
+    } else if (!selectedSquare_) {
+        SelectNearestFreeSquare();
     } else return false;
 }
 
@@ -345,9 +367,5 @@ void Board::Step(IntVector2 step)
         if (squares_.Contains(newCoords)){
             Select(squares_[newCoords].Get());
         }
-    } else if (lastSelectedSquare_)
-        SelectLast();
-    else {
-        SelectNearestFreeSquare();
-    }
+    } else SelectLast();
 }

@@ -78,10 +78,8 @@ void EffectMaster::ArchTo(Node* node, Vector3 pos, Quaternion rot, float archHei
 {
     ValueAnimation* posAnim{new ValueAnimation(context_)};
     posAnim->SetKeyFrame(0.0f, node->GetPosition());
-    if (delay != 0.0f)
-        posAnim->SetKeyFrame(0.5f * delay, node->GetPosition());
 
-    for (int i{1}; i < WAYPOINTS - 1; ++i){
+    for (int i{0}; i < WAYPOINTS - 1; ++i){
         float t{static_cast<float>(i) / WAYPOINTS};
         posAnim->SetKeyFrame(delay + duration * t,
                              node->GetPosition().Lerp(pos, t) + archHeight * Vector3::UP * Arch(t));

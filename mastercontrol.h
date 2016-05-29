@@ -23,10 +23,8 @@
 #include "luckey.h"
 
 namespace Urho3D {
-class Drawable;
 class Node;
 class Scene;
-class Sprite;
 }
 
 using namespace Urho3D;
@@ -105,14 +103,15 @@ public:
     Sound* GetMusic(String name) const;
     Sound* GetSample(String name) const;
 
-    float Sine(const float freq, const float min, const float max, const float shift = 0.0f);
-    float Cosine(const float freq, const float min, const float max, const float shift = 0.0f);
-
     void Quatter();
     void DeselectPiece();
 
+    void NextPhase();
     void NextMusicState();
     void TakeScreenshot();
+
+    float Sine(const float freq, const float min = -1.0f, const float max = 1.0f, const float shift = 0.0f);
+    float Cosine(const float freq, const float min = -1.0f, const float max = 1.0f, const float shift = 0.0f);
 private:
     static MasterControl* instance_;
     InputMaster* inputMaster_;
@@ -127,16 +126,15 @@ private:
     GameState previousGameState_;
     MusicState musicState_;
     MusicState previousMusicState_;
+    SelectionMode selectionMode_;
 
     Piece* selectedPiece_;
     Piece* lastSelectedPiece_;
     Piece* pickedPiece_;
-    SelectionMode selectionMode_;
 
     void CreateScene();
     void Reset();
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
-    void NextPhase();
 
     void CameraSelectPiece();
     void StepSelectPiece(bool next);
@@ -149,7 +147,7 @@ private:
     bool SelectLastPiece();
 
     float lastReset_;
-    bool Lame() { return GetSubsystem<Time>()->GetElapsedTime() - lastReset_ < (RESET_DURATION + 0.23f); }
+    bool IsLame() { return GetSubsystem<Time>()->GetElapsedTime() - lastReset_ < (RESET_DURATION + 0.23f); }
 };
 
 #endif // MASTERCONTROL_H

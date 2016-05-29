@@ -25,8 +25,10 @@ Piece::Piece(Attributes attributes): Object(MC->GetContext()),
     attributes_{attributes},
     state_{PieceState::FREE }
 {
-    rootNode_ = MC->world_.scene_->CreateChild("Piece"+GetCodon(4));
+    rootNode_ = MC->world_.scene_->CreateChild("Piece_"+GetCodon(4));
     rootNode_->SetRotation(Quaternion(Random(360.0f), Vector3::UP));
+    StringVector tag{}; tag.Push(String("Piece"));
+    rootNode_->SetTags(tag);
 
     StaticModel* pieceModel{rootNode_->CreateComponent<StaticModel>()};
     pieceModel->SetCastShadows(true);
@@ -75,13 +77,13 @@ String Piece::GetCodon(int length) const
 
     String codon{};
 
-        codon += attributes_[0] ? "T" : "S"; //Tall  : Short
+        codon += !attributes_[0] ? "S" : "T"; //Tall  : Short
     if (length > 1)
-        codon += attributes_[1] ? "R" : "S"; //Round : Square
+        codon += !attributes_[1] ? "S" : "R"; //Round : Square
     if (length > 2)
-        codon += attributes_[2] ? "H" : "S"; //Hole  : Solid
+        codon += !attributes_[2] ? "S" : "H"; //Hole  : Solid
     if (length == NUM_ATTRIBUTES)
-        codon += attributes_[3] ? "L" : "D"; //Light : Dark
+        codon += !attributes_[3] ? "D" : "L"; //Light : Dark
 
     return codon;
 }
@@ -103,6 +105,7 @@ void Piece::Select()
 void Piece::Deselect()
 {
     if (state_ == PieceState::SELECTED){
+
         state_ = PieceState::FREE;
         FX->FadeOut(outlineModel_->GetMaterial());
         FX->FadeOut(light_);
@@ -110,7 +113,8 @@ void Piece::Deselect()
 }
 void Piece::Pick()
 {
-    if (state_ == PieceState::SELECTED){
+    if (state_ != PieceState::PUT){
+
         state_ = PieceState::PICKED;
         if (MC->GetGameState() == GameState::PLAYER1PICKS)
             rootNode_->SetParent(CAMERA->GetPocket(false));
@@ -121,15 +125,20 @@ void Piece::Pick()
 
         FX->FadeOut(outlineModel_->GetMaterial());
         FX->FadeOut(light_);
+
+        MC->NextPhase();
     }
 }
 void Piece::Put(Vector3 position)
 {
     if (state_ == PieceState::PICKED){
+
         state_ = PieceState::PUT;
-
         rootNode_->SetParent(MC->world_.scene_);
-
         FX->ArchTo(rootNode_, position, Quaternion(Random(-13.0f, 13.0f), Vector3::UP), 2.3f, 0.42f);
     }
+}
+void Piece::Put(Square* square)
+{
+    BOARD->PutPiece(this, square);
 }

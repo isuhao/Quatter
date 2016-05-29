@@ -20,6 +20,7 @@
 #define BOARD_H
 
 #include <Urho3D/Urho3D.h>
+
 #include "mastercontrol.h"
 #include "piece.h"
 #include "quattercam.h"
@@ -64,8 +65,16 @@ public:
         } else
             return PutPiece(piece, selectedSquare_);
     }
+    bool PutPiece(Square* square) {
+        return PutPiece(MC->GetPickedPiece(), square);
+    }
+
+    bool PutPiece(){
+        return PutPiece(MC->GetPickedPiece());
+    }
 
     void Step(IntVector2 step);
+    Vector<SharedPtr<Square>> GetSquares() const { return squares_.Values(); }
     Square* GetNearestSquare(Vector3 pos, bool free = true);
     Square* GetSelectedSquare() const { return selectedSquare_; }
     Square* GetLastSelectedSquare() const { return lastSelectedSquare_; }
@@ -80,6 +89,7 @@ public:
     void Refuse();
 
     bool IsEmpty() const;
+    bool IsFull() const;
 private:
     SharedPtr<Node> rootNode_;
     StaticModel* model_;

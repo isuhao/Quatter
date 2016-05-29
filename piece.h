@@ -33,6 +33,8 @@ enum class PieceState {FREE, SELECTED, PICKED, PUT};
 
 #define NUM_ATTRIBUTES 4
 
+class Square;
+
 class Piece : public Object
 {
     URHO3D_OBJECT(Piece, Object);
@@ -40,6 +42,7 @@ public:
     typedef std::bitset<NUM_ATTRIBUTES> Attributes;
     Piece(Attributes);
 
+    Node* GetNode() const { return rootNode_; }
     void SetPosition(Vector3 pos) { rootNode_->SetPosition(pos); }
     Vector3 GetPosition() const { return rootNode_->GetPosition(); }
     bool GetAttribute(int index) const { return attributes_[index]; }
@@ -51,6 +54,7 @@ public:
     PieceState GetState() const noexcept { return state_; }
     void Pick();
     void Put(Vector3 position);
+    void Put(Square* square);
     void Reset();
 
     int ToInt() const { return static_cast<int>(attributes_.to_ulong()); }

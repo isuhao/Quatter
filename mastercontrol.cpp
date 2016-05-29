@@ -40,11 +40,10 @@ MasterControl::MasterControl(Context *context):
     musicState_{MUSIC_SONG1},
     previousMusicState_{MUSIC_OFF},
     selectionMode_{SM_CAMERA},
-    lastReset_{0.0f},
-
     selectedPiece_{nullptr},
     lastSelectedPiece_{nullptr},
-    pickedPiece_{nullptr}
+    pickedPiece_{nullptr},
+    lastReset_{0.0f}
 {
     instance_ = this;
 }
@@ -124,6 +123,7 @@ void MasterControl::CreateScene()
 
     //Create board and pieces
     world_.board_ = new Board();
+    world_.pieces_.Reserve(NUM_PIECES);
     for (int p{0}; p < NUM_PIECES; ++p){
 
         Piece* newPiece = new Piece(Piece::Attributes(p));
@@ -229,9 +229,9 @@ void MasterControl::HandleUpdate(StringHash eventType, VariantMap& eventData)
         CameraSelectPiece();
 
     //Wave leafy light
-    leafyLightNode_->SetRotation(Quaternion(Sine(Sine(0.1f, 0.05f, 0.23f), -0.23f, 0.23f) + 90.0f, Vector3::RIGHT) *
-                                 Quaternion(Sine(0.23f, 178.0f, 182.0f), Vector3::FORWARD));
-    leafyLight_->SetBrightness(0.34f + Sine(0.011f, 0.05f, 0.23f) + Sine(0.02f, 0.05f, 0.13f));
+    leafyLightNode_->SetRotation(Quaternion(MC->Sine(MC->Sine(0.1f, 0.05f, 0.23f), -0.23f, 0.23f) + 90.0f, Vector3::RIGHT) *
+                                 Quaternion(MC->Sine(0.23f, 178.0f, 182.0f), Vector3::FORWARD));
+    leafyLight_->SetBrightness(0.34f + MC->Sine(0.011f, 0.05f, 0.23f) + MC->Sine(0.02f, 0.05f, 0.13f));
 }
 void MasterControl::SelectPiece(Piece* piece)
 {
@@ -243,7 +243,7 @@ void MasterControl::SelectPiece(Piece* piece)
 
 void MasterControl::CameraSelectPiece()
 {
-    if (Lame())
+    if (IsLame())
         return;
 
     Piece* nearest{selectedPiece_};
@@ -313,6 +313,10 @@ void MasterControl::NextPhase()
     if (gameState_ == GameState::QUATTER)
         return;
 
+    if (selectedPiece_){
+        selectedPiece_->Deselect();
+    }
+
     previousGameState_ = gameState_;
 
     switch (gameState_)    {
@@ -354,30 +358,24 @@ void MasterControl::Reset()
 
 void MasterControl::NextMusicState()
 {
+    //Fade out
     if (musicState_ == MUSIC_SONG1){
-        FX->FadeOut(musicSource1_);
-    } else if (musicState_ == MUSIC_SONG2){
-        FX->FadeOut(musicSource2_);
-    }
-
-    switch (musicState_) {
-    case MUSIC_SONG1: case MUSIC_SONG2:{
         previousMusicState_ = musicState_;
         musicState_ = MUSIC_OFF;
-    } break;
-    case MUSIC_OFF: {
+        FX->FadeOut(musicSource1_);
+    } else if (musicState_ == MUSIC_SONG2){
+        previousMusicState_ = musicState_;
+        musicState_ = MUSIC_OFF;
+        FX->FadeOut(musicSource2_);
+    } else if (musicState_ == MUSIC_OFF){
+        previousMusicState_ = musicState_;
         if (previousMusicState_ == MUSIC_SONG1)
             musicState_ = MUSIC_SONG2;
         else if (previousMusicState_ == MUSIC_SONG2)
             musicState_ = MUSIC_SONG1;
-        previousMusicState_ = MUSIC_OFF;
-    } break;
-    default: {
-        previousMusicState_ = MUSIC_OFF;
-        musicState_ = MUSIC_SONG1;
-    } break;
     }
 
+    //Fade in
     if (musicState_ == MUSIC_SONG1){
         FX->FadeTo(musicSource1_, musicGain_);
     } else if (musicState_ == MUSIC_SONG2){
@@ -404,6 +402,18 @@ void MasterControl::MusicGainDown(float step)
         FX->FadeTo(musicSource2_, musicGain_, 0.23f);
 }
 
+void MasterControl::TakeScreenshot()
+{
+    Graphics* graphics{GetSubsystem<Graphics>()};
+    Image screenshot{context_};
+    graphics->TakeScreenShot(screenshot);
+    //Here we save in the Screenshots folder with date and time appended
+    String fileName{GetSubsystem<FileSystem>()->GetProgramDir() + "Screenshots/Screenshot_" +
+                Time::GetTimeStamp().Replaced(':', '_').Replaced('.', '_').Replaced(' ', '_')+".png"};
+    Log::Write(1, fileName);
+    screenshot.SavePNG(fileName);
+}
+
 float MasterControl::Sine(const float freq, const float min, const float max, const float shift)
 {
     float phase{freq * world_.scene_->GetElapsedTime() + shift};
@@ -415,16 +425,4 @@ float MasterControl::Cosine(const float freq, const float min, const float max, 
     float phase{freq * world_.scene_->GetElapsedTime() + shift};
     float add{0.5f * (min + max)};
     return LucKey::Cosine(phase) * 0.5f * (max - min) + add;
-}
-
-void MasterControl::TakeScreenshot()
-{
-    Graphics* graphics{GetSubsystem<Graphics>()};
-    Image screenshot{context_};
-    graphics->TakeScreenShot(screenshot);
-    //Here we save in the Screenshots folder with date and time appended
-    String fileName{GetSubsystem<FileSystem>()->GetProgramDir() + "Screenshots/Screenshot_" +
-                Time::GetTimeStamp().Replaced(':', '_').Replaced('.', '_').Replaced(' ', '_')+".png"};
-    Log::Write(1, fileName);
-    screenshot.SavePNG(fileName);
 }

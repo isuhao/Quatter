@@ -26,6 +26,8 @@
 #define STEP_INTERVAL 0.23f
 #define DEADZONE 0.34f
 
+class Square;
+
 class InputMaster : public Master
 {
     URHO3D_OBJECT(InputMaster, Master);
@@ -40,6 +42,8 @@ public:
 
     JoystickState* GetActiveJoystick();
     bool MultipleJoysticks();
+    Ray MouseRay();
+
 private:
     Input* input_;
 
@@ -47,6 +51,8 @@ private:
 
     float idleTime_;
     bool idle_;
+    float mouseIdleTime_;
+
     Vector2 smoothCamRotate_;
     float smoothCamZoom_;
 
@@ -58,14 +64,19 @@ private:
 
     void HandleKeyDown(StringHash eventType, VariantMap &eventData);
     void HandleKeyUp(StringHash eventType, VariantMap &eventData);
+    void HandleKeys();
+
+    void HandleMouseMove(StringHash eventType, VariantMap& eventData);
     void HandleMouseButtonDown(StringHash eventType, VariantMap &eventData);
     void HandleMouseButtonUp(StringHash eventType, VariantMap &eventData);
+
     void HandleJoystickButtonDown(StringHash eventType, VariantMap &eventData);
     void HandleJoystickButtonUp(StringHash eventType, VariantMap &eventData);
+    void HandleJoystickButtons();
+
     void HandleUpdate(StringHash eventType, VariantMap &eventData);
     void SmoothCameraMovement(Vector2 camRot, float camZoom);
     void HandleCameraMovement(float t);
-    void HandleJoystickButtons();
 
     void Screenshot();
     void HandleActionButtonPressed();
@@ -74,7 +85,11 @@ private:
     void HandleRightArrowPressed();
     void HandleLeftArrowPressed();
     bool CorrectJoystickId(int joystickId);
-    void HandleKeys();
+
+    Piece* RaycastToPiece();
+    Square* RaycastToSquare();
+    Piece* rayPiece_;
+    Square* raySquare_;
 };
 
 #endif // INPUTMASTER_H

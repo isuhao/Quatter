@@ -17,16 +17,22 @@
 */
 
 #include "inputmaster.h"
+#include "effectmaster.h"
 #include "quattercam.h"
 #include "board.h"
 #include "piece.h"
 
 InputMaster::InputMaster() : Master(),
     input_{GetSubsystem<Input>()},
+    idleTime_{0.0f},
     idle_{false},
+    mouseIdleTime_{0.0f},
     sinceStep_{STEP_INTERVAL},
-    actionDone_{false}
+    actionDone_{false},
+    rayPiece_{},
+    raySquare_{}
 {
+    SubscribeToEvent(E_MOUSEMOVE, URHO3D_HANDLER(InputMaster, HandleMouseMove));
     SubscribeToEvent(E_MOUSEBUTTONDOWN, URHO3D_HANDLER(InputMaster, HandleMouseButtonDown));
     SubscribeToEvent(E_MOUSEBUTTONUP, URHO3D_HANDLER(InputMaster, HandleMouseButtonUp));
     SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(InputMaster, HandleKeyDown));
@@ -80,7 +86,10 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
 
     switch (key){
     case KEY_ESC:{
-        if (!BOARD->IsEmpty() || MC->GetSelectedPiece() || MC->GetPickedPiece()){
+        if (!BOARD->IsEmpty()
+         || MC->GetSelectedPiece()
+         || MC->GetPickedPiece())
+        {
             MC->Reset();
         } else MC->Exit();
     } break;
@@ -108,10 +117,10 @@ void InputMaster::HandleKeyUp(StringHash eventType, VariantMap &eventData)
 
     if (key == KEY_SPACE) actionDone_ = false;
 
-    if (key == KEY_UP    ||
-        key == KEY_DOWN  ||
-        key == KEY_LEFT  ||
-        key == KEY_RIGHT)
+    if (key == KEY_UP
+     || key == KEY_DOWN
+     || key == KEY_LEFT
+     || key == KEY_RIGHT)
     {
         sinceStep_ = STEP_INTERVAL;
     }
@@ -164,23 +173,47 @@ void InputMaster::Step(Vector3 step)
     }
 }
 
+void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData){
+    mouseIdleTime_ = 0.0f;
+    ///Reposition cursor and update selection
+}
+
 void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventData)
 {
+    mouseIdleTime_ = 0.0f;
     ResetIdle();
 
     using namespace MouseButtonDown;
     int button{eventData[P_BUTTON].GetInt()};
     pressedMouseButtons_.Insert(button);
+    if (MC->InPickState()){
+        Piece* piece{RaycastToPiece()};
+        if (piece){
+            rayPiece_ = piece;
+        } else rayPiece_ = nullptr;
+    } else if (MC->InPutState()){
+        Square* square{RaycastToSquare()};
+        if (square){
+            raySquare_ = square;
+        } else raySquare_ = nullptr;
+    }
 }
-
-
 void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventData)
 {
+    mouseIdleTime_ = 0.0f;
     ResetIdle();
 
     using namespace MouseButtonUp;
     int button{eventData[P_BUTTON].GetInt()};
     if (pressedMouseButtons_.Contains(button)) pressedMouseButtons_.Erase(button);
+
+    if (MC->InPickState()){
+        if (rayPiece_)
+            rayPiece_->Pick();
+    } else if (MC->InPutState()){
+        if (raySquare_)
+            BOARD->PutPiece(raySquare_);
+    }
 }
 
 void InputMaster::HandleJoystickButtons()
@@ -192,8 +225,9 @@ void InputMaster::HandleJoystickButtons()
             ResetIdle();
 
         if (buttons.Contains(LucKey::SB_START)){
-            if (MC->GetGameState() == GameState::QUATTER
-                || buttons.Contains(LucKey::SB_SELECT))
+            if (buttons.Contains(LucKey::SB_SELECT
+             || BOARD->IsFull()
+             || MC->GetGameState() == GameState::QUATTER))
             {
                 MC->Reset();
             }
@@ -305,7 +339,6 @@ void InputMaster::HandleActionButtonPressed()
         if (selectedPiece){
 
             selectedPiece->Pick();
-            MC->NextPhase();
             BOARD->SelectNearestFreeSquare();
         } else if (MC->selectionMode_ == SM_STEP)
             MC->SelectLastPiece();
@@ -313,44 +346,8 @@ void InputMaster::HandleActionButtonPressed()
             MC->CameraSelectPiece();
 
     } else if (MC->InPutState() ){
-
-        if (BOARD->PutPiece(MC->GetPickedPiece())){
-            MC->NextPhase();
-        } else BOARD->Refuse();
-
+        BOARD->PutPiece(MC->GetPickedPiece());
     }
-}
-
-void InputMaster::SetIdle()
-{
-    if (!idle_){
-
-        idle_ = true;
-
-        if (MC->GetSelectedPiece())
-            MC->DeselectPiece();
-
-        Square* selectedSquare{BOARD->GetSelectedSquare()};
-        if (selectedSquare)
-            BOARD->Deselect(selectedSquare);
-    }
-}
-void InputMaster::ResetIdle()
-{
-    if (idle_) {
-
-        idle_ = false;
-        if (MC->InPutState()){
-            if (!BOARD->SelectLast())
-                BOARD->SelectNearestFreeSquare();
-
-        } else if (MC->InPickState()){
-            if (!MC->SelectLastPiece())
-                MC->CameraSelectPiece();
-        }
-    }
-
-    idleTime_ = 0.0f;
 }
 
 void InputMaster::HandleCameraMovement(float t)
@@ -469,4 +466,82 @@ void InputMaster::SmoothCameraMovement(Vector2 camRot, float camZoom)
 
     smoothCamRotate_ = 0.0666f * (camRot  + smoothCamRotate_ * 14.0f);
     smoothCamZoom_   = 0.05f * (camZoom + smoothCamZoom_   * 19.0f);
+}
+
+void InputMaster::SetIdle()
+{
+    if (!idle_){
+
+        idle_ = true;
+
+        if (MC->GetSelectedPiece())
+            MC->DeselectPiece();
+
+        Square* selectedSquare{BOARD->GetSelectedSquare()};
+        if (selectedSquare)
+            BOARD->Deselect(selectedSquare);
+    }
+}
+void InputMaster::ResetIdle()
+{
+    if (idle_) {
+
+        idle_ = false;
+        if (MC->InPutState()){
+            BOARD->SelectLast();
+
+        } else if (MC->InPickState()){
+            if (!MC->SelectLastPiece())
+                MC->CameraSelectPiece();
+        }
+    }
+
+    idleTime_ = 0.0f;
+}
+
+Piece* InputMaster::RaycastToPiece()
+{
+    Ray cameraRay{MouseRay()};
+
+    PODVector<RayQueryResult> results;
+    RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 1000.0f, DRAWABLE_GEOMETRY);
+    MC->world_.scene_->GetComponent<Octree>()->Raycast(query);
+
+    for (RayQueryResult r : results){
+
+        for (Piece* p : MC->world_.pieces_)
+            if (r.node_ == p->GetNode())
+                return p;
+    }
+
+    return nullptr;
+}
+
+Square* InputMaster::RaycastToSquare()
+{
+    Ray cameraRay{MouseRay()};
+
+    PODVector<RayQueryResult> results;
+    RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 1000.0f, DRAWABLE_GEOMETRY);
+    MC->world_.scene_->GetComponent<Octree>()->Raycast(query);
+
+    for (RayQueryResult r : results){
+
+        for (Square* s : BOARD->GetSquares())
+            if (r.node_ == s->node_)
+                return s;
+    }
+
+    return nullptr;
+}
+
+Ray InputMaster::MouseRay()
+{
+    IntVector2 mousePos{GetSubsystem<Input>()->GetMousePosition()};
+    Graphics* graphics{GetSubsystem<Graphics>()};
+    float screenX{static_cast<float>(mousePos.x_) / graphics->GetWidth()};
+    float screenY{static_cast<float>(mousePos.y_) / graphics->GetHeight()};
+    Ray mouseRay{CAMERA->camera_->GetScreenRay(screenX, screenY)};
+
+    return mouseRay;
 }
