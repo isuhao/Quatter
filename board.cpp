@@ -441,12 +441,12 @@ void Board::Indicate(IntVector2 first, IntVector2 last)
     //Indicate single square
     if (last == IntVector2(-1, -1)){
         if (indicateSingle_){
-            FX->FadeTo(indicators_[0]->glow_, COLOR_GLOW);
+            FX->FadeTo(indicators_[0]->glow_, COLOR_GLOW, 2.3f, 1.0f);
             FX->TransformTo(indicators_[0]->rootNode_,
                     CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f),
                     indicators_[0]->rootNode_->GetRotation(),
                     0.23f);
-            FX->FadeTo(indicators_[1]->glow_, COLOR_GLOW);
+            FX->FadeTo(indicators_[1]->glow_, COLOR_GLOW, 2.3f, 1.0f);
             FX->TransformTo(indicators_[1]->rootNode_,
                     CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f),
                     indicators_[1]->rootNode_->GetRotation(),
@@ -454,24 +454,24 @@ void Board::Indicate(IntVector2 first, IntVector2 last)
         }
     //Indicate row
     } else if (first.y_ == last.y_){
-        FX->FadeTo(indicators_[0]->glow_, COLOR_GLOW);
+        FX->FadeTo(indicators_[0]->glow_, COLOR_GLOW, 2.3f, 1.0f);
         indicators_[0]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
     //Indicate column
     } else if (first.x_ == last.x_){
-        FX->FadeTo(indicators_[1]->glow_, COLOR_GLOW);
+        FX->FadeTo(indicators_[1]->glow_, COLOR_GLOW, 2.3f, 1.0f);
         indicators_[1]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
     //Indicate first diagonal
     } else if (first.x_ == 0 && last.y_ == 0){
-        FX->FadeTo(indicators_[3]->glow_, COLOR_GLOW);
+        FX->FadeTo(indicators_[3]->glow_, COLOR_GLOW, 2.3f, 1.0f);
     //Indicate 2x2 blocks
     } else if (last.x_ - first.x_ == 1) {
-        FX->FadeTo(indicators_[4]->glow_, COLOR_GLOW);
+        FX->FadeTo(indicators_[4]->glow_, COLOR_GLOW, 2.3f, 1.0f);
         indicators_[4]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
-        FX->FadeTo(indicators_[5]->glow_, COLOR_GLOW);
+        FX->FadeTo(indicators_[5]->glow_, COLOR_GLOW, 2.3f, 1.0f);
         indicators_[5]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
     //Indicate other diagonal
     } else
-        FX->FadeTo(indicators_[2]->glow_, COLOR_GLOW);
+        FX->FadeTo(indicators_[2]->glow_, COLOR_GLOW, 2.3f, 1.0f);
 }
 
 void Board::HideIndicators()

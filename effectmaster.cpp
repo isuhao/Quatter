@@ -24,12 +24,16 @@ EffectMaster::EffectMaster() : Master()
 {
 }
 
-void EffectMaster::FadeTo(Material* material, Color color, float duration)
+void EffectMaster::FadeTo(Material* material, Color color, float duration, float delay)
 {
     Color startColor{material->GetShaderParameter("MatDiffColor").GetColor()};
     ValueAnimation* fade{new ValueAnimation(context_)};
+
     fade->SetKeyFrame(0.0f, startColor);
-    fade->SetKeyFrame(duration, color);
+    if (delay)
+        fade->SetKeyFrame(delay, startColor);
+    fade->SetKeyFrame(delay + duration, color);
+
     material->SetShaderParameterAnimation("MatDiffColor", fade, WM_ONCE);
 }
 
