@@ -112,14 +112,9 @@ void InputMaster::RevealYad()
 }
 Vector3 InputMaster::YadRaycast(bool& none)
 {
-    Ray cameraRay{MouseRay()};
-
-    PODVector<RayQueryResult> results;
-    RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 1000.0f, DRAWABLE_GEOMETRY);
-    MC->world_.scene_->GetComponent<Octree>()->Raycast(query);
-
     bool square{false};
-    if (RaycastToPiece()
+    if (MC->InPickState()
+     && RaycastToPiece()
      && (rayPiece_->GetState() == PieceState::FREE
      || rayPiece_->GetState() == PieceState::SELECTED)){
         if (MC->InPickState()){
@@ -128,7 +123,7 @@ Vector3 InputMaster::YadRaycast(bool& none)
                 HideYad();
             return yad_->node_->GetPosition();
         }
-    } else if (RaycastToSquare()){
+    } else if (MC->InPutState() && RaycastToSquare()){
         square = true;
         if (MC->InPutState()){
             BOARD->Select(raySquare_);
@@ -139,6 +134,11 @@ Vector3 InputMaster::YadRaycast(bool& none)
         }
     }
 
+    Ray cameraRay{MouseRay()};
+    PODVector<RayQueryResult> results;
+    RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 1000.0f, DRAWABLE_GEOMETRY);
+    MC->world_.scene_->GetComponent<Octree>()->Raycast(query);
+
     for (RayQueryResult r : results){
         if (MC->InPickState()){
             MC->DeselectPiece();
@@ -148,7 +148,8 @@ Vector3 InputMaster::YadRaycast(bool& none)
         }
         if (yad_->hidden_)
             RevealYad();
-        return r.position_;
+        if (!r.node_->HasTag("Piece"))
+            return r.position_;
     }
     none = true;
     return Vector3::ZERO;
