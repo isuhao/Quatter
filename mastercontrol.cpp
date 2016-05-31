@@ -123,7 +123,7 @@ void MasterControl::CreateScene()
     tableModel->SetCastShadows(true);
     Node* hitNode{world_.scene_->CreateChild("HitPlane")};
     hitNode->SetPosition(Vector3::DOWN * 1.23f);
-    hitNode->SetScale(42.0f);
+    hitNode->SetScale(128.0f);
     StaticModel* hitPlane{hitNode->CreateComponent<StaticModel>()};
     hitPlane->SetModel(MC->GetModel("Plane"));
     hitPlane->SetMaterial(MC->GetMaterial("Invisible"));

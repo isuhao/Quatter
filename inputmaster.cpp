@@ -57,6 +57,7 @@ void InputMaster::ConstructYad()
     yad_->model_->SetMaterial(yad_->material_);
     yad_->light_ = lightNode->CreateComponent<Light>();
     yad_->light_->SetLightType(LIGHT_POINT);
+    yad_->light_->SetCastShadows(true);
     yad_->light_->SetColor(COLOR_GLOW);
     yad_->light_->SetRange(1.0f);
     yad_->light_->SetBrightness(YAD_FULLBRIGHT);
@@ -85,13 +86,16 @@ void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
 
 void InputMaster::UpdateYad()
 {
-    Vector3 yadPos{YadRaycast()};
+    bool hide{false};
+    Vector3 yadPos{YadRaycast(hide)};
     if (yadPos.Length())
         yad_->node_->SetPosition(Vector3(0.5f * (yadPos.x_ + yad_->node_->GetPosition().x_),
                                          yadPos.y_,
                                          0.5f * (yadPos.z_ + yad_->node_->GetPosition().z_)));
     if (!yad_->hidden_
-     && mouseIdleTime_ > IDLE_THRESHOLD * 0.5f ){
+     && (mouseIdleTime_ > IDLE_THRESHOLD * 0.5f
+     || hide))
+    {
         HideYad();
     }
 }
@@ -106,7 +110,7 @@ void InputMaster::RevealYad()
     yad_->hidden_ = false;
     RestoreYad();
 }
-Vector3 InputMaster::YadRaycast()
+Vector3 InputMaster::YadRaycast(bool& none)
 {
     Ray cameraRay{MouseRay()};
 
@@ -135,7 +139,6 @@ Vector3 InputMaster::YadRaycast()
         }
     }
 
-    Vector3 pos{yad_->node_->GetPosition()};
     for (RayQueryResult r : results){
         if (MC->InPickState()){
             MC->DeselectPiece();
@@ -147,6 +150,8 @@ Vector3 InputMaster::YadRaycast()
             RevealYad();
         return r.position_;
     }
+    none = true;
+    return Vector3::ZERO;
 }
 void InputMaster::DimYad()
 {
@@ -185,7 +190,7 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
     pressedKeys_.Insert(key);
 
     switch (key){
-    case KEY_ESC:{
+    case KEY_ESCAPE:{
         if (!BOARD->IsEmpty()
          || MC->GetSelectedPiece()
          || MC->GetPickedPiece())

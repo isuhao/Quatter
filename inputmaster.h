@@ -90,7 +90,7 @@ private:
     void HandleUpdate(StringHash eventType, VariantMap &eventData);
     void UpdateMousePos(bool delta);
     void UpdateYad();
-    Vector3 YadRaycast();
+    Vector3 YadRaycast(bool& none);
 
     void HandleKeyDown(StringHash eventType, VariantMap &eventData);
     void HandleKeyUp(StringHash eventType, VariantMap &eventData);

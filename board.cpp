@@ -94,19 +94,23 @@ Board::Board(): Object(MC->GetContext()),
         arrowNode1->SetPosition(Vector3::LEFT * (2.3f + 0.95f * (i == 2 || i == 3)) + Vector3::FORWARD * (i >= 4));
         arrowNode1->Rotate(Quaternion(-90.0f, Vector3::UP));
         indicator->model1_ = arrowNode1->CreateComponent<AnimatedModel>();
-        if (i < 4)
+        if (i < 4){
             indicator->model1_->SetModel(MC->GetModel("Arrow"));
-        else
+            indicator->model1_->SetMorphWeight(0, static_cast<float>(i < 2));
+        } else {
             indicator->model1_->SetModel(MC->GetModel("BlockIndicator"));
+        }
         indicator->model1_->SetMaterial(indicator->glow_);
         Node* arrowNode2{indicator->rootNode_->CreateChild("Arrow")};
         arrowNode2->SetPosition(Vector3::RIGHT * (2.3f + 0.95f * (i == 2 || i == 3)));
         arrowNode2->Rotate(Quaternion(90.0f, Vector3::UP));
         indicator->model2_ = arrowNode2->CreateComponent<AnimatedModel>();
-        if (i < 4)
+        if (i < 4){
             indicator->model2_->SetModel(MC->GetModel("Arrow"));
-        else
+            indicator->model2_->SetMorphWeight(0, static_cast<float>(i < 2));
+        } else {
             indicator->model2_->SetModel(MC->GetModel("BlockIndicator"));
+        }
         indicator->model2_->SetMaterial(indicator->glow_);
         indicator->model2_->GetMaterial()->SetShaderParameter("MatDiffColor", Color(0.0f, 0.0f, 0.0f, 0.0f));
         //Create light
@@ -456,10 +460,14 @@ void Board::Indicate(IntVector2 first, IntVector2 last)
     } else if (first.y_ == last.y_){
         FX->FadeTo(indicators_[0]->glow_, COLOR_GLOW, 2.3f, 1.0f);
         indicators_[0]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
+        indicators_[0]->model1_->SetMorphWeight(1, static_cast<float>(first.y_ > 0 && first.y_ < 3));
+        indicators_[0]->model2_->SetMorphWeight(1, static_cast<float>(first.y_ > 0 && first.y_ < 3));
     //Indicate column
     } else if (first.x_ == last.x_){
         FX->FadeTo(indicators_[1]->glow_, COLOR_GLOW, 2.3f, 1.0f);
         indicators_[1]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
+        indicators_[1]->model1_->SetMorphWeight(1, static_cast<float>(first.x_ > 0 && first.x_ < 3));
+        indicators_[1]->model2_->SetMorphWeight(1, static_cast<float>(first.x_ > 0 && first.x_ < 3));
     //Indicate first diagonal
     } else if (first.x_ == 0 && last.y_ == 0){
         FX->FadeTo(indicators_[3]->glow_, COLOR_GLOW, 2.3f, 1.0f);
