@@ -28,6 +28,7 @@ template <> unsigned MakeHash(const IntVector2& value)
 }
 
 Board::Board(): Object(MC->GetContext()),
+    indicateSingle_{false},
     squares_{},
     selectedSquare_{nullptr},
     lastSelectedSquare_{nullptr}
@@ -63,12 +64,68 @@ Board::Board(): Object(MC->GetContext()),
         Node* lightNode{slotNode->CreateChild("Light")};
         lightNode->SetPosition(Vector3::UP * 0.23f);
         square->light_ = lightNode->CreateComponent<Light>();
-        square->light_->SetColor(COLOR_GLOW);
+        square->light_->SetColor(0.5f * COLOR_GLOW);
         square->light_->SetBrightness(0.023f);
         square->light_->SetRange(2.0f);
         square->light_->SetCastShadows(false);
 
         squares_[square->coords_] = square;
+
+    }
+
+    //Create Quatter indicators
+    for (int i{0}; i < 6; ++i){
+        //Create base
+        Indicator* indicator{new Indicator};
+        indicator->rootNode_ = rootNode_->CreateChild("Indicator");
+        indicator->rootNode_->SetPosition(GetThickness() * Vector3::UP);
+        if (i == 1)
+            indicator->rootNode_->Rotate(Quaternion(90.0f, Vector3::UP));
+        else if (i == 2)
+            indicator->rootNode_->Rotate(Quaternion(45.0f, Vector3::UP));
+        else if (i == 3)
+            indicator->rootNode_->Rotate(Quaternion(-45.0f, Vector3::UP));
+        else if (i == 5)
+            indicator->rootNode_->Rotate(Quaternion(90.0f, Vector3::UP));
+
+        indicator->glow_ = MC->GetMaterial("Glow")->Clone();
+        //Create models
+        Node* arrowNode1{indicator->rootNode_->CreateChild("Arrow")};
+        arrowNode1->SetPosition(Vector3::LEFT * (2.3f + 0.95f * (i == 2 || i == 3)) + Vector3::FORWARD * (i >= 4));
+        arrowNode1->Rotate(Quaternion(-90.0f, Vector3::UP));
+        indicator->model1_ = arrowNode1->CreateComponent<AnimatedModel>();
+        if (i < 4)
+            indicator->model1_->SetModel(MC->GetModel("Arrow"));
+        else
+            indicator->model1_->SetModel(MC->GetModel("BlockIndicator"));
+        indicator->model1_->SetMaterial(indicator->glow_);
+        Node* arrowNode2{indicator->rootNode_->CreateChild("Arrow")};
+        arrowNode2->SetPosition(Vector3::RIGHT * (2.3f + 0.95f * (i == 2 || i == 3)));
+        arrowNode2->Rotate(Quaternion(90.0f, Vector3::UP));
+        indicator->model2_ = arrowNode2->CreateComponent<AnimatedModel>();
+        if (i < 4)
+            indicator->model2_->SetModel(MC->GetModel("Arrow"));
+        else
+            indicator->model2_->SetModel(MC->GetModel("BlockIndicator"));
+        indicator->model2_->SetMaterial(indicator->glow_);
+        indicator->model2_->GetMaterial()->SetShaderParameter("MatDiffColor", Color(0.0f, 0.0f, 0.0f, 0.0f));
+        //Create light
+        Node* lightNode1{arrowNode1->CreateChild("Light")};
+        lightNode1->SetPosition(Vector3::UP * 0.23f);
+        indicator->light1_ = lightNode1->CreateComponent<Light>();
+        indicator->light1_->SetColor(COLOR_GLOW);
+        indicator->light1_->SetBrightness(0.023f);
+        indicator->light1_->SetRange(2.0f);
+        indicator->light1_->SetCastShadows(false);
+        Node* lightNode2{arrowNode2->CreateChild("Light")};
+        lightNode2->SetPosition(Vector3::UP * 0.23f);
+        indicator->light2_ = lightNode2->CreateComponent<Light>();
+        indicator->light2_->SetColor(COLOR_GLOW);
+        indicator->light2_->SetBrightness(0.023f);
+        indicator->light2_->SetRange(2.0f);
+        indicator->light2_->SetCastShadows(false);
+
+        indicators_.Push(SharedPtr<Indicator>(indicator));
 
     }
 
@@ -166,35 +223,6 @@ bool Board::CheckQuatter()
     bool checkBlocks{true};
 
     //Check rows
-    for (int i{0}; i < BOARD_WIDTH; ++i){
-        Piece::Attributes matching{};
-        matching.flip();
-        Piece::Attributes first{};
-        for (int j{0}; j < BOARD_HEIGHT; ++j){
-            IntVector2 coords(i, j);
-            Piece* piece{squares_[coords].Get()->piece_};
-            if (piece){
-                Piece::Attributes attributes{piece->GetAttributes()};
-                if (j == 0) {
-                    first = attributes;
-                } else {
-                    for (int a{0}; a < NUM_ATTRIBUTES; ++a)
-                        if (first[a] != attributes[a])
-                            matching[a] = false;
-                }
-            //Full row required
-            } else {
-                matching.reset();
-                break;
-            }
-        }
-        //Quatter!
-        if (matching.any()){
-            return true;
-        }
-    }
-
-    //Check columns
     for (int j{0}; j < BOARD_HEIGHT; ++j){
         Piece::Attributes matching{};
         matching.flip();
@@ -211,6 +239,36 @@ bool Board::CheckQuatter()
                         if (first[a] != attributes[a])
                             matching[a] = false;
                 }
+            //Full row required
+            } else {
+                matching.reset();
+                break;
+            }
+        }
+        //Quatter!
+        if (matching.any()){
+            Indicate(IntVector2(0, j), IntVector2(BOARD_WIDTH - 1, j));
+            return true;
+        }
+    }
+
+    //Check columns
+    for (int i{0}; i < BOARD_WIDTH; ++i){
+        Piece::Attributes matching{};
+        matching.flip();
+        Piece::Attributes first{};
+        for (int j{0}; j < BOARD_HEIGHT; ++j){
+            IntVector2 coords(i, j);
+            Piece* piece{squares_[coords].Get()->piece_};
+            if (piece){
+                Piece::Attributes attributes{piece->GetAttributes()};
+                if (j == 0) {
+                    first = attributes;
+                } else {
+                    for (int a{0}; a < NUM_ATTRIBUTES; ++a)
+                        if (first[a] != attributes[a])
+                            matching[a] = false;
+                }
             //Full column required
             } else {
                 matching.reset();
@@ -219,6 +277,7 @@ bool Board::CheckQuatter()
         }
         //Quatter!
         if (matching.any()){
+            Indicate(IntVector2(i, 0), IntVector2(i, BOARD_HEIGHT - 1));
             return true;
         }
     }
@@ -247,6 +306,8 @@ bool Board::CheckQuatter()
         }
         //Quatter!
         if (matching.any()){
+            Indicate(IntVector2(0, direction * (BOARD_HEIGHT - 1)),
+                     IntVector2(BOARD_WIDTH - 1, !direction * (BOARD_HEIGHT - 1)));
             return true;
         }
     }
@@ -277,6 +338,8 @@ bool Board::CheckQuatter()
                 }
                 //Quatter!
                 if (matching.any()){
+                    Indicate(IntVector2(k, l),
+                             IntVector2(k + 1, l + 1));
                     return true;
                 }
             }
@@ -336,10 +399,13 @@ void Board::Select(Square* square)
                    Color(1.0f, 0.8f, 0.0f, 0.5f));
     }
 
+    Indicate(square->coords_);
+
     FX->FadeTo(square->light_, 0.42f);
 }
 void Board::Deselect(Square* square)
 {
+    HideIndicators();
     if (!square) return;
 
     if (selectedSquare_ == square){
@@ -368,4 +434,49 @@ void Board::Step(IntVector2 step)
             Select(squares_[newCoords].Get());
         }
     } else SelectLast();
+}
+
+void Board::Indicate(IntVector2 first, IntVector2 last)
+{
+    //Indicate single square
+    if (last == IntVector2(-1, -1)){
+        if (indicateSingle_){
+            FX->FadeTo(indicators_[0]->glow_, COLOR_GLOW);
+            FX->TransformTo(indicators_[0]->rootNode_,
+                    CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f),
+                    indicators_[0]->rootNode_->GetRotation(),
+                    0.23f);
+            FX->FadeTo(indicators_[1]->glow_, COLOR_GLOW);
+            FX->TransformTo(indicators_[1]->rootNode_,
+                    CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f),
+                    indicators_[1]->rootNode_->GetRotation(),
+                    0.23f);
+        }
+    //Indicate row
+    } else if (first.y_ == last.y_){
+        FX->FadeTo(indicators_[0]->glow_, COLOR_GLOW);
+        indicators_[0]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
+    //Indicate column
+    } else if (first.x_ == last.x_){
+        FX->FadeTo(indicators_[1]->glow_, COLOR_GLOW);
+        indicators_[1]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
+    //Indicate first diagonal
+    } else if (first.x_ == 0 && last.y_ == 0){
+        FX->FadeTo(indicators_[3]->glow_, COLOR_GLOW);
+    //Indicate 2x2 blocks
+    } else if (last.x_ - first.x_ == 1) {
+        FX->FadeTo(indicators_[4]->glow_, COLOR_GLOW);
+        indicators_[4]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
+        FX->FadeTo(indicators_[5]->glow_, COLOR_GLOW);
+        indicators_[5]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
+    //Indicate other diagonal
+    } else
+        FX->FadeTo(indicators_[2]->glow_, COLOR_GLOW);
+}
+
+void Board::HideIndicators()
+{
+    for (SharedPtr<Indicator> i: indicators_){
+        FX->FadeOut(i.Get()->glow_);
+    }
 }

@@ -24,8 +24,8 @@
 
 InputMaster::InputMaster() : Master(),
     input_{GetSubsystem<Input>()},
-    idleTime_{-IDLE_THRESHOLD * 0.5f},
-    idle_{true},
+    idleTime_{IDLE_THRESHOLD},
+    idle_{false},
     mousePos_{},
     mouseIdleTime_{0.0f},
     sinceStep_{STEP_INTERVAL},
@@ -48,15 +48,18 @@ InputMaster::InputMaster() : Master(),
 
 void InputMaster::ConstructYad()
 {
-    //Construct yad
     yad_->node_ = MC->world_.scene_->CreateChild("Yad");
     Node* lightNode{yad_->node_->CreateChild("Light")};
     lightNode->SetPosition(Vector3::UP * 0.23f);
+    yad_->model_ = yad_->node_->CreateComponent<AnimatedModel>();
+    yad_->model_->SetModel(MC->GetModel("Yad"));
+    yad_->material_ = MC->GetMaterial("Glow")->Clone();
+    yad_->model_->SetMaterial(yad_->material_);
     yad_->light_ = lightNode->CreateComponent<Light>();
     yad_->light_->SetLightType(LIGHT_POINT);
     yad_->light_->SetColor(COLOR_GLOW);
     yad_->light_->SetRange(1.0f);
-    yad_->light_->SetBrightness(3.0f);
+    yad_->light_->SetBrightness(YAD_FULLBRIGHT);
 
     HideYad();
 }
@@ -84,7 +87,9 @@ void InputMaster::UpdateYad()
 {
     Vector3 yadPos{YadRaycast()};
     if (yadPos.Length())
-        yad_->node_->SetPosition(yadPos);
+        yad_->node_->SetPosition(Vector3(0.5f * (yadPos.x_ + yad_->node_->GetPosition().x_),
+                                         yadPos.y_,
+                                         0.5f * (yadPos.z_ + yad_->node_->GetPosition().z_)));
     if (!yad_->hidden_
      && mouseIdleTime_ > IDLE_THRESHOLD * 0.5f ){
         HideYad();
@@ -94,11 +99,12 @@ void InputMaster::HideYad()
 {
     yad_->hidden_ = true;
     FX->FadeOut(yad_->light_);
+    FX->FadeOut(yad_->material_, 0.1f);
 }
 void InputMaster::RevealYad()
 {
     yad_->hidden_ = false;
-    FX->FadeTo(yad_->light_, 1.0f);
+    RestoreYad();
 }
 Vector3 InputMaster::YadRaycast()
 {
@@ -109,7 +115,9 @@ Vector3 InputMaster::YadRaycast()
     MC->world_.scene_->GetComponent<Octree>()->Raycast(query);
 
     bool square{false};
-    if (RaycastToPiece()){
+    if (RaycastToPiece()
+     && (rayPiece_->GetState() == PieceState::FREE
+     || rayPiece_->GetState() == PieceState::SELECTED)){
         if (MC->InPickState()){
             MC->SelectPiece(rayPiece_);
             if (!yad_->hidden_)
@@ -122,6 +130,8 @@ Vector3 InputMaster::YadRaycast()
             BOARD->Select(raySquare_);
             if (yad_->hidden_)
                 RevealYad();
+            else
+                DimYad();
         }
     }
 
@@ -131,11 +141,21 @@ Vector3 InputMaster::YadRaycast()
             MC->DeselectPiece();
         } else if (MC->InPutState() && !square){
             BOARD->Deselect();
+            RestoreYad();
         }
         if (yad_->hidden_)
             RevealYad();
         return r.position_;
     }
+}
+void InputMaster::DimYad()
+{
+    FX->FadeTo(yad_->light_, YAD_DIMMED);
+}
+void InputMaster::RestoreYad()
+{
+    FX->FadeTo(yad_->light_, YAD_FULLBRIGHT);
+    FX->FadeTo(yad_->material_, COLOR_GLOW, 0.1f);
 }
 
 void InputMaster::HandleKeys()
@@ -424,8 +444,9 @@ void InputMaster::HandleActionButtonPressed()
 
             selectedPiece->Pick();
             BOARD->SelectNearestFreeSquare();
-        } else if (MC->selectionMode_ == SM_STEP)
-            MC->SelectLastPiece();
+        } else if (MC->selectionMode_ == SM_STEP || MC->selectionMode_ == SM_YAD)
+            if (!MC->SelectLastPiece())
+                    MC->CameraSelectPiece();
         else if (MC->selectionMode_ == SM_CAMERA)
             MC->CameraSelectPiece();
 

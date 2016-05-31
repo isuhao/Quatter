@@ -121,6 +121,13 @@ void MasterControl::CreateScene()
     tableModel->SetMaterial(GetMaterial("Table"));
     tableModel->GetMaterial()->SetShaderParameter("MatDiffColor", Vector4(0.32f, 0.40f, 0.42f, 1.0f));
     tableModel->SetCastShadows(true);
+    Node* hitNode{world_.scene_->CreateChild("HitPlane")};
+    hitNode->SetPosition(Vector3::DOWN * 1.23f);
+    hitNode->SetScale(42.0f);
+    StaticModel* hitPlane{hitNode->CreateComponent<StaticModel>()};
+    hitPlane->SetModel(MC->GetModel("Plane"));
+    hitPlane->SetMaterial(MC->GetMaterial("Invisible"));
+
 
     //Create board and pieces
     world_.board_ = new Board();

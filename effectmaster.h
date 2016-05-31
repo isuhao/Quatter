@@ -34,7 +34,7 @@ public:
     void FadeTo(Light* light, float brightness, float duration = 0.23f);
     void FadeTo(SoundSource* soundSource, float gain, float duration = 2.3f);
 
-    void FadeOut(Material* material) {FadeTo(material, material->GetShaderParameter("MatDiffColor").GetColor() * 0.0f); }
+    void FadeOut(Material* material, float duration = 0.23f) {FadeTo(material, material->GetShaderParameter("MatDiffColor").GetColor() * 0.0f, duration); }
     void FadeOut(Light* light) { FadeTo(light, 0.0f); }
     void FadeOut(SoundSource* soundSource, float duration = 5.0f);
 

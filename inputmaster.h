@@ -27,6 +27,9 @@
 #define DEADZONE 0.34f
 #define MOUSESPEED 0.23f
 
+#define YAD_FULLBRIGHT 0.5f
+#define YAD_DIMMED 0.1f
+
 class Square;
 
 typedef class Yad : public Object{
@@ -35,7 +38,7 @@ public:
     Yad() : Object(MC->GetContext()) {}
     SharedPtr<Node> node_;
     SharedPtr<AnimatedModel> model_;
-    SharedPtr<AnimatedModel> material_;
+    SharedPtr<Material> material_;
     SharedPtr<Light> light_;
     bool hidden_{true};
 }Yad;
@@ -111,6 +114,8 @@ private:
     void HandleRightArrowPressed();
     void HandleLeftArrowPressed();
     bool CorrectJoystickId(int joystickId);
+    void DimYad();
+    void RestoreYad();
 };
 
 #endif // INPUTMASTER_H

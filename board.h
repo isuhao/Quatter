@@ -47,6 +47,18 @@ public:
     bool selected_;
 }Square;
 
+typedef class Indicator : public Object{
+    URHO3D_OBJECT(Indicator, Object);
+public:
+    Indicator() : Object(MC->GetContext()) {}
+    SharedPtr<Node> rootNode_;
+    SharedPtr<Material> glow_;
+    SharedPtr<AnimatedModel> model1_;
+    SharedPtr<AnimatedModel> model2_;
+    SharedPtr<Light> light1_;
+    SharedPtr<Light> light2_;
+}Indicator;
+
 class Board : public Object
 {
     URHO3D_OBJECT(Board, Object);
@@ -90,15 +102,19 @@ public:
 
     bool IsEmpty() const;
     bool IsFull() const;
+    void HideIndicators();
 private:
+    bool indicateSingle_;
     SharedPtr<Node> rootNode_;
     StaticModel* model_;
 
     HashMap<IntVector2, SharedPtr<Square>> squares_;
     Square* selectedSquare_;
     Square* lastSelectedSquare_;
+    Vector<SharedPtr<Indicator>> indicators_;
     Vector3 CoordsToPosition(IntVector2 coords);
     void HandleSceneUpdate(StringHash eventType, VariantMap& eventData);
+    void Indicate(IntVector2 first, IntVector2 last = IntVector2(-1, -1));
 };
 
 #endif // BOARD_H
