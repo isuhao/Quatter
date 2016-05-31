@@ -37,7 +37,7 @@ class Piece;
 
 enum class GameState{PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS, QUATTER};
 enum MusicState{MUSIC_SONG1, MUSIC_SONG2, MUSIC_OFF};
-enum SelectionMode{SM_CAMERA, SM_STEP};
+enum SelectionMode{SM_CAMERA, SM_STEP, SM_YAD};
 
 typedef struct GameWorld
 {
@@ -108,6 +108,8 @@ public:
 
     void NextPhase();
     void NextMusicState();
+    void NextSelectionMode();
+    void SetSelectionMode(SelectionMode mode);
     void TakeScreenshot();
 
     float Sine(const float freq, const float min = -1.0f, const float max = 1.0f, const float shift = 0.0f);
@@ -124,6 +126,7 @@ private:
 
     GameState gameState_;
     GameState previousGameState_;
+    GameState startGameState_;
     MusicState musicState_;
     MusicState previousMusicState_;
     SelectionMode selectionMode_;

@@ -24,14 +24,18 @@
 
 InputMaster::InputMaster() : Master(),
     input_{GetSubsystem<Input>()},
-    idleTime_{0.0f},
-    idle_{false},
+    idleTime_{-IDLE_THRESHOLD * 0.5f},
+    idle_{true},
+    mousePos_{},
     mouseIdleTime_{0.0f},
     sinceStep_{STEP_INTERVAL},
     actionDone_{false},
+    yad_{new Yad()},
     rayPiece_{},
     raySquare_{}
 {
+    input_->SetMouseMode(MM_FREE);
+    UpdateMousePos(false);
     SubscribeToEvent(E_MOUSEMOVE, URHO3D_HANDLER(InputMaster, HandleMouseMove));
     SubscribeToEvent(E_MOUSEBUTTONDOWN, URHO3D_HANDLER(InputMaster, HandleMouseButtonDown));
     SubscribeToEvent(E_MOUSEBUTTONUP, URHO3D_HANDLER(InputMaster, HandleMouseButtonUp));
@@ -42,20 +46,96 @@ InputMaster::InputMaster() : Master(),
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(InputMaster, HandleUpdate));
 }
 
+void InputMaster::ConstructYad()
+{
+    //Construct yad
+    yad_->node_ = MC->world_.scene_->CreateChild("Yad");
+    Node* lightNode{yad_->node_->CreateChild("Light")};
+    lightNode->SetPosition(Vector3::UP * 0.23f);
+    yad_->light_ = lightNode->CreateComponent<Light>();
+    yad_->light_->SetLightType(LIGHT_POINT);
+    yad_->light_->SetColor(COLOR_GLOW);
+    yad_->light_->SetRange(1.0f);
+    yad_->light_->SetBrightness(3.0f);
+
+    HideYad();
+}
 
 void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
 {
     float t{eventData[Update::P_TIMESTEP].GetFloat()};
     idleTime_ += t;
+    mouseIdleTime_ += t;
     sinceStep_ += t;
 
     if (idleTime_ > IDLE_THRESHOLD)
         SetIdle();
 
+    if (mouseIdleTime_ > IDLE_THRESHOLD * 0.23f)
+        HideYad();
+
     HandleCameraMovement(t);
 
     HandleKeys();
     HandleJoystickButtons();
+}
+
+void InputMaster::UpdateYad()
+{
+    Vector3 yadPos{YadRaycast()};
+    if (yadPos.Length())
+        yad_->node_->SetPosition(yadPos);
+    if (!yad_->hidden_
+     && mouseIdleTime_ > IDLE_THRESHOLD * 0.5f ){
+        HideYad();
+    }
+}
+void InputMaster::HideYad()
+{
+    yad_->hidden_ = true;
+    FX->FadeOut(yad_->light_);
+}
+void InputMaster::RevealYad()
+{
+    yad_->hidden_ = false;
+    FX->FadeTo(yad_->light_, 1.0f);
+}
+Vector3 InputMaster::YadRaycast()
+{
+    Ray cameraRay{MouseRay()};
+
+    PODVector<RayQueryResult> results;
+    RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 1000.0f, DRAWABLE_GEOMETRY);
+    MC->world_.scene_->GetComponent<Octree>()->Raycast(query);
+
+    bool square{false};
+    if (RaycastToPiece()){
+        if (MC->InPickState()){
+            MC->SelectPiece(rayPiece_);
+            if (!yad_->hidden_)
+                HideYad();
+            return yad_->node_->GetPosition();
+        }
+    } else if (RaycastToSquare()){
+        square = true;
+        if (MC->InPutState()){
+            BOARD->Select(raySquare_);
+            if (yad_->hidden_)
+                RevealYad();
+        }
+    }
+
+    Vector3 pos{yad_->node_->GetPosition()};
+    for (RayQueryResult r : results){
+        if (MC->InPickState()){
+            MC->DeselectPiece();
+        } else if (MC->InPutState() && !square){
+            BOARD->Deselect();
+        }
+        if (yad_->hidden_)
+            RevealYad();
+        return r.position_;
+    }
 }
 
 void InputMaster::HandleKeys()
@@ -174,45 +254,49 @@ void InputMaster::Step(Vector3 step)
 }
 
 void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData){
+    UpdateMousePos(false);
+
+    Graphics* graphics{GetSubsystem<Graphics>()};
+    mousePos_.x_ += eventData[MouseMove::P_DX].GetFloat() / graphics->GetWidth();
+    mousePos_.y_ += eventData[MouseMove::P_DY].GetFloat() / graphics->GetHeight();
+
+    MC->SetSelectionMode(SM_YAD);
+    UpdateYad();
+
     mouseIdleTime_ = 0.0f;
-    ///Reposition cursor and update selection
+    ResetIdle();
 }
 
 void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventData)
 {
-    mouseIdleTime_ = 0.0f;
-    ResetIdle();
-
     using namespace MouseButtonDown;
     int button{eventData[P_BUTTON].GetInt()};
     pressedMouseButtons_.Insert(button);
-    if (MC->InPickState()){
-        Piece* piece{RaycastToPiece()};
-        if (piece){
-            rayPiece_ = piece;
-        } else rayPiece_ = nullptr;
-    } else if (MC->InPutState()){
-        Square* square{RaycastToSquare()};
-        if (square){
-            raySquare_ = square;
-        } else raySquare_ = nullptr;
-    }
+
+    MC->SetSelectionMode(SM_YAD);
+    UpdateMousePos(false);
+
+    UpdateYad();
+    mouseIdleTime_ = 0.0f;
+    ResetIdle();
 }
 void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventData)
 {
-    mouseIdleTime_ = 0.0f;
-    ResetIdle();
-
     using namespace MouseButtonUp;
     int button{eventData[P_BUTTON].GetInt()};
     if (pressedMouseButtons_.Contains(button)) pressedMouseButtons_.Erase(button);
 
-    if (MC->InPickState()){
-        if (rayPiece_)
-            rayPiece_->Pick();
-    } else if (MC->InPutState()){
-        if (raySquare_)
-            BOARD->PutPiece(raySquare_);
+    MC->SetSelectionMode(SM_YAD);
+    UpdateMousePos(false);
+
+    UpdateYad();
+    mouseIdleTime_ = 0.0f;
+    ResetIdle();
+
+    if (MC->InPickState() && MC->GetSelectedPiece()){
+            MC->GetSelectedPiece()->Pick();
+    } else if (MC->InPutState() && MC->GetPickedPiece()){
+            MC->GetPickedPiece()->Put(BOARD->GetSelectedSquare());
     }
 }
 
@@ -256,7 +340,7 @@ void InputMaster::HandleJoystickButtons()
             } break;
             case LucKey::SB_SELECT:{
                 if (MC->InPickState())
-                    MC->selectionMode_ = SM_CAMERA;
+                    MC->SetSelectionMode(SM_CAMERA);
                 else if (MC->InPutState())
                     BOARD->SelectNearestFreeSquare();
             } break;
@@ -510,10 +594,12 @@ Piece* InputMaster::RaycastToPiece()
     for (RayQueryResult r : results){
 
         for (Piece* p : MC->world_.pieces_)
-            if (r.node_ == p->GetNode())
+            if (r.node_ == p->GetNode()){
+                rayPiece_ = p;
                 return p;
+            }
     }
-
+    rayPiece_ = nullptr;
     return nullptr;
 }
 
@@ -528,20 +614,35 @@ Square* InputMaster::RaycastToSquare()
     for (RayQueryResult r : results){
 
         for (Square* s : BOARD->GetSquares())
-            if (r.node_ == s->node_)
+            if (r.node_ == s->node_){
+                raySquare_ = s;
                 return s;
+            }
     }
-
+    raySquare_ = nullptr;
     return nullptr;
 }
 
 Ray InputMaster::MouseRay()
 {
-    IntVector2 mousePos{GetSubsystem<Input>()->GetMousePosition()};
-    Graphics* graphics{GetSubsystem<Graphics>()};
-    float screenX{static_cast<float>(mousePos.x_) / graphics->GetWidth()};
-    float screenY{static_cast<float>(mousePos.y_) / graphics->GetHeight()};
-    Ray mouseRay{CAMERA->camera_->GetScreenRay(screenX, screenY)};
+    Ray mouseRay{CAMERA->camera_->GetScreenRay(mousePos_.x_, mousePos_.y_)};
 
     return mouseRay;
+}
+
+void InputMaster::UpdateMousePos(bool delta)
+{
+    if (delta){
+        IntVector2 mouseDelta{GetSubsystem<Input>()->GetMouseMove()};
+        Graphics* graphics{GetSubsystem<Graphics>()};
+        mousePos_.x_ += MOUSESPEED * static_cast<float>(mouseDelta.x_) / graphics->GetWidth();
+        mousePos_.y_ += MOUSESPEED * static_cast<float>(mouseDelta.y_) / graphics->GetHeight();
+    } else {
+        IntVector2 mousePos{GetSubsystem<Input>()->GetMousePosition()};
+        Graphics* graphics{GetSubsystem<Graphics>()};
+        mousePos_.x_ = static_cast<float>(mousePos.x_) / graphics->GetWidth();
+        mousePos_.y_ = static_cast<float>(mousePos.y_) / graphics->GetHeight();
+    }
+    mousePos_.x_ = Clamp(mousePos_.x_, 0.0f, 1.0f);
+    mousePos_.y_ = Clamp(mousePos_.y_, 0.0f, 1.0f);
 }

@@ -25,8 +25,20 @@
 #define IDLE_THRESHOLD 5.0f
 #define STEP_INTERVAL 0.23f
 #define DEADZONE 0.34f
+#define MOUSESPEED 0.23f
 
 class Square;
+
+typedef class Yad : public Object{
+    URHO3D_OBJECT(Yad, Object);
+public:
+    Yad() : Object(MC->GetContext()) {}
+    SharedPtr<Node> node_;
+    SharedPtr<AnimatedModel> model_;
+    SharedPtr<AnimatedModel> material_;
+    SharedPtr<Light> light_;
+    bool hidden_{true};
+}Yad;
 
 class InputMaster : public Master
 {
@@ -44,10 +56,14 @@ public:
     bool MultipleJoysticks();
     Ray MouseRay();
 
+
+    void ConstructYad();
+    void HideYad();
+    void RevealYad();
 private:
     Input* input_;
 
-    IntVector2 mousePos_;
+    Vector2 mousePos_;
 
     float idleTime_;
     bool idle_;
@@ -62,6 +78,17 @@ private:
     float sinceStep_;
     bool actionDone_;
 
+    Yad* yad_;
+    Piece* RaycastToPiece();
+    Square* RaycastToSquare();
+    Piece* rayPiece_;
+    Square* raySquare_;
+
+    void HandleUpdate(StringHash eventType, VariantMap &eventData);
+    void UpdateMousePos(bool delta);
+    void UpdateYad();
+    Vector3 YadRaycast();
+
     void HandleKeyDown(StringHash eventType, VariantMap &eventData);
     void HandleKeyUp(StringHash eventType, VariantMap &eventData);
     void HandleKeys();
@@ -74,7 +101,6 @@ private:
     void HandleJoystickButtonUp(StringHash eventType, VariantMap &eventData);
     void HandleJoystickButtons();
 
-    void HandleUpdate(StringHash eventType, VariantMap &eventData);
     void SmoothCameraMovement(Vector2 camRot, float camZoom);
     void HandleCameraMovement(float t);
 
@@ -85,11 +111,6 @@ private:
     void HandleRightArrowPressed();
     void HandleLeftArrowPressed();
     bool CorrectJoystickId(int joystickId);
-
-    Piece* RaycastToPiece();
-    Square* RaycastToSquare();
-    Piece* rayPiece_;
-    Square* raySquare_;
 };
 
 #endif // INPUTMASTER_H

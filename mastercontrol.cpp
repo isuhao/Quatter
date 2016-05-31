@@ -37,6 +37,7 @@ MasterControl::MasterControl(Context *context):
     musicGain_{1.0f},
     gameState_{GameState::PLAYER1PICKS},
     previousGameState_{},
+    startGameState_{gameState_},
     musicState_{MUSIC_SONG1},
     previousMusicState_{MUSIC_OFF},
     selectionMode_{SM_CAMERA},
@@ -133,6 +134,7 @@ void MasterControl::CreateScene()
                                         0.0f,
                                         Random(0.05f)));
     }
+    inputMaster_->ConstructYad();
 }
 
 
@@ -225,7 +227,7 @@ void MasterControl::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
     //    float t{eventData[Update::P_TIMESTEP].GetFloat()};
 
-    if (!selectionMode_ && !inputMaster_->IsIdle())
+    if (selectionMode_ == SM_CAMERA && !inputMaster_->IsIdle())
         CameraSelectPiece();
 
     //Wave leafy light
@@ -273,7 +275,7 @@ bool MasterControl::SelectLastPiece()
 
 void MasterControl::StepSelectPiece(bool next)
 {
-    selectionMode_ = SM_STEP;
+    SetSelectionMode(SM_STEP);
 
     if (selectedPiece_){
         int selectInt{selectedPiece_->ToInt()};
@@ -325,16 +327,17 @@ void MasterControl::NextPhase()
     } break;
     case GameState::PLAYER2PUTS: {
         gameState_ = GameState::PLAYER2PICKS;
-        CameraSelectPiece();
+        if (selectionMode_ != SM_YAD)
+            CameraSelectPiece();
     } break;
     case GameState::PLAYER2PICKS: {
         gameState_ = GameState::PLAYER1PUTS;
     } break;
-    case GameState::PLAYER1PUTS: {
+    default: case GameState::PLAYER1PUTS: {
         gameState_ = GameState::PLAYER1PICKS;
-        CameraSelectPiece();
+        if (selectionMode_ != SM_YAD)
+            CameraSelectPiece();
     } break;
-    default: break;
     }
 }
 void MasterControl::Quatter()
@@ -348,12 +351,28 @@ void MasterControl::Reset()
     lastReset_ = GetSubsystem<Time>()->GetElapsedTime();
 
     for (Piece* p: world_.pieces_){
+
         p->Reset();
     }
     world_.board_->Reset();
-    selectionMode_ = SM_CAMERA;
 
-    gameState_ = GameState::PLAYER1PICKS;
+
+    if (gameState_ == GameState::QUATTER){
+
+        if (previousGameState_ == GameState::PLAYER1PUTS){
+            gameState_ = GameState::PLAYER1PICKS;
+        } else if (previousGameState_ == GameState::PLAYER2PUTS){
+            gameState_ = GameState::PLAYER2PICKS;
+        }
+    } else {
+
+        if (startGameState_ == GameState::PLAYER1PICKS){
+            gameState_ = GameState::PLAYER1PICKS;
+        } else if (startGameState_ == GameState::PLAYER2PICKS){
+            gameState_ = GameState::PLAYER1PICKS;
+        }
+    }
+    startGameState_ = gameState_;
 }
 
 void MasterControl::NextMusicState()
@@ -377,9 +396,42 @@ void MasterControl::NextMusicState()
 
     //Fade in
     if (musicState_ == MUSIC_SONG1){
-        FX->FadeTo(musicSource1_, musicGain_);
+        FX->FadeTo(musicSource1_, Max(musicGain_, 0.1f));
     } else if (musicState_ == MUSIC_SONG2){
-        FX->FadeTo(musicSource2_, musicGain_);
+        FX->FadeTo(musicSource2_, Max(musicGain_, 0.1f));
+    }
+}
+
+void MasterControl::NextSelectionMode()
+{
+    switch (selectionMode_){
+    case SM_CAMERA:
+        SetSelectionMode(SM_YAD);
+        break;
+    case SM_STEP:
+        SetSelectionMode(SM_CAMERA);
+        break;
+    case SM_YAD:
+        SetSelectionMode(SM_CAMERA);
+        break;
+    default: break;
+    }
+}
+void MasterControl::SetSelectionMode(SelectionMode mode)
+{
+    if (selectionMode_ == mode) return;
+
+    selectionMode_ = mode;
+    switch (mode){
+    default: case SM_CAMERA:
+        CameraSelectPiece();
+        break;
+    case SM_STEP:
+        CameraSelectPiece();
+        break;
+    case SM_YAD:
+        DeselectPiece();
+        break;
     }
 }
 

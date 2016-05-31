@@ -1,3 +1,5 @@
+TARGET = quatter
+
 LIBS += ../Quatter/Urho3D/lib/libUrho3D.a \
     -lpthread \
     -ldl \
