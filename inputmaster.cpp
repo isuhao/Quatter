@@ -223,6 +223,7 @@ void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData){
       || pressedMouseButtons_.Contains(MOUSEB_RIGHT)))
     {
         drag_ = true;
+        input_->SetMouseMode(MM_WRAP);
         HideYad();
     }
 
@@ -279,6 +280,7 @@ void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventDat
         }
     }
     drag_ = false;
+    input_->SetMouseMode(MM_FREE);
 }
 void InputMaster::HandleMouseWheel(StringHash eventType, VariantMap &eventData)
 {
@@ -288,15 +290,18 @@ void InputMaster::UpdateYad()
 {
     bool hide{false};
     Vector3 yadPos{YadRaycast(hide)};
-    if (yadPos.Length())
-        yad_->node_->SetPosition(Vector3(0.5f * (yadPos.x_ + yad_->node_->GetPosition().x_),
-                                         yadPos.y_,
-                                         0.5f * (yadPos.z_ + yad_->node_->GetPosition().z_)));
-    if (!yad_->hidden_
-     && (mouseIdleTime_ > IDLE_THRESHOLD * 0.5f
-     || hide))
-    {
-        HideYad();
+    if (!yad_->hidden_){
+        if (yadPos.Length())
+        {
+            yad_->node_->SetPosition(Vector3(0.5f * (yadPos.x_ + yad_->node_->GetPosition().x_),
+                                             yadPos.y_,
+                                             0.5f * (yadPos.z_ + yad_->node_->GetPosition().z_)));
+        }
+        if (mouseIdleTime_ > IDLE_THRESHOLD * 0.5f
+         || hide)
+        {
+            HideYad();
+        }
     }
 }
 void InputMaster::HideYad()
@@ -357,6 +362,7 @@ Vector3 InputMaster::YadRaycast(bool& none)
         if (yad_->hidden_ && !drag_)
             RevealYad();
         if (!r.node_->HasTag("Piece")
+         && !r.node_->HasTag("Square")
          && !r.node_->HasTag("Yad"))
             return r.position_; //return
     }

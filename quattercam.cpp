@@ -104,10 +104,10 @@ void QuatterCam::Rotate(Vector2 rotation)
     //Clamp pitch
     if (GetPitch() > PITCH_MAX)
         rootNode_->RotateAround(targetPosition_,
-                                Quaternion(-(GetPitch() - PITCH_MAX), rootNode_->GetRight()), TS_WORLD);
+                                Quaternion(PITCH_MAX - GetPitch(), rootNode_->GetRight()), TS_WORLD);
     else if (GetPitch() < PITCH_MIN)
         rootNode_->RotateAround(targetPosition_,
-                                Quaternion(-GetPitch() + PITCH_MIN, rootNode_->GetRight()), TS_WORLD);
+                                Quaternion(PITCH_MIN - GetPitch(), rootNode_->GetRight()), TS_WORLD);
 }
 void QuatterCam::Zoom(float delta)
 {

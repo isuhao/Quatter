@@ -59,8 +59,8 @@ void MasterControl::Setup()
     engineParameters_["WindowIcon"] = "icon.png";
 
 //    engineParameters_["FullScreen"] = false;
-//    engineParameters_["WindowWidth"] = 960;
-//    engineParameters_["WindowHeight"] = 540;
+//    engineParameters_["WindowWidth"] = 800;
+//    engineParameters_["WindowHeight"] = 600;
 }
 void MasterControl::Start()
 {
