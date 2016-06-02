@@ -1,19 +1,9 @@
 <?xml version="1.0"?>
 <material>
-	<technique name="Techniques/DiffNormalEnvCube.xml" quality="1" loddistance="0" />
+	<technique name="Techniques/DiffNormalSpec.xml" quality="1" loddistance="0" />
 	<texture unit="diffuse" name="Textures/BoardDiffuse.png" />
 	<texture unit="normal" name="Textures/BoardNormal.png" />
-	<texture unit="specular" name="Textures/BoardSpecular.dds" />
-	<texture unit="environment" name="Textures/LeafyKnoll.xml" />
-	<parameter name="UOffset" value="1 0 0 0" />
-	<parameter name="VOffset" value="0 1 0 0" />
+	<texture unit="specular" name="Textures/BoardSpecular.png" />
 	<parameter name="MatDiffColor" value="1 1 1 1" />
-	<parameter name="MatEmissiveColor" value="0 0 0" />
-	<parameter name="MatEnvMapColor" value="0.023 0.023 0.023" />
-	<parameter name="MatSpecColor" value=".34 .34 .34 5" />
-	<cull value="ccw" />
-	<shadowcull value="ccw" />
-	<fill value="solid" />
-	<depthbias constant="0" slopescaled="0" />
-	<renderorder value="128" />
+	<parameter name="MatSpecColor" value="1 1 1 34" />
 </material>

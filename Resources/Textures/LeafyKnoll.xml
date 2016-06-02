@@ -5,5 +5,4 @@
     <face name="LeafyKnoll_NegY.dds" />
     <face name="LeafyKnoll_PosZ.dds" />
     <face name="LeafyKnoll_NegZ.dds" />
-    <!--quality low="0" /-->
 </cubemap>

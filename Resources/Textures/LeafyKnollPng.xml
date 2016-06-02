@@ -1,9 +1,0 @@
-<cubemap>
-    <face name="East.png" />
-    <face name="West.png" />
-    <face name="Up.png" />
-    <face name="Down.png" />
-    <face name="North.png" />
-    <face name="South.png" />
-    <quality low="0" />
-</cubemap>

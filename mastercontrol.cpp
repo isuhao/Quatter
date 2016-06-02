@@ -157,7 +157,6 @@ void MasterControl::CreateLights()
     leafyLight_->SetLightType(LIGHT_SPOT);
     leafyLight_->SetRange(180.0f);
     leafyLight_->SetFov(34.0f);
-    leafyLight_->SetCastShadows(false);
     leafyLight_->SetShapeTexture(static_cast<Texture*>(cache_->GetResource<Texture2D>("Textures/LeafyMask.png")));
 
     //Add a directional light to the world. Enable cascaded shadows on it
@@ -170,7 +169,7 @@ void MasterControl::CreateLights()
     downwardsLight->SetColor(Color(0.8f, 0.9f, 0.95f));
     downwardsLight->SetCastShadows(true);
     downwardsLight->SetShadowBias(BiasParameters(0.000025f, 0.5f));
-    downwardsLight->SetShadowCascade(CascadeParameters(5.0f, 7.0f, 23.0f, 42.0f, 0.8f));
+    downwardsLight->SetShadowCascade(CascadeParameters(7.0f, 13.0f, 23.0f, 42.0f, 0.6));
 
     //Create point lights
     for (Vector3 pos : {Vector3(-10.0f, 8.0f, -23.0f), Vector3(-20.0f, -8.0f, 23.0f), Vector3(20.0f, -7.0f, 23.0f)}){
@@ -240,7 +239,7 @@ void MasterControl::HandleUpdate(StringHash eventType, VariantMap& eventData)
         CameraSelectPiece();
 
     //Wave leafy light
-    leafyLightNode_->SetRotation(Quaternion(MC->Sine(MC->Sine(0.1f, 0.05f, 0.23f), -0.23f, 0.23f) + 90.0f, Vector3::RIGHT) *
+    leafyLightNode_->SetRotation(Quaternion(MC->Sine(0.1f, 90.0f-0.23f, 90.23f), Vector3::RIGHT) *
                                  Quaternion(MC->Sine(0.23f, 178.0f, 182.0f), Vector3::FORWARD));
     leafyLight_->SetBrightness(0.34f + MC->Sine(0.011f, 0.05f, 0.23f) + MC->Sine(0.02f, 0.05f, 0.13f));
 }
