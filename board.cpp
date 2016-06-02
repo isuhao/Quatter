@@ -34,6 +34,8 @@ Board::Board(): Object(MC->GetContext()),
     lastSelectedSquare_{nullptr}
 {
     rootNode_ = MC->world_.scene_->CreateChild("Board");
+    StringVector tag{}; tag.Push(String("Board"));
+    rootNode_->SetTags(tag);
     model_ = rootNode_->CreateComponent<StaticModel>();
     model_->SetModel(MC->GetModel("Board"));
     model_->SetMaterial(MC->GetMaterial("Board"));

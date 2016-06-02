@@ -115,6 +115,8 @@ void MasterControl::CreateScene()
 
     //Create table
     Node* tableNode{world_.scene_->CreateChild("Table")};
+    StringVector tag{}; tag.Push(String("Table"));
+    tableNode->SetTags(tag);
     tableNode->SetRotation(Quaternion(23.5f, Vector3::UP));
     StaticModel* tableModel = tableNode->CreateComponent<StaticModel>();
     tableModel->SetModel(GetModel("Table"));

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <material>
 	<technique name="Techniques/DiffNormalEnvCube.xml" quality="1" loddistance="0" />
-	<texture unit="diffuse" name="Textures/BoardDiffuse.dds" />
-	<texture unit="normal" name="Textures/BoardNormal.dds" />
+	<texture unit="diffuse" name="Textures/BoardDiffuse.png" />
+	<texture unit="normal" name="Textures/BoardNormal.png" />
 	<texture unit="specular" name="Textures/BoardSpecular.dds" />
 	<texture unit="environment" name="Textures/LeafyKnoll.xml" />
 	<parameter name="UOffset" value="1 0 0 0" />

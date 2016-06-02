@@ -27,7 +27,11 @@ InputMaster::InputMaster() : Master(),
     idleTime_{IDLE_THRESHOLD},
     idle_{false},
     mousePos_{},
+    mouseMoveSinceClick_{},
+    drag_{false},
     mouseIdleTime_{0.0f},
+    boardClick_{false},
+    tableClick_{false},
     sinceStep_{STEP_INTERVAL},
     actionDone_{false},
     yad_{new Yad()},
@@ -39,6 +43,7 @@ InputMaster::InputMaster() : Master(),
     SubscribeToEvent(E_MOUSEMOVE, URHO3D_HANDLER(InputMaster, HandleMouseMove));
     SubscribeToEvent(E_MOUSEBUTTONDOWN, URHO3D_HANDLER(InputMaster, HandleMouseButtonDown));
     SubscribeToEvent(E_MOUSEBUTTONUP, URHO3D_HANDLER(InputMaster, HandleMouseButtonUp));
+    SubscribeToEvent(E_MOUSEWHEEL, URHO3D_HANDLER(InputMaster, HandleMouseWheel));
     SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(InputMaster, HandleKeyDown));
     SubscribeToEvent(E_KEYUP, URHO3D_HANDLER(InputMaster, HandleKeyUp));
     SubscribeToEvent(E_JOYSTICKBUTTONDOWN, URHO3D_HANDLER(InputMaster, HandleJoystickButtonDown));
@@ -84,86 +89,6 @@ void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
     HandleJoystickButtons();
 }
 
-void InputMaster::UpdateYad()
-{
-    bool hide{false};
-    Vector3 yadPos{YadRaycast(hide)};
-    if (yadPos.Length())
-        yad_->node_->SetPosition(Vector3(0.5f * (yadPos.x_ + yad_->node_->GetPosition().x_),
-                                         yadPos.y_,
-                                         0.5f * (yadPos.z_ + yad_->node_->GetPosition().z_)));
-    if (!yad_->hidden_
-     && (mouseIdleTime_ > IDLE_THRESHOLD * 0.5f
-     || hide))
-    {
-        HideYad();
-    }
-}
-void InputMaster::HideYad()
-{
-    yad_->hidden_ = true;
-    FX->FadeOut(yad_->light_);
-    FX->FadeOut(yad_->material_, 0.1f);
-}
-void InputMaster::RevealYad()
-{
-    yad_->hidden_ = false;
-    RestoreYad();
-}
-Vector3 InputMaster::YadRaycast(bool& none)
-{
-    bool square{false};
-    if (MC->InPickState()
-     && RaycastToPiece()
-     && (rayPiece_->GetState() == PieceState::FREE
-     || rayPiece_->GetState() == PieceState::SELECTED)){
-        if (MC->InPickState()){
-            MC->SelectPiece(rayPiece_);
-            if (!yad_->hidden_)
-                HideYad();
-            return yad_->node_->GetPosition();
-        }
-    } else if (MC->InPutState() && RaycastToSquare()){
-        square = true;
-        if (MC->InPutState()){
-            BOARD->Select(raySquare_);
-            if (yad_->hidden_)
-                RevealYad();
-            else
-                DimYad();
-        }
-    }
-
-    Ray cameraRay{MouseRay()};
-    PODVector<RayQueryResult> results;
-    RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 1000.0f, DRAWABLE_GEOMETRY);
-    MC->world_.scene_->GetComponent<Octree>()->Raycast(query);
-
-    for (RayQueryResult r : results){
-        if (MC->InPickState()){
-            MC->DeselectPiece();
-        } else if (MC->InPutState() && !square){
-            BOARD->Deselect();
-            RestoreYad();
-        }
-        if (yad_->hidden_)
-            RevealYad();
-        if (!r.node_->HasTag("Piece"))
-            return r.position_;
-    }
-    none = true;
-    return Vector3::ZERO;
-}
-void InputMaster::DimYad()
-{
-    FX->FadeTo(yad_->light_, YAD_DIMMED);
-}
-void InputMaster::RestoreYad()
-{
-    FX->FadeTo(yad_->light_, YAD_FULLBRIGHT);
-    FX->FadeTo(yad_->material_, COLOR_GLOW, 0.1f);
-}
-
 void InputMaster::HandleKeys()
 {
     for (int key: pressedKeys_){
@@ -197,6 +122,7 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
          || MC->GetPickedPiece())
         {
             MC->Reset();
+//            SetIdle();
         } else MC->Exit();
     } break;
     case KEY_9:{
@@ -286,6 +212,17 @@ void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData){
     mousePos_.x_ += eventData[MouseMove::P_DX].GetFloat() / graphics->GetWidth();
     mousePos_.y_ += eventData[MouseMove::P_DY].GetFloat() / graphics->GetHeight();
 
+    mouseMoveSinceClick_.x_ += eventData[MouseMove::P_DX].GetFloat() / graphics->GetWidth();
+    mouseMoveSinceClick_.y_ += eventData[MouseMove::P_DY].GetFloat() / graphics->GetHeight();
+    if (!drag_
+     && mouseMoveSinceClick_.Length() > DRAG_THRESHOLD
+     && (pressedMouseButtons_.Contains(MOUSEB_LEFT)
+      || pressedMouseButtons_.Contains(MOUSEB_MIDDLE)
+      || pressedMouseButtons_.Contains(MOUSEB_RIGHT)))
+    {
+        drag_ = true;
+    }
+
     MC->SetSelectionMode(SM_YAD);
     UpdateYad();
 
@@ -298,9 +235,13 @@ void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventD
     using namespace MouseButtonDown;
     int button{eventData[P_BUTTON].GetInt()};
     pressedMouseButtons_.Insert(button);
+    mouseMoveSinceClick_ = Vector2::ZERO;
 
     MC->SetSelectionMode(SM_YAD);
     UpdateMousePos(false);
+
+    boardClick_ = RaycastToBoard();
+    tableClick_ = RaycastToTable();
 
     UpdateYad();
     mouseIdleTime_ = 0.0f;
@@ -310,7 +251,8 @@ void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventDat
 {
     using namespace MouseButtonUp;
     int button{eventData[P_BUTTON].GetInt()};
-    if (pressedMouseButtons_.Contains(button)) pressedMouseButtons_.Erase(button);
+    if (pressedMouseButtons_.Contains(button))
+        pressedMouseButtons_.Erase(button);
 
     MC->SetSelectionMode(SM_YAD);
     UpdateMousePos(false);
@@ -319,11 +261,108 @@ void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventDat
     mouseIdleTime_ = 0.0f;
     ResetIdle();
 
-    if (MC->InPickState() && MC->GetSelectedPiece()){
+    if (!drag_){
+        if (MC->InPickState() && MC->GetSelectedPiece()){
             MC->GetSelectedPiece()->Pick();
-    } else if (MC->InPutState() && MC->GetPickedPiece()){
+        } else if (MC->InPutState() && BOARD->GetSelectedSquare()){
             MC->GetPickedPiece()->Put(BOARD->GetSelectedSquare());
+        //Zoom
+        } else if (boardClick_ && RaycastToBoard()){
+            CAMERA->ZoomToBoard();
+        } else if (tableClick_ && RaycastToTable()){
+            CAMERA->ZoomToTable();
+        }
     }
+    drag_ = false;
+}
+void InputMaster::HandleMouseWheel(StringHash eventType, VariantMap &eventData)
+{
+    CAMERA->SetDistance(CAMERA->GetDistance() - eventData[MouseWheel::P_WHEEL].GetInt() * 2.3f);
+}
+void InputMaster::UpdateYad()
+{
+    bool hide{false};
+    Vector3 yadPos{YadRaycast(hide)};
+    if (yadPos.Length())
+        yad_->node_->SetPosition(Vector3(0.5f * (yadPos.x_ + yad_->node_->GetPosition().x_),
+                                         yadPos.y_,
+                                         0.5f * (yadPos.z_ + yad_->node_->GetPosition().z_)));
+    if (!yad_->hidden_
+     && (mouseIdleTime_ > IDLE_THRESHOLD * 0.5f
+     || hide))
+    {
+        HideYad();
+    }
+}
+void InputMaster::HideYad()
+{
+    yad_->hidden_ = true;
+    FX->FadeOut(yad_->light_);
+    FX->FadeOut(yad_->material_, 0.1f);
+}
+void InputMaster::RevealYad()
+{
+    yad_->hidden_ = false;
+    RestoreYad();
+}
+Vector3 InputMaster::YadRaycast(bool& none)
+{
+    bool square{false};
+    //Select piece and hide yad when hovering over a piece in a pick state
+    if (MC->InPickState()
+     && RaycastToPiece()
+     && (rayPiece_->GetState() == PieceState::FREE
+     || rayPiece_->GetState() == PieceState::SELECTED)){
+        if (MC->InPickState()){
+            MC->SelectPiece(rayPiece_);
+            if (!yad_->hidden_)
+                HideYad();
+            return yad_->node_->GetPosition(); //return
+        }
+    //Select square and dim yad when hovering over a square in a put state
+    } else if (MC->InPutState() && RaycastToSquare()){
+        square = true;
+        if (MC->InPutState()){
+            BOARD->Select(raySquare_);
+            if (yad_->hidden_)
+                RevealYad();
+            else if (!yad_->dimmed_)
+                DimYad();
+        }
+    }
+
+    Ray cameraRay{MouseRay()};
+    PODVector<RayQueryResult> results;
+    RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 1000.0f, DRAWABLE_GEOMETRY);
+    MC->world_.scene_->GetComponent<Octree>()->Raycast(query);
+
+    for (RayQueryResult r : results){
+        if (MC->InPickState()){
+            MC->DeselectPiece();
+        } else if (MC->InPutState()
+                && !square
+                && BOARD->GetSelectedSquare())
+        {
+            BOARD->Deselect();
+            if (yad_->dimmed_)
+                RestoreYad();
+        }
+        if (yad_->hidden_)
+            RevealYad();
+        if (!r.node_->HasTag("Piece"))
+            return r.position_; //return
+    }
+    none = true;
+    return Vector3::ZERO; //return
+}
+void InputMaster::DimYad()
+{
+    FX->FadeTo(yad_->light_, YAD_DIMMED);
+}
+void InputMaster::RestoreYad()
+{
+    FX->FadeTo(yad_->light_, YAD_FULLBRIGHT);
+    FX->FadeTo(yad_->material_, COLOR_GLOW, 0.1f);
 }
 
 void InputMaster::HandleJoystickButtons()
@@ -491,7 +530,7 @@ void InputMaster::HandleCameraMovement(float t)
     }
 
     //Mouse rotate
-    if (pressedMouseButtons_.Contains(MOUSEB_RIGHT)){
+    if (drag_){
         IntVector2 mouseMove{input_->GetMouseMove()};
         camRot += Vector2(mouseMove.x_, mouseMove.y_) * 0.1f;
     }
@@ -648,6 +687,38 @@ Square* InputMaster::RaycastToSquare()
     }
     raySquare_ = nullptr;
     return nullptr;
+}
+bool InputMaster::RaycastToBoard()
+{
+    Ray cameraRay{MouseRay()};
+
+    PODVector<RayQueryResult> results;
+    RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 1000.0f, DRAWABLE_GEOMETRY);
+    MC->world_.scene_->GetComponent<Octree>()->Raycast(query);
+
+    for (RayQueryResult r : results){
+
+            if (r.node_->HasTag("Board")){
+                return true;
+            }
+    }
+    return false;
+}
+bool InputMaster::RaycastToTable()
+{
+    Ray cameraRay{MouseRay()};
+
+    PODVector<RayQueryResult> results;
+    RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 1000.0f, DRAWABLE_GEOMETRY);
+    MC->world_.scene_->GetComponent<Octree>()->Raycast(query);
+
+    for (RayQueryResult r : results){
+
+            if (r.node_->HasTag("Table")){
+                return true;
+            }
+    }
+    return false;
 }
 
 Ray InputMaster::MouseRay()

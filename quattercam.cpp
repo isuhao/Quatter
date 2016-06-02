@@ -22,6 +22,7 @@
 QuatterCam::QuatterCam():
     Object(MC->GetContext()),
     distance_{12.0f},
+    targetDistance_{distance_},
     targetPosition_{Vector3::UP * 0.42f},
     smoothTargetPosition_{targetPosition_}
 {
@@ -76,6 +77,10 @@ void QuatterCam::HandleSceneUpdate(StringHash eventType, VariantMap& eventData)
 {
     float t{eventData[SceneUpdate::P_TIMESTEP].GetFloat()};
     //Update distance
+    if (targetDistance_ != distance_){
+        distance_ = 0.1f * (9.0f * distance_ + targetDistance_);
+    }
+
     Vector3 relativeToTarget{(rootNode_->GetPosition() - targetPosition_).Normalized()};
     if (relativeToTarget.Length() != distance_){
             rootNode_->SetPosition(distance_ * relativeToTarget + targetPosition_);
@@ -104,7 +109,8 @@ void QuatterCam::Rotate(Vector2 rotation)
         rootNode_->RotateAround(targetPosition_,
                                 Quaternion(-GetPitch() + PITCH_MIN, rootNode_->GetRight()), TS_WORLD);
 }
-void QuatterCam::Zoom(float distance)
+void QuatterCam::Zoom(float delta)
 {
-    distance_ = Clamp(distance_ - distance, ZOOM_MIN, ZOOM_MAX);
+    targetDistance_ = Clamp(targetDistance_ - delta, ZOOM_MIN, ZOOM_MAX);
 }
+

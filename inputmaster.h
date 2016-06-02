@@ -29,6 +29,7 @@
 
 #define YAD_FULLBRIGHT 0.5f
 #define YAD_DIMMED 0.1f
+#define DRAG_THRESHOLD 0.023f
 
 class Square;
 
@@ -41,6 +42,7 @@ public:
     SharedPtr<Material> material_;
     SharedPtr<Light> light_;
     bool hidden_{true};
+    bool dimmed_{false};
 }Yad;
 
 class InputMaster : public Master
@@ -48,29 +50,27 @@ class InputMaster : public Master
     URHO3D_OBJECT(InputMaster, Master);
 public:
     InputMaster();
-    WeakPtr<Node> firstHit_;
-
     bool IsIdle() const noexcept { return idle_; }
-    void ResetIdle();
-
-    void SetIdle();
-
-    JoystickState* GetActiveJoystick();
-    bool MultipleJoysticks();
-    Ray MouseRay();
-
-
     void ConstructYad();
-    void HideYad();
-    void RevealYad();
+
 private:
     Input* input_;
 
-    Vector2 mousePos_;
 
     float idleTime_;
     bool idle_;
+    Vector2 mousePos_;
+    Vector2 mouseMoveSinceClick_;
+    bool drag_;
     float mouseIdleTime_;
+    bool boardClick_;
+    bool tableClick_;
+
+    void ResetIdle();
+    void SetIdle();
+    Ray MouseRay();
+    void HideYad();
+    void RevealYad();
 
     Vector2 smoothCamRotate_;
     float smoothCamZoom_;
@@ -82,10 +82,12 @@ private:
     bool actionDone_;
 
     Yad* yad_;
-    Piece* RaycastToPiece();
-    Square* RaycastToSquare();
     Piece* rayPiece_;
     Square* raySquare_;
+    Piece* RaycastToPiece();
+    Square* RaycastToSquare();
+    bool RaycastToBoard();
+    bool RaycastToTable();
 
     void HandleUpdate(StringHash eventType, VariantMap &eventData);
     void UpdateMousePos(bool delta);
@@ -99,7 +101,10 @@ private:
     void HandleMouseMove(StringHash eventType, VariantMap& eventData);
     void HandleMouseButtonDown(StringHash eventType, VariantMap &eventData);
     void HandleMouseButtonUp(StringHash eventType, VariantMap &eventData);
+    void HandleMouseWheel(StringHash eventType, VariantMap& eventData);
 
+    JoystickState* GetActiveJoystick();
+    bool MultipleJoysticks();
     void HandleJoystickButtonDown(StringHash eventType, VariantMap &eventData);
     void HandleJoystickButtonUp(StringHash eventType, VariantMap &eventData);
     void HandleJoystickButtons();
