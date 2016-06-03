@@ -394,12 +394,13 @@ void MasterControl::NextMusicState()
         previousMusicState_ = musicState_;
         musicState_ = MUSIC_OFF;
         FX->FadeOut(musicSource2_);
+    //Pick song
     } else if (musicState_ == MUSIC_OFF){
-        previousMusicState_ = musicState_;
         if (previousMusicState_ == MUSIC_SONG1)
             musicState_ = MUSIC_SONG2;
         else if (previousMusicState_ == MUSIC_SONG2)
             musicState_ = MUSIC_SONG1;
+        previousMusicState_ = musicState_;
     }
 
     //Fade in
