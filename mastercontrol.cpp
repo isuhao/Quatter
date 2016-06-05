@@ -62,7 +62,6 @@ void MasterControl::Setup()
 
     if (fs->DirExists(resourcePath))
         engineParameters_["ResourcePaths"] = resourcePath;
-    Log::Write(1, resourcePath);
 
     engineParameters_["WindowTitle"] = "Quatter";
     engineParameters_["LogName"] = fs->GetAppPreferencesDir("urho3d", "logs")+"Quatter.log";

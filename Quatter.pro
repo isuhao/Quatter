@@ -52,13 +52,10 @@ unix {
 
     target.path = $$BINDIR
 
-    pixmap.files = resources/linux/icons/marklar.xpm
-    pixmap.path = $$DATADIR/pixmaps
-
     icon.files = resources/linux/icons/hicolor/*
     icon.path = $$DATADIR/icons/hicolor
 
-    desktop.files = resources/linux/marklar.desktop
+    desktop.files = quatter.desktop
     desktop.path = $$DATADIR/applications/
 
     appdata.files = Resources/*

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Quatter
+GenericName=A board game for two players
+Comment=Made in celebration of the 25th anniversary of the board game Quarto by Blaise Müller
+Icon=quatter
+TryExec=quatter
+Exec=quatter
+Terminal=false
+Categories=Games;
+Keywords=Quarto;Board-Game;Game;
