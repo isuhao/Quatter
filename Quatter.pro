@@ -46,7 +46,7 @@ unix {
         BINDIR = $$PREFIX/bin
     }
     isEmpty(DATADIR) {
-        DATADIR = $$PREFIX/share
+        DATADIR = ~/.local/share
     }
     DEFINES += DATADIR=\\\"$${DATADIR}/quatter\\\"
 

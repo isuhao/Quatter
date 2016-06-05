@@ -14,6 +14,7 @@ make
 cd ..
 
 git pull
+rm -f *.o
 qmake Quatter.pro
 sudo make uninstall
 sudo make install

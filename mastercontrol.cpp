@@ -55,7 +55,7 @@ void MasterControl::Setup()
     SetRandomSeed(TIME->GetSystemTime());
 
     FileSystem* fs{GetSubsystem<FileSystem>()};
-    String resourcePath{"/usr/local/share/quatter"};
+    String resourcePath{"~/.local/share/quatter"};
     if (!fs->DirExists(resourcePath)){
         resourcePath = "Resources";
     }
