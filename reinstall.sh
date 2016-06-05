@@ -1,4 +1,4 @@
-sudo apt-get install libx11-dev libxrandr-dev libasound2-dev git cmake make qmake
+sudo apt-get install libx11-dev libxrandr-dev libasound2-dev git cmake make qt5-default
 
 cd `dirname $0`
 if [ ! -d Urho3D ]
