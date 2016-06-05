@@ -7,10 +7,12 @@ then
 fi
 
 cd Urho3D
+git pull
 cmake .
 make
 cd ..
 
+git pull
 qmake Quatter.pro
 sudo make uninstall
 sudo make install
