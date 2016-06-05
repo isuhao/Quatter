@@ -101,7 +101,6 @@ private:
     void HandleMouseWheel(StringHash eventType, VariantMap& eventData);
 
     JoystickState* GetActiveJoystick();
-    bool MultipleJoysticks();
     void HandleJoystickButtonDown(StringHash eventType, VariantMap &eventData);
     void HandleJoystickButtonUp(StringHash eventType, VariantMap &eventData);
     void HandleJoystickButtons();

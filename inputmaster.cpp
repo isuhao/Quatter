@@ -452,7 +452,7 @@ bool InputMaster::CorrectJoystickId(int joystickId)
 }
 JoystickState* InputMaster::GetActiveJoystick()
 {
-    if (MultipleJoysticks()) {
+    if (INPUT->GetNumJoysticks() > 1) {
 
         if (MC->InPlayer1State())
         {
@@ -481,10 +481,6 @@ JoystickState* InputMaster::GetActiveJoystick()
     }
     return nullptr;
 }
-bool InputMaster::MultipleJoysticks()
-{
-    return INPUT->GetJoystickByIndex(0) && INPUT->GetJoystickByIndex(1);
-}
 void InputMaster::HandleJoystickButtonDown(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
 
@@ -492,7 +488,9 @@ void InputMaster::HandleJoystickButtonDown(StringHash eventType, VariantMap &eve
     int joystickId{eventData[P_JOYSTICKID].GetInt()};
     int button{eventData[P_BUTTON].GetInt()};
 
-    if (MultipleJoysticks() && !CorrectJoystickId(joystickId) && MC->GetGameState() != GameState::QUATTER) return;
+    if (INPUT->GetNumJoysticks() > 1
+     && !CorrectJoystickId(joystickId)
+     && MC->GetGameState() != GameState::QUATTER) return;
 
     pressedJoystickButtons_[joystickId].Insert(button);
 }

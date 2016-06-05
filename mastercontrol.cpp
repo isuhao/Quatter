@@ -22,6 +22,7 @@
 #include "quattercam.h"
 #include "board.h"
 #include <Urho3D/Graphics/Texture2D.h>
+#include <Urho3D/Graphics/Terrain.h>
 
 URHO3D_DEFINE_APPLICATION_MAIN(MasterControl);
 
@@ -196,8 +197,7 @@ Sound* MasterControl::GetMusic(String name) const {
     song->SetLooped(true);
     return song;
 }
-
-Sound*MasterControl::GetSample(String name) const {
+Sound* MasterControl::GetSample(String name) const {
     Sound* sample{CACHE->GetResource<Sound>("Samples/"+name+".ogg")};
     sample->SetLooped(false);
     return sample;
