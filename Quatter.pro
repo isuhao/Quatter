@@ -37,3 +37,32 @@ HEADERS += \
     piece.h \
     master.h \
     effectmaster.h
+
+unix {
+    isEmpty(PREFIX) {
+        PREFIX = /usr/local
+    }
+    isEmpty(BINDIR) {
+        BINDIR = $$PREFIX/bin
+    }
+    isEmpty(DATADIR) {
+        DATADIR = $$PREFIX/share
+    }
+    DEFINES += DATADIR=\\\"$${DATADIR}/quatter\\\"
+
+    target.path = $$BINDIR
+
+    pixmap.files = resources/linux/icons/marklar.xpm
+    pixmap.path = $$DATADIR/pixmaps
+
+    icon.files = resources/linux/icons/hicolor/*
+    icon.path = $$DATADIR/icons/hicolor
+
+    desktop.files = resources/linux/marklar.desktop
+    desktop.path = $$DATADIR/applications/
+
+    appdata.files = Resources/*
+    appdata.path = $$DATADIR/quatter/
+
+    INSTALLS += target icon pixmap desktop appdata
+}

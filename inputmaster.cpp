@@ -518,7 +518,6 @@ void InputMaster::ActionButtonPressed()
 
         Piece* selectedPiece{MC->GetSelectedPiece()};
         if (selectedPiece){
-
             selectedPiece->Pick();
             BOARD->SelectNearestFreeSquare();
         } else if (MC->selectionMode_ == SM_STEP || MC->selectionMode_ == SM_YAD){
@@ -527,7 +526,7 @@ void InputMaster::ActionButtonPressed()
         } else if (MC->selectionMode_ == SM_CAMERA){
             MC->CameraSelectPiece();
         }
-    } else if (MC->InPutState() ){
+    } else if (MC->InPutState() && MC->GetPickedPiece()){
         BOARD->PutPiece(MC->GetPickedPiece());
     }
 }

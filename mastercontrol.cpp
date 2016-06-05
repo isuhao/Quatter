@@ -54,14 +54,24 @@ void MasterControl::Setup()
 {
     SetRandomSeed(TIME->GetSystemTime());
 
+    FileSystem* fs{GetSubsystem<FileSystem>()};
+    String resourcePath{"/usr/local/share/quatter"};
+    if (!fs->DirExists(resourcePath)){
+        resourcePath = "Resources";
+    }
+
+    if (fs->DirExists(resourcePath))
+        engineParameters_["ResourcePaths"] = resourcePath;
+    Log::Write(1, resourcePath);
+
     engineParameters_["WindowTitle"] = "Quatter";
-    engineParameters_["LogName"] = GetSubsystem<FileSystem>()->GetAppPreferencesDir("urho3d", "logs")+"Quatter.log";
-    engineParameters_["ResourcePaths"] = "Resources";
+    engineParameters_["LogName"] = fs->GetAppPreferencesDir("urho3d", "logs")+"Quatter.log";
     engineParameters_["WindowIcon"] = "icon.png";
 
-//    engineParameters_["FullScreen"] = false;
-//    engineParameters_["WindowWidth"] = 800;
-//    engineParameters_["WindowHeight"] = 600;
+    //    engineParameters_["FullScreen"] = false;
+    //    engineParameters_["WindowWidth"] = 800;
+    //    engineParameters_["WindowHeight"] = 600;
+    //    engineParameters_["borderless"] = true;
 }
 void MasterControl::Start()
 {

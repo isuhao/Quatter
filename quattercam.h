@@ -62,7 +62,7 @@ public:
     void SetDistance(float distance) { aimDistance_ = Clamp(distance, ZOOM_MIN, ZOOM_MAX); }
     float GetDistance() const { return distance_; }
     void Zoom(float delta);
-    void ZoomToBoard() { SetDistance(7.0f); }
+    void ZoomToBoard() { SetDistance(6.0f); }
     void ZoomToTable() { SetDistance(13.0f); }
 
 private:
