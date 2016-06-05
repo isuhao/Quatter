@@ -52,14 +52,17 @@ unix {
 
     target.path = $$BINDIR
 
-    icon.files = resources/linux/icons/hicolor/*
-    icon.path = $$DATADIR/icons/hicolor
+    icon.files = quatter.svg
+    icon.path = $$DATADIR/icons/hicolor/scalable/apps/
+
+    pixmap.files = Resources/*
+    pixmap.path = $$DATADIR/quatter/
 
     desktop.files = quatter.desktop
     desktop.path = $$DATADIR/applications/
 
-    appdata.files = Resources/*
-    appdata.path = $$DATADIR/quatter/
+    appdata.files = quatter.appdata.xml
+    appdata.path = $$DATADIR/appdata/
 
     INSTALLS += target icon pixmap desktop appdata
 }
