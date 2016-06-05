@@ -7,5 +7,5 @@ Icon=quatter
 TryExec=quatter
 Exec=quatter
 Terminal=false
-Categories=Games;
-Keywords=Quarto;Board-Game;Game;
+Categories=Game;
+Keywords=Quarto;Board-Game;
