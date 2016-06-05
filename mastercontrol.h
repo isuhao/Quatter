@@ -53,7 +53,7 @@ typedef struct GameWorld
 } GameWorld;
 
 #define MC MasterControl::GetInstance()
-#define FX MC->effectMaster_
+#define FX MC->GetEffectMaster()
 #define CAMERA MC->world_.camera_
 #define BOARD MC->world_.board_
 #define NUM_PIECES 16
@@ -69,11 +69,9 @@ class MasterControl : public Application
 public:
     MasterControl(Context* context);
     static MasterControl* GetInstance();
+    EffectMaster* GetEffectMaster() const { return effectMaster_; }
 
-    EffectMaster* effectMaster_;
     GameWorld world_;
-    SharedPtr<ResourceCache> cache_;
-    SharedPtr<Graphics> graphics_;
 
     virtual void Setup();
     virtual void Start();
@@ -81,6 +79,7 @@ public:
 
     void Exit();
     void CreateLights();
+
     inline GameState GetGameState() const noexcept { return gameState_; }
     inline GameState GetPreviousGameState() const noexcept { return previousGameState_; }
     inline bool InPickState() const noexcept { return gameState_ == GameState::PLAYER1PICKS || gameState_ == GameState::PLAYER2PICKS; }
@@ -88,35 +87,36 @@ public:
     inline bool InPlayer1State() const noexcept { return gameState_ == GameState::PLAYER1PICKS || gameState_ == GameState::PLAYER1PUTS; }
     inline bool InPlayer2State() const noexcept { return gameState_ == GameState::PLAYER2PICKS || gameState_ == GameState::PLAYER2PUTS; }
 
+    void NextPhase();
+    void NextSelectionMode();
+    void SetSelectionMode(SelectionMode mode);
+    void NextMusicState();
+    void TakeScreenshot();
+
     float AttributesToAngle(int attributes) const { return (360.0f/NUM_PIECES * attributes) + 180.0f/NUM_PIECES + 23.5f; }
     Vector3 AttributesToPosition(int attributes) const {
         return Quaternion(AttributesToAngle(attributes), Vector3::UP) * Vector3::BACK * 7.0f
                 + Vector3::DOWN * TABLE_DEPTH;
     }
-    Piece* GetSelectedPiece() const;
-    Piece* GetPickedPiece() const;
-    int CountFreePieces();
 
-    Material* GetMaterial(String name) const { return cache_->GetResource<Material>("Materials/"+name+".xml"); }
-    Model* GetModel(String name) const { return cache_->GetResource<Model>("Models/"+name+".mdl"); }
-    Texture* GetTexture(String name) const { return cache_->GetResource<Texture>("Textures/"+name+".png"); }
+    Material* GetMaterial(String name) const { return CACHE->GetResource<Material>("Materials/"+name+".xml"); }
+    Model* GetModel(String name) const { return CACHE->GetResource<Model>("Models/"+name+".mdl"); }
+    Texture* GetTexture(String name) const { return CACHE->GetResource<Texture>("Textures/"+name+".png"); }
     Sound* GetMusic(String name) const;
     Sound* GetSample(String name) const;
 
     void Quatter();
+    void SetPickedPiece(Piece* piece) { pickedPiece_ = piece; }
+    Piece* GetSelectedPiece() const { return selectedPiece_; }
+    Piece* GetPickedPiece() const { return pickedPiece_; }
     void DeselectPiece();
-
-    void NextPhase();
-    void NextMusicState();
-    void NextSelectionMode();
-    void SetSelectionMode(SelectionMode mode);
-    void TakeScreenshot();
 
     float Sine(const float freq, const float min = -1.0f, const float max = 1.0f, const float shift = 0.0f);
     float Cosine(const float freq, const float min = -1.0f, const float max = 1.0f, const float shift = 0.0f);
 private:
     static MasterControl* instance_;
     InputMaster* inputMaster_;
+    EffectMaster* effectMaster_;
     SharedPtr<Node> leafyLightNode_;
     SharedPtr<Light> leafyLight_;
 
@@ -139,7 +139,7 @@ private:
     void Reset();
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
 
-    void CameraSelectPiece();
+    void CameraSelectPiece(bool force = false);
     void StepSelectPiece(bool next);
     void SelectPrevious();
 
@@ -150,7 +150,11 @@ private:
     bool SelectLastPiece();
 
     float lastReset_;
-    bool IsLame() { return GetSubsystem<Time>()->GetElapsedTime() - lastReset_ < (RESET_DURATION + 0.23f); }
+    bool IsLame() { return TIME->GetElapsedTime() - lastReset_ < (RESET_DURATION + 0.23f); }
+    void CreateJukebox();
+    void CreateSkybox();
+    void CreateTable();
+    void CreateBoardAndPieces();
 };
 
 #endif // MASTERCONTROL_H

@@ -85,7 +85,8 @@ void EffectMaster::ArchTo(Node* node, Vector3 pos, Quaternion rot, float archHei
 
     for (int i{0}; i < WAYPOINTS - 1; ++i){
         float t{static_cast<float>(i) / WAYPOINTS};
-        posAnim->SetKeyFrame(delay + duration * t,
+        float t2 = 0.5f * (t + (0.5f + 0.5f * pow(2.0f * (t - 0.5f), 3.0f)));
+        posAnim->SetKeyFrame(delay + duration * t2,
                              node->GetPosition().Lerp(pos, t) + archHeight * Vector3::UP * Arch(t));
     }
     posAnim->SetKeyFrame(delay + duration, pos);

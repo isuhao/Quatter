@@ -53,29 +53,32 @@ public:
     SharedPtr<Viewport> viewport_;
     SharedPtr<RenderPath> effectRenderPath_;
 
+    Vector3 GetPosition() const { return rootNode_->GetPosition(); }
+    Node* GetPocket(bool right) const { return right ? pockets_.second_ : pockets_.first_; }
+
     float GetPitch() const { return rootNode_->GetRotation().EulerAngles().x_; }
     float GetYaw() const { return rootNode_->GetRotation().EulerAngles().y_; }
-    void SetDistance(float distance) { targetDistance_ = Clamp(distance, ZOOM_MIN, ZOOM_MAX); }
+
+    void SetDistance(float distance) { aimDistance_ = Clamp(distance, ZOOM_MIN, ZOOM_MAX); }
     float GetDistance() const { return distance_; }
-    Vector3 GetPosition() const { return rootNode_->GetPosition(); }
     void Zoom(float delta);
     void ZoomToBoard() { SetDistance(7.0f); }
     void ZoomToTable() { SetDistance(13.0f); }
-    Node* GetPocket(bool right) const { return right ? pockets_.second_ : pockets_.first_; }
+
 private:
     SharedPtr<Node> rootNode_;
     Pair<SharedPtr<Node>,
          SharedPtr<Node>> pockets_;
 
     float distance_;
-    float targetDistance_;
+    float aimDistance_;
     Vector3 targetPosition_;
-    Vector3 smoothTargetPosition_;
+
 
     void SetupViewport();
-
-    void Rotate(Vector2 rotation);
     void HandleSceneUpdate(StringHash eventType, VariantMap& eventData);
+    void Rotate(Vector2 rotation);
+    void CreatePockets();
 };
 
 #endif // QUATTERCAM_H

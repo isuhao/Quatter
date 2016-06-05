@@ -30,8 +30,8 @@ template <> unsigned MakeHash(const IntVector2& value)
 Board::Board(): Object(MC->GetContext()),
     indicateSingle_{false},
     squares_{},
-    selectedSquare_{nullptr},
-    lastSelectedSquare_{nullptr}
+    selectedSquare_{},
+    lastSelectedSquare_{}
 {
     rootNode_ = MC->world_.scene_->CreateChild("Board");
     StringVector tag{}; tag.Push(String("Board"));
@@ -41,7 +41,13 @@ Board::Board(): Object(MC->GetContext()),
     model_->SetMaterial(MC->GetMaterial("Board"));
     model_->SetCastShadows(true);
 
-    //Fill board with squares
+    CreateSquares();
+    CreateIndicators();
+
+    SubscribeToEvent(E_SCENEUPDATE, URHO3D_HANDLER(Board, HandleSceneUpdate));
+}
+void Board::CreateSquares()
+{
     for (int i{0}; i < BOARD_WIDTH; ++i) for (int j{0}; j < BOARD_HEIGHT; ++j){
         //Create base
         Square* square{new Square};
@@ -74,8 +80,9 @@ Board::Board(): Object(MC->GetContext()),
         squares_[square->coords_] = square;
 
     }
-
-    //Create Quatter indicators
+}
+void Board::CreateIndicators()
+{
     for (int i{0}; i < 6; ++i){
         //Create base
         Indicator* indicator{new Indicator};
@@ -132,10 +139,7 @@ Board::Board(): Object(MC->GetContext()),
         indicator->light2_->SetCastShadows(false);
 
         indicators_.Push(SharedPtr<Indicator>(indicator));
-
     }
-
-    SubscribeToEvent(E_SCENEUPDATE, URHO3D_HANDLER(Board, HandleSceneUpdate));
 }
 void Board::Reset()
 {
@@ -147,7 +151,7 @@ void Board::Reset()
 
     }
 
-    DeselectAll();
+    Deselect();
 }
 
 void Board::Refuse()
@@ -179,13 +183,15 @@ bool Board::IsFull() const
 
 Vector3 Board::CoordsToPosition(IntVector2 coords)
 {
-    return Vector3(0.5f + coords.x_ - BOARD_WIDTH/2,
+    return Vector3(0.5f + coords.x_ - BOARD_WIDTH / 2,
                    GetThickness(),
-                   0.5f + coords.y_ - BOARD_HEIGHT/2);
+                   0.5f + coords.y_ - BOARD_HEIGHT / 2);
 }
 
 void Board::HandleSceneUpdate(StringHash eventType, VariantMap& eventData)
 {
+    (void)eventType;
+
     for (Square* s: squares_.Values()){
 
         s->slot_->SetMorphWeight(0, MC->Sine(2.3f, 0.0f, 1.0f));
@@ -211,7 +217,10 @@ bool Board::PutPiece(Piece* piece, Square* square)
                    + Vector3(Random(-0.05f, 0.05f),
                              0.0f,
                              Random(-0.05f, 0.05f)));
-        DeselectAll();
+
+        Deselect();
+        lastSelectedSquare_ = nullptr;
+
         if (CheckQuatter())
             MC->Quatter();
 
@@ -222,6 +231,92 @@ bool Board::PutPiece(Piece* piece, Square* square)
         Refuse();
         return false;
     }
+}
+bool Board::PutPiece(Piece* piece) {
+    if (!selectedSquare_){
+        SelectLast();
+        return false;
+    } else
+        return PutPiece(piece, selectedSquare_);
+}
+bool Board::PutPiece(Square* square) {
+    return PutPiece(MC->GetPickedPiece(), square);
+}
+bool Board::PutPiece(){
+    return PutPiece(MC->GetPickedPiece());
+}
+
+Square* Board::GetNearestSquare(Vector3 pos, bool free)
+{
+    Square* nearest{};
+    for (Square* s : squares_.Values()){
+        if (!nearest ||
+                LucKey::Distance(s->node_->GetWorldPosition(), pos) <
+            LucKey::Distance(nearest->node_->GetWorldPosition(), pos))
+            if (s->free_ || !free)
+                nearest = s;
+    }
+    return nearest;
+}
+void Board::SelectNearestFreeSquare(Vector3 pos)
+{
+    Square* square{GetNearestSquare(pos, true)};
+    if (square) Select(square);
+}
+void Board::SelectNearestSquare(Vector3 pos)
+{
+    Square* square{GetNearestSquare(pos, false)};
+    if (square) Select(square);
+}
+void Board::SelectLast()
+{
+    if (lastSelectedSquare_ && lastSelectedSquare_ != selectedSquare_)
+        Select(lastSelectedSquare_);
+    else if (!selectedSquare_)
+        SelectNearestFreeSquare();
+}
+void Board::Select(Square* square)
+{
+    Deselect();
+
+    selectedSquare_ = square;
+    square->selected_ = true;
+
+    //Fade in slot and light
+    if (square->free_){
+        FX->FadeTo(square->slot_->GetMaterial(),
+                   COLOR_GLOW);
+    } else {
+        FX->FadeTo(square->slot_->GetMaterial(),
+                   Color(1.0f, 0.8f, 0.0f, 0.5f));
+    }
+
+    Indicate(square->coords_);
+
+    FX->FadeTo(square->light_, 0.42f);
+}
+void Board::Deselect()
+{
+    HideIndicators();
+    if (!selectedSquare_) return;
+
+    //Fade out slot and light
+    FX->FadeOut(selectedSquare_->slot_->GetMaterial());
+    FX->FadeTo(selectedSquare_->light_, 0.023f);
+
+    lastSelectedSquare_ = selectedSquare_;
+    selectedSquare_->selected_ = false;
+    selectedSquare_ = nullptr;
+}
+
+void Board::Step(IntVector2 step)
+{
+    if (selectedSquare_){
+        IntVector2 newCoords{selectedSquare_->coords_ + step};
+        if (squares_.Contains(newCoords)){
+            Select(squares_[newCoords].Get());
+        }
+    } else SelectLast();
 }
 
 bool Board::CheckQuatter()
@@ -355,104 +450,17 @@ bool Board::CheckQuatter()
     //No Quatter
     return false;
 }
-
-Square* Board::GetNearestSquare(Vector3 pos, bool free)
-{
-    Square* nearest{};
-    for (Square* s : squares_.Values()){
-        if (!nearest ||
-            LucKey::Distance(s->node_->GetWorldPosition(), pos) <
-            LucKey::Distance(nearest->node_->GetWorldPosition(), pos))
-            if (s->free_ || !free)
-                nearest = s;
-    }
-    return nearest;
-}
-void Board::SelectNearestFreeSquare(Vector3 pos)
-{
-    Square* square{GetNearestSquare(pos, true)};
-    if (square) Select(square);
-}
-void Board::SelectNearestSquare(Vector3 pos)
-{
-    Square* square{GetNearestSquare(pos, false)};
-    if (square) Select(square);
-}
-bool Board::SelectLast()
-{
-    if (lastSelectedSquare_ && lastSelectedSquare_ != selectedSquare_) {
-        Select(lastSelectedSquare_);
-        return true;
-    } else if (!selectedSquare_) {
-        SelectNearestFreeSquare();
-    } else return false;
-}
-
-void Board::Select(Square* square)
-{
-    if (selectedSquare_)
-        Deselect(selectedSquare_);
-
-    selectedSquare_ = square;
-    square->selected_ = true;
-
-    //Fade in slot and light
-    if (square->free_){
-        FX->FadeTo(square->slot_->GetMaterial(),
-                   COLOR_GLOW);
-    } else {
-        FX->FadeTo(square->slot_->GetMaterial(),
-                   Color(1.0f, 0.8f, 0.0f, 0.5f));
-    }
-
-    Indicate(square->coords_);
-
-    FX->FadeTo(square->light_, 0.42f);
-}
-void Board::Deselect(Square* square)
-{
-    HideIndicators();
-    if (!square) return;
-
-    if (selectedSquare_ == square){
-        lastSelectedSquare_ = selectedSquare_;
-        selectedSquare_ = nullptr;
-    }
-
-    square->selected_ = false;
-
-    //Fade out slot and light
-    FX->FadeOut(square->slot_->GetMaterial());
-    FX->FadeTo(square->light_, 0.023f);
-}
-void Board::DeselectAll()
-{
-    for (Square* s: squares_.Values()){
-        Deselect(s);
-    }
-}
-
-void Board::Step(IntVector2 step)
-{
-    if (selectedSquare_){
-        IntVector2 newCoords{selectedSquare_->coords_ + step};
-        if (squares_.Contains(newCoords)){
-            Select(squares_[newCoords].Get());
-        }
-    } else SelectLast();
-}
-
 void Board::Indicate(IntVector2 first, IntVector2 last)
 {
     //Indicate single square
     if (last == IntVector2(-1, -1)){
         if (indicateSingle_){
-            FX->FadeTo(indicators_[0]->glow_, COLOR_GLOW, 2.3f, 1.0f);
+            FadeInIndicator(indicators_[0]);
             FX->TransformTo(indicators_[0]->rootNode_,
                     CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f),
                     indicators_[0]->rootNode_->GetRotation(),
                     0.23f);
-            FX->FadeTo(indicators_[1]->glow_, COLOR_GLOW, 2.3f, 1.0f);
+            FadeInIndicator(indicators_[1]);
             FX->TransformTo(indicators_[1]->rootNode_,
                     CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f),
                     indicators_[1]->rootNode_->GetRotation(),
@@ -460,33 +468,36 @@ void Board::Indicate(IntVector2 first, IntVector2 last)
         }
     //Indicate row
     } else if (first.y_ == last.y_){
-        FX->FadeTo(indicators_[0]->glow_, COLOR_GLOW, 2.3f, 1.0f);
+        FadeInIndicator(indicators_[0]);
         indicators_[0]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
         indicators_[0]->model1_->SetMorphWeight(1, static_cast<float>(first.y_ > 0 && first.y_ < 3));
         indicators_[0]->model2_->SetMorphWeight(1, static_cast<float>(first.y_ > 0 && first.y_ < 3));
     //Indicate column
     } else if (first.x_ == last.x_){
-        FX->FadeTo(indicators_[1]->glow_, COLOR_GLOW, 2.3f, 1.0f);
+        FadeInIndicator(indicators_[1]);
         indicators_[1]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
         indicators_[1]->model1_->SetMorphWeight(1, static_cast<float>(first.x_ > 0 && first.x_ < 3));
         indicators_[1]->model2_->SetMorphWeight(1, static_cast<float>(first.x_ > 0 && first.x_ < 3));
     //Indicate first diagonal
     } else if (first.x_ == 0 && last.y_ == 0){
-        FX->FadeTo(indicators_[3]->glow_, COLOR_GLOW, 2.3f, 1.0f);
+        FadeInIndicator(indicators_[3]);
     //Indicate 2x2 blocks
     } else if (last.x_ - first.x_ == 1) {
-        FX->FadeTo(indicators_[4]->glow_, COLOR_GLOW, 2.3f, 1.0f);
+        FadeInIndicator(indicators_[4]);
         indicators_[4]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
-        FX->FadeTo(indicators_[5]->glow_, COLOR_GLOW, 2.3f, 1.0f);
+        FadeInIndicator(indicators_[5]);
         indicators_[5]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
     //Indicate other diagonal
     } else
-        FX->FadeTo(indicators_[2]->glow_, COLOR_GLOW, 2.3f, 1.0f);
+        FadeInIndicator(indicators_[2]);
 }
-
+void Board::FadeInIndicator(Indicator* indicator)
+{
+    FX->FadeTo(indicator->glow_, COLOR_GLOW, 2.3f, 1.0f);
+}
 void Board::HideIndicators()
 {
-    for (SharedPtr<Indicator> i: indicators_){
+    for (SharedPtr<Indicator> i : indicators_){
         FX->FadeOut(i.Get()->glow_);
     }
 }

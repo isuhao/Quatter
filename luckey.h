@@ -77,6 +77,12 @@
 
 #include <Urho3D/DebugNew.h>
 
+#define ENGINE GetSubsystem<Engine>()
+#define CACHE GetSubsystem<ResourceCache>()
+#define INPUT GetSubsystem<Input>()
+#define GRAPHICS GetSubsystem<Graphics>()
+#define TIME GetSubsystem<Time>()
+
 namespace Urho3D {
 class Drawable;
 class Node;
@@ -96,12 +102,10 @@ enum SixaxisButton {  SB_SELECT, SB_LEFTSTICK, SB_RIGHTSTICK, SB_START,
                       SB_TRIANGLE, SB_CIRCLE, SB_CROSS, SB_SQUARE,
                       SB_PS };
 
-int Cycle(int x, int min, int max);
-float Cycle(float x, float min, float max);
+unsigned IntVector2ToHash(IntVector2 vec);
 
 float Delta(float lhs, float rhs, bool angle = false);
 float Distance(const Vector3 from, const Vector3 to);
-unsigned IntVector2ToHash(IntVector2 vec);
 Vector3 Scale(const Vector3 lhs, const Vector3 rhs);
 IntVector2 Scale(const IntVector2 lhs, const IntVector2 rhs);
 Vector2 Rotate(const Vector2 vec2, const float angle);
@@ -112,6 +116,9 @@ Color RandomHairColor();
 
 float Sine(float x);
 float Cosine(float x);
+
+int Cycle(int x, int min, int max);
+float Cycle(float x, float min, float max);
 }
 
 #endif // LUCKEY_H

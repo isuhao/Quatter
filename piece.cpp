@@ -56,9 +56,10 @@ void Piece::Reset()
 {
     rootNode_->SetParent(MC->world_.scene_);
 
-    if (MC->GetSelectedPiece() == this){
+    if (MC->GetSelectedPiece() == this)
         MC->DeselectPiece();
-    } else Deselect();
+    if (MC->GetPickedPiece() == this)
+        MC->SetPickedPiece(nullptr);
 
     if (state_ != PieceState::FREE){
         state_ = PieceState::FREE;
@@ -117,6 +118,7 @@ void Piece::Pick()
     if (state_ != PieceState::PUT){
 
         state_ = PieceState::PICKED;
+        MC->SetPickedPiece(this);
         if (MC->GetGameState() == GameState::PLAYER1PICKS)
             rootNode_->SetParent(CAMERA->GetPocket(false));
         if (MC->GetGameState() == GameState::PLAYER2PICKS)
@@ -135,11 +137,8 @@ void Piece::Put(Vector3 position)
     if (state_ == PieceState::PICKED){
 
         state_ = PieceState::PUT;
+        MC->SetPickedPiece(nullptr);
         rootNode_->SetParent(MC->world_.scene_);
-        FX->ArchTo(rootNode_, position, Quaternion(Random(-13.0f, 13.0f), Vector3::UP), 2.3f, 0.42f);
+        FX->ArchTo(rootNode_, position, Quaternion(Random(-13.0f, 13.0f), Vector3::UP), 2.3f, 0.5f);
     }
-}
-void Piece::Put(Square* square)
-{
-    BOARD->PutPiece(this, square);
 }

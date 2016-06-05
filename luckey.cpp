@@ -18,6 +18,7 @@
 
 #include "luckey.h"
 
+unsigned LucKey::IntVector2ToHash(IntVector2 vec) { return (MakeHash(vec.x_) & 0xffff) | (MakeHash(vec.y_) << 16); }
 
 float LucKey::Delta(float lhs, float rhs, bool angle)
 {
@@ -36,17 +37,12 @@ float LucKey::Delta(float lhs, float rhs, bool angle)
 float LucKey::Distance(const Vector3 from, const Vector3 to){
     return (to - from).Length();
 }
-
-unsigned LucKey::IntVector2ToHash(IntVector2 vec) { return (MakeHash(vec.x_) & 0xffff) | (MakeHash(vec.y_) << 16); }
-
 Vector3 LucKey::Scale(const Vector3 lhs, const Vector3 rhs) {
     return Vector3(lhs.x_ * rhs.x_, lhs.y_ * rhs.y_, lhs.z_ * rhs.z_);
 }
-
 Urho3D::IntVector2 LucKey::Scale(const Urho3D::IntVector2 lhs, const Urho3D::IntVector2 rhs) {
     return Urho3D::IntVector2(lhs.x_ * rhs.x_, lhs.y_ * rhs.y_);
 }
-
 Vector2 LucKey::Rotate(const Vector2 vec2, const float angle){
     float x{vec2.x_};
     float y{vec2.y_};
@@ -63,14 +59,12 @@ float LucKey::RandomSign()
 {
     return Random(2)*2-1;
 }
-
 Color LucKey::RandomHairColor()
 {
     Color hairColor{};
     hairColor.FromHSV(Random(0.1666f), Random(0.05f, 0.7f), Random(0.9f));
     return hairColor;
 }
-
 Color LucKey::RandomSkinColor()
 {
     Color skinColor{};

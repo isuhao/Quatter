@@ -38,8 +38,6 @@ class Master : public Object
 public:
     Master();
 protected:
-
-//    virtual void HandleUpdate(StringHash eventType, VariantMap &eventData);
 };
 
 #endif // MASTER_H

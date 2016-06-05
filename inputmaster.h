@@ -37,10 +37,10 @@ typedef class Yad : public Object{
     URHO3D_OBJECT(Yad, Object);
 public:
     Yad() : Object(MC->GetContext()) {}
-    SharedPtr<Node> node_;
-    SharedPtr<AnimatedModel> model_;
-    SharedPtr<Material> material_;
-    SharedPtr<Light> light_;
+    SharedPtr<Node> node_{};
+    SharedPtr<AnimatedModel> model_{};
+    SharedPtr<Material> material_{};
+    SharedPtr<Light> light_{};
     bool hidden_{true};
     bool dimmed_{false};
 }Yad;
@@ -54,17 +54,26 @@ public:
     void ConstructYad();
 
 private:
-    Input* input_;
+    HashSet<int> pressedKeys_;
+    HashSet<int> pressedMouseButtons_;
+    HashMap<int, HashSet<int>> pressedJoystickButtons_;
 
-
-    float idleTime_;
     bool idle_;
-    Vector2 mousePos_;
-    Vector2 mouseMoveSinceClick_;
     bool drag_;
-    float mouseIdleTime_;
+    bool actionDone_;
     bool boardClick_;
     bool tableClick_;
+    float sinceStep_;
+    float idleTime_;
+    float mouseIdleTime_;
+    Vector2 mousePos_;
+    Vector2 mouseMoveSinceClick_;
+    Vector2 smoothCamRotate_;
+    float smoothCamZoom_;
+
+    Yad* yad_;
+    Piece* rayPiece_;
+    Square* raySquare_;
 
     void ResetIdle();
     void SetIdle();
@@ -72,25 +81,13 @@ private:
     void HideYad();
     void RevealYad();
 
-    Vector2 smoothCamRotate_;
-    float smoothCamZoom_;
-
-    HashSet<int> pressedKeys_;
-    HashSet<int> pressedMouseButtons_;
-    HashMap<int, HashSet<int>> pressedJoystickButtons_;
-    float sinceStep_;
-    bool actionDone_;
-
-    Yad* yad_;
-    Piece* rayPiece_;
-    Square* raySquare_;
     Piece* RaycastToPiece();
     Square* RaycastToSquare();
     bool RaycastToBoard();
     bool RaycastToTable();
 
     void HandleUpdate(StringHash eventType, VariantMap &eventData);
-    void UpdateMousePos(bool delta);
+    void UpdateMousePos();
     void UpdateYad();
     Vector3 YadRaycast(bool& none);
 
@@ -113,7 +110,7 @@ private:
     void HandleCameraMovement(float t);
 
     void Screenshot();
-    void HandleActionButtonPressed();
+    void ActionButtonPressed();
     void Step(Vector3 step);
     void HandleDownArrowPressed();
     void HandleRightArrowPressed();
@@ -121,6 +118,7 @@ private:
     bool CorrectJoystickId(int joystickId);
     void DimYad();
     void RestoreYad();
+    void SelectionButtonPressed();
 };
 
 #endif // INPUTMASTER_H

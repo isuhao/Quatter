@@ -23,23 +23,27 @@
 #include "piece.h"
 
 InputMaster::InputMaster() : Master(),
-    input_{GetSubsystem<Input>()},
-    idleTime_{IDLE_THRESHOLD},
+    pressedKeys_{},
+    pressedMouseButtons_{},
+    pressedJoystickButtons_{},
     idle_{false},
-    mousePos_{},
-    mouseMoveSinceClick_{},
     drag_{false},
-    mouseIdleTime_{0.0f},
+    actionDone_{false},
     boardClick_{false},
     tableClick_{false},
     sinceStep_{STEP_INTERVAL},
-    actionDone_{false},
+    idleTime_{IDLE_THRESHOLD},
+    mouseIdleTime_{0.0f},
+    mousePos_{},
+    mouseMoveSinceClick_{},
+    smoothCamRotate_{},
+    smoothCamZoom_{},
     yad_{new Yad()},
     rayPiece_{},
     raySquare_{}
 {
-    input_->SetMouseMode(MM_FREE);
-    UpdateMousePos(false);
+    INPUT->SetMouseMode(MM_FREE);
+
     SubscribeToEvent(E_MOUSEMOVE, URHO3D_HANDLER(InputMaster, HandleMouseMove));
     SubscribeToEvent(E_MOUSEBUTTONDOWN, URHO3D_HANDLER(InputMaster, HandleMouseButtonDown));
     SubscribeToEvent(E_MOUSEBUTTONUP, URHO3D_HANDLER(InputMaster, HandleMouseButtonUp));
@@ -73,7 +77,8 @@ void InputMaster::ConstructYad()
 }
 
 void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
-{
+{ (void)eventType;
+
     float t{eventData[Update::P_TIMESTEP].GetFloat()};
     idleTime_ += t;
     mouseIdleTime_ += t;
@@ -96,8 +101,11 @@ void InputMaster::HandleKeys()
     for (int key: pressedKeys_){
         switch (key){
         case KEY_SPACE:{
-            HandleActionButtonPressed();
+            ActionButtonPressed();
         } break;
+        case KEY_TAB: {
+            SelectionButtonPressed();
+        }
         case KEY_UP:{ Step(Vector3::UP);
         } break;
         case KEY_DOWN:{ Step(Vector3::DOWN);
@@ -111,7 +119,8 @@ void InputMaster::HandleKeys()
     }
 }
 void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
-{
+{ (void)eventType;
+
     ResetIdle();
 
     int key{eventData[KeyDown::P_KEY].GetInt()};
@@ -124,7 +133,6 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
          || MC->GetPickedPiece())
         {
             MC->Reset();
-//            SetIdle();
         } else MC->Exit();
     } break;
     case KEY_9:{
@@ -143,7 +151,8 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
     }
 }
 void InputMaster::HandleKeyUp(StringHash eventType, VariantMap &eventData)
-{
+{ (void)eventType;
+
     ResetIdle();
 
     using namespace KeyUp;
@@ -167,6 +176,7 @@ void InputMaster::Step(Vector3 step)
     if (sinceStep_ < STEP_INTERVAL)
         return;
 
+
     if (MC->InPickState()){
 
             sinceStep_ = 0.0f;
@@ -177,6 +187,7 @@ void InputMaster::Step(Vector3 step)
 
     } else if (MC->InPutState()){
 
+        Square* previouslySelected{BOARD->GetSelectedSquare()};
         //Correct for semantics
         step = Quaternion(90.0f, Vector3::RIGHT) * step; ///Asks for Vector3& operator *=(Quaternion rhs)
         //Correct step according to view angle
@@ -190,32 +201,30 @@ void InputMaster::Step(Vector3 step)
             }
 
         }
-        Vector3 resultingStep{Quaternion(quadrant, Vector3::UP) * step};
+
         Square* selectedSquare{BOARD->GetSelectedSquare()};
-        Square* lastSelectedSquare{BOARD->GetLastSelectedSquare()};
-        if (selectedSquare){
+        if (selectedSquare) {
+            Vector3 resultingStep{Quaternion(quadrant, Vector3::UP) * step};
             BOARD->SelectNearestSquare(selectedSquare->node_->GetPosition() + resultingStep);
-            if (BOARD->GetSelectedSquare() != selectedSquare)
-                sinceStep_ = 0.0f;
-        } else if (lastSelectedSquare) {
-            BOARD->SelectLast();
-            sinceStep_ = 0.0f;
         } else {
-            BOARD->SelectNearestFreeSquare();
-            sinceStep_ = 0.0f;
+            BOARD->SelectLast();
         }
+
+        if (BOARD->GetSelectedSquare() != previouslySelected)
+            sinceStep_ = 0.0f;
     }
 }
 
-void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData){
-    UpdateMousePos(false);
+void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData)
+{ (void)eventType;
 
-    Graphics* graphics{GetSubsystem<Graphics>()};
-    mousePos_.x_ += eventData[MouseMove::P_DX].GetFloat() / graphics->GetWidth();
-    mousePos_.y_ += eventData[MouseMove::P_DY].GetFloat() / graphics->GetHeight();
+    UpdateMousePos();
 
-    mouseMoveSinceClick_.x_ += eventData[MouseMove::P_DX].GetFloat() / graphics->GetWidth();
-    mouseMoveSinceClick_.y_ += eventData[MouseMove::P_DY].GetFloat() / graphics->GetHeight();
+    mousePos_.x_ += eventData[MouseMove::P_DX].GetFloat() / GRAPHICS->GetWidth();
+    mousePos_.y_ += eventData[MouseMove::P_DY].GetFloat() / GRAPHICS->GetHeight();
+
+    mouseMoveSinceClick_.x_ += eventData[MouseMove::P_DX].GetFloat() / GRAPHICS->GetWidth();
+    mouseMoveSinceClick_.y_ += eventData[MouseMove::P_DY].GetFloat() / GRAPHICS->GetHeight();
     if (!drag_
      && mouseMoveSinceClick_.Length() > DRAG_THRESHOLD
      && (pressedMouseButtons_.Contains(MOUSEB_LEFT)
@@ -223,7 +232,7 @@ void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData){
       || pressedMouseButtons_.Contains(MOUSEB_RIGHT)))
     {
         drag_ = true;
-        input_->SetMouseMode(MM_WRAP);
+        INPUT->SetMouseMode(MM_WRAP);
         HideYad();
     }
 
@@ -235,14 +244,15 @@ void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData){
 }
 
 void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventData)
-{
+{ (void)eventType;
+
     using namespace MouseButtonDown;
     int button{eventData[P_BUTTON].GetInt()};
     pressedMouseButtons_.Insert(button);
     mouseMoveSinceClick_ = Vector2::ZERO;
 
     MC->SetSelectionMode(SM_YAD);
-    UpdateMousePos(false);
+    UpdateMousePos();
 
     boardClick_ = RaycastToBoard();
     tableClick_ = RaycastToTable();
@@ -252,14 +262,15 @@ void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventD
     ResetIdle();
 }
 void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventData)
-{
+{ (void)eventType;
+
     using namespace MouseButtonUp;
     int button{eventData[P_BUTTON].GetInt()};
     if (pressedMouseButtons_.Contains(button))
         pressedMouseButtons_.Erase(button);
 
     MC->SetSelectionMode(SM_YAD);
-    UpdateMousePos(false);
+    UpdateMousePos();
 
     UpdateYad();
     mouseIdleTime_ = 0.0f;
@@ -270,7 +281,7 @@ void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventDat
             MC->GetSelectedPiece()->Pick();
             RestoreYad();
         } else if (MC->InPutState() && BOARD->GetSelectedSquare()){
-            MC->GetPickedPiece()->Put(BOARD->GetSelectedSquare());
+            BOARD->PutPiece(MC->GetPickedPiece(), BOARD->GetSelectedSquare());
             RestoreYad();
         //Zoom
         } else if (boardClick_ && RaycastToBoard()){
@@ -280,12 +291,14 @@ void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventDat
         }
     }
     drag_ = false;
-    input_->SetMouseMode(MM_FREE);
+    INPUT->SetMouseMode(MM_FREE);
 }
 void InputMaster::HandleMouseWheel(StringHash eventType, VariantMap &eventData)
-{
+{ (void)eventType;
+
     CAMERA->SetDistance(CAMERA->GetDistance() - eventData[MouseWheel::P_WHEEL].GetInt() * 2.3f);
 }
+
 void InputMaster::UpdateYad()
 {
     bool hide{false};
@@ -379,6 +392,14 @@ void InputMaster::RestoreYad()
     FX->FadeTo(yad_->material_, COLOR_GLOW, 0.1f);
 }
 
+void InputMaster::SelectionButtonPressed()
+{
+    if (MC->InPickState())
+        MC->SetSelectionMode(SM_CAMERA);
+    else if (MC->InPutState())
+        BOARD->SelectNearestFreeSquare();
+}
+
 void InputMaster::HandleJoystickButtons()
 {
     for(int joystickId: {0, 1}) {
@@ -401,7 +422,7 @@ void InputMaster::HandleJoystickButtons()
         for (int button: buttons){
             switch (button){
             case LucKey::SB_CROSS:{
-                HandleActionButtonPressed();
+                ActionButtonPressed();
             } break;
             case LucKey::SB_CIRCLE:{
                 if (MC->InPickState())
@@ -418,10 +439,7 @@ void InputMaster::HandleJoystickButtons()
             case LucKey::SB_DPAD_LEFT:{ Step(Vector3::LEFT);
             } break;
             case LucKey::SB_SELECT:{
-                if (MC->InPickState())
-                    MC->SetSelectionMode(SM_CAMERA);
-                else if (MC->InPutState())
-                    BOARD->SelectNearestFreeSquare();
+                SelectionButtonPressed();
             } break;
             default: break;
             }
@@ -430,7 +448,7 @@ void InputMaster::HandleJoystickButtons()
 }
 bool InputMaster::CorrectJoystickId(int joystickId)
 {
-    return input_->GetJoystickByIndex(joystickId) == GetActiveJoystick();
+    return INPUT->GetJoystickByIndex(joystickId) == GetActiveJoystick();
 }
 JoystickState* InputMaster::GetActiveJoystick()
 {
@@ -438,37 +456,38 @@ JoystickState* InputMaster::GetActiveJoystick()
 
         if (MC->InPlayer1State())
         {
-            return input_->GetJoystickByIndex(0);
+            return INPUT->GetJoystickByIndex(0);
 
         } else if (MC->InPlayer2State())
         {
-            return input_->GetJoystickByIndex(1);
+            return INPUT->GetJoystickByIndex(1);
         } else if (MC->GetGameState() == GameState::QUATTER) {
             if (MC->GetPreviousGameState() == GameState::PLAYER1PICKS ||
                 MC->GetPreviousGameState() == GameState::PLAYER1PUTS)
             {
-                return input_->GetJoystickByIndex(0);
+                return INPUT->GetJoystickByIndex(0);
 
             } else if (MC->GetPreviousGameState() == GameState::PLAYER2PICKS ||
                        MC->GetPreviousGameState() == GameState::PLAYER2PUTS)
             {
-                return input_->GetJoystickByIndex(1);
+                return INPUT->GetJoystickByIndex(1);
             }
         }
 
-    } else if (input_->GetJoystickByIndex(0)) {
+    } else if (INPUT->GetJoystickByIndex(0)) {
 
-        return input_->GetJoystickByIndex(0);
+        return INPUT->GetJoystickByIndex(0);
 
     }
     return nullptr;
 }
 bool InputMaster::MultipleJoysticks()
 {
-    return input_->GetJoystickByIndex(0) && input_->GetJoystickByIndex(1);
+    return INPUT->GetJoystickByIndex(0) && INPUT->GetJoystickByIndex(1);
 }
 void InputMaster::HandleJoystickButtonDown(StringHash eventType, VariantMap &eventData)
-{
+{ (void)eventType;
+
     using namespace JoystickButtonDown;
     int joystickId{eventData[P_JOYSTICKID].GetInt()};
     int button{eventData[P_BUTTON].GetInt()};
@@ -478,7 +497,8 @@ void InputMaster::HandleJoystickButtonDown(StringHash eventType, VariantMap &eve
     pressedJoystickButtons_[joystickId].Insert(button);
 }
 void InputMaster::HandleJoystickButtonUp(StringHash eventType, VariantMap &eventData)
-{
+{ (void)eventType;
+
     using namespace JoystickButtonUp;
     int joystickId{eventData[P_JOYSTICKID].GetInt()};
     int button{eventData[P_BUTTON].GetInt()};
@@ -490,7 +510,7 @@ void InputMaster::HandleJoystickButtonUp(StringHash eventType, VariantMap &event
         pressedJoystickButtons_[joystickId].Erase(button);
 }
 
-void InputMaster::HandleActionButtonPressed()
+void InputMaster::ActionButtonPressed()
 {
     if (actionDone_)
         return;
@@ -503,12 +523,12 @@ void InputMaster::HandleActionButtonPressed()
 
             selectedPiece->Pick();
             BOARD->SelectNearestFreeSquare();
-        } else if (MC->selectionMode_ == SM_STEP || MC->selectionMode_ == SM_YAD)
+        } else if (MC->selectionMode_ == SM_STEP || MC->selectionMode_ == SM_YAD){
             if (!MC->SelectLastPiece())
-                    MC->CameraSelectPiece();
-        else if (MC->selectionMode_ == SM_CAMERA)
+                MC->CameraSelectPiece();
+        } else if (MC->selectionMode_ == SM_CAMERA){
             MC->CameraSelectPiece();
-
+        }
     } else if (MC->InPutState() ){
         BOARD->PutPiece(MC->GetPickedPiece());
     }
@@ -545,10 +565,10 @@ void InputMaster::HandleCameraMovement(float t)
 
     //Mouse rotate
     if (drag_){
-        IntVector2 mouseMove{input_->GetMouseMove()};
+        IntVector2 mouseMove{INPUT->GetMouseMove()};
         camRot += Vector2(mouseMove.x_, mouseMove.y_) * 0.1f;
     }
-
+    //Joystick camera movement
     JoystickState* joy{GetActiveJoystick()};
     if (joy){
         Vector2 rotation{-Vector2(joy->GetAxisPosition(0), joy->GetAxisPosition(1))
@@ -583,6 +603,13 @@ void InputMaster::HandleCameraMovement(float t)
         }
         camZoom += t * joyZoomSpeed * zoom;
     }
+    //Move camera faster when shift key is held down
+    if (pressedKeys_.Contains(KEY_SHIFT)){
+        camRot *= 3.0f;
+        camZoom *= 2.0f;
+    }
+    //Slow down up and down rotation when nearing extremes
+    SmoothCameraMovement(camRot, camZoom);
 
     //Slowly spin camera when there hasn't been any input for a while
     if (idle_){
@@ -590,20 +617,13 @@ void InputMaster::HandleCameraMovement(float t)
         camRot += Vector2(t * idleStartup * -0.5f,
                           t * idleStartup * MC->Sine(0.23f, -0.042f, 0.042f));
     }
-    //Speed up camera movement when shift key is held down
-    if (pressedKeys_.Contains(KEY_SHIFT)){
-        camRot *= 3.0f;
-        camZoom *= 2.0f;
-    }
-
-    //Slow down up and down rotation when nearing extremes
-    SmoothCameraMovement(camRot, camZoom);
 
     CAMERA->Rotate(smoothCamRotate_);
     CAMERA->Zoom(smoothCamZoom_);
 }
 void InputMaster::SmoothCameraMovement(Vector2 camRot, float camZoom)
 {
+    //Slow down rotation when nearing extremes
     float pitchBrake{1.0f};
     if (Sign(camRot.y_) > 0.0f){
         float pitchLeft{LucKey::Delta(CAMERA->GetPitch(), PITCH_MAX)};
@@ -643,7 +663,7 @@ void InputMaster::SetIdle()
 
         Square* selectedSquare{BOARD->GetSelectedSquare()};
         if (selectedSquare)
-            BOARD->Deselect(selectedSquare);
+            BOARD->Deselect();
     }
 }
 void InputMaster::ResetIdle()
@@ -682,7 +702,6 @@ Piece* InputMaster::RaycastToPiece()
     rayPiece_ = nullptr;
     return nullptr;
 }
-
 Square* InputMaster::RaycastToSquare()
 {
     Ray cameraRay{MouseRay()};
@@ -734,27 +753,15 @@ bool InputMaster::RaycastToTable()
     }
     return false;
 }
-
 Ray InputMaster::MouseRay()
 {
     Ray mouseRay{CAMERA->camera_->GetScreenRay(mousePos_.x_, mousePos_.y_)};
 
     return mouseRay;
 }
-
-void InputMaster::UpdateMousePos(bool delta)
+void InputMaster::UpdateMousePos()
 {
-    if (delta){
-        IntVector2 mouseDelta{GetSubsystem<Input>()->GetMouseMove()};
-        Graphics* graphics{GetSubsystem<Graphics>()};
-        mousePos_.x_ += MOUSESPEED * static_cast<float>(mouseDelta.x_) / graphics->GetWidth();
-        mousePos_.y_ += MOUSESPEED * static_cast<float>(mouseDelta.y_) / graphics->GetHeight();
-    } else {
-        IntVector2 mousePos{GetSubsystem<Input>()->GetMousePosition()};
-        Graphics* graphics{GetSubsystem<Graphics>()};
-        mousePos_.x_ = static_cast<float>(mousePos.x_) / graphics->GetWidth();
-        mousePos_.y_ = static_cast<float>(mousePos.y_) / graphics->GetHeight();
-    }
-    mousePos_.x_ = Clamp(mousePos_.x_, 0.0f, 1.0f);
-    mousePos_.y_ = Clamp(mousePos_.y_, 0.0f, 1.0f);
+    IntVector2 mousePos{INPUT->GetMousePosition()};
+    mousePos_.x_ = Clamp(static_cast<float>(mousePos.x_) / GRAPHICS->GetWidth(), 0.0f, 1.0f);
+    mousePos_.y_ = Clamp(static_cast<float>(mousePos.y_) / GRAPHICS->GetHeight(), 0.0f, 1.0f);
 }

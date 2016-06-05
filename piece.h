@@ -54,7 +54,6 @@ public:
     PieceState GetState() const noexcept { return state_; }
     void Pick();
     void Put(Vector3 position);
-    void Put(Square* square);
     void Reset();
 
     int ToInt() const { return static_cast<int>(attributes_.to_ulong()); }

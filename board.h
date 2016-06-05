@@ -65,25 +65,14 @@ class Board : public Object
 public:
     Board();
     Node* GetRootNode() const { return rootNode_; }
-
     float GetThickness() const { return model_->GetBoundingBox().Size().y_; }
 
-    bool CheckQuatter();
     bool PutPiece(Piece* piece, Square* square);
-    bool PutPiece(Piece* piece) {
-        if (!selectedSquare_){
-            SelectLast();
-            return false;
-        } else
-            return PutPiece(piece, selectedSquare_);
-    }
-    bool PutPiece(Square* square) {
-        return PutPiece(MC->GetPickedPiece(), square);
-    }
+    bool PutPiece(Piece* piece);
+    bool PutPiece(Square* square);
+    bool PutPiece();
 
-    bool PutPiece(){
-        return PutPiece(MC->GetPickedPiece());
-    }
+    bool CheckQuatter();
 
     void Step(IntVector2 step);
     Vector<SharedPtr<Square>> GetSquares() const { return squares_.Values(); }
@@ -91,12 +80,10 @@ public:
     Square* GetSelectedSquare() const { return selectedSquare_; }
     Square* GetLastSelectedSquare() const { return lastSelectedSquare_; }
     void Select(Square* square);
-    void Deselect(Square* square);
-    void Deselect() { Deselect(selectedSquare_); }
+    void Deselect();
     void SelectNearestSquare(Vector3 pos = CAMERA->GetPosition());
     void SelectNearestFreeSquare(Vector3 pos = CAMERA->GetPosition());
-    bool SelectLast();
-    void DeselectAll();
+    void SelectLast();
     void Reset();
     void Refuse();
 
@@ -115,6 +102,9 @@ private:
     Vector3 CoordsToPosition(IntVector2 coords);
     void HandleSceneUpdate(StringHash eventType, VariantMap& eventData);
     void Indicate(IntVector2 first, IntVector2 last = IntVector2(-1, -1));
+    void CreateSquares();
+    void CreateIndicators();
+    void FadeInIndicator(Indicator* indicator);
 };
 
 #endif // BOARD_H
