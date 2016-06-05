@@ -18,4 +18,4 @@ rm -f *.o
 qmake Quatter.pro
 sudo make uninstall
 sudo make install
-sudo update-icon-caches /usr/local/share/icons/hicolor
+sudo update-icon-caches ~/.local/share/icons/

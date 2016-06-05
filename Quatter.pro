@@ -53,7 +53,7 @@ unix {
     target.path = $$BINDIR
 
     icon.files = quatter.svg
-    icon.path = $$DATADIR/icons/hicolor/scalable/apps/
+    icon.path = $$DATADIR/icons/
 
     pixmap.files = Resources/*
     pixmap.path = $$DATADIR/quatter/
