@@ -82,6 +82,7 @@
 #define INPUT GetSubsystem<Input>()
 #define GRAPHICS GetSubsystem<Graphics>()
 #define TIME GetSubsystem<Time>()
+#define FILES GetSubsystem<FileSystem>()
 
 namespace Urho3D {
 class Drawable;

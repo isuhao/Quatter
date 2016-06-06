@@ -54,24 +54,23 @@ void MasterControl::Setup()
 {
     SetRandomSeed(TIME->GetSystemTime());
 
-    FileSystem* fs{GetSubsystem<FileSystem>()};
-
+    engineParameters_["LogName"] = FILES->GetAppPreferencesDir("urho3d", "logs")+"Quatter.log";
     engineParameters_["WindowTitle"] = "Quatter";
-    engineParameters_["LogName"] = fs->GetAppPreferencesDir("urho3d", "logs")+"Quatter.log";
     engineParameters_["WindowIcon"] = "icon.png";
 
     //Add resource path
-    String resourcePath{fs->GetAppPreferencesDir("luckey", "quatter")};
-    if (!fs->DirExists(resourcePath)){
-        Log::Write(1, resourcePath);
-        resourcePath = "Resources";
-    }
-    if (fs->DirExists(resourcePath))
-        engineParameters_["ResourcePaths"] = resourcePath;
+    Vector<String> resourcePaths{FILES->GetAppPreferencesDir("luckey", "quatter"),
+                                "Resources",
+                                "../Quatter/Resources"};
+    for (String path : resourcePaths)
+        if (FILES->DirExists(path)){
+            engineParameters_["ResourcePaths"] = path;
+            break;
+        }
 
     //    engineParameters_["FullScreen"] = false;
-    //    engineParameters_["WindowWidth"] = 800;
-    //    engineParameters_["WindowHeight"] = 600;
+    //    engineParameters_["WindowWidth"] = 1280;
+    //    engineParameters_["WindowHeight"] = 1024;
     //    engineParameters_["borderless"] = true;
 }
 void MasterControl::Start()
