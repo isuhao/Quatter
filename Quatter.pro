@@ -56,7 +56,7 @@ unix {
     icon.path = $$DATADIR/icons/
 
     pixmap.files = Resources/*
-    pixmap.path = $$DATADIR/quatter/
+    pixmap.path = $$DATADIR/luckey/quatter/
 
     desktop.files = quatter.desktop
     desktop.path = $$DATADIR/applications/

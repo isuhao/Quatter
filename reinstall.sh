@@ -3,7 +3,13 @@ sudo apt-get install libx11-dev libxrandr-dev libasound2-dev git cmake make
 cd `dirname $0`
 if [ ! -d Urho3D ]
 then
-  git clone https://github.com/Urho3D/Urho3D
+	cd ..
+	if [ ! -d Urho3D ]
+	then
+  	git clone https://github.com/Urho3D/Urho3D
+	fi
+	cd `dirname $0`
+	ln -s ../Urho3D
 fi
 
 cd Urho3D
@@ -13,9 +19,9 @@ git pull
 make
 cd ..
 
+sudo make uninstall
 git pull
 rm -f *.o
 qmake Quatter.pro
-sudo make uninstall
 sudo make install
 sudo update-icon-caches ~/.local/share/icons/

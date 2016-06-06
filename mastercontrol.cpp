@@ -61,7 +61,7 @@ void MasterControl::Setup()
     engineParameters_["WindowIcon"] = "icon.png";
 
     //Add resource path
-    String resourcePath{fs->GetUserDocumentsDir()+".local/share/quatter"};
+    String resourcePath{fs->GetAppPreferencesDir("luckey", "quatter")};
     if (!fs->DirExists(resourcePath)){
         Log::Write(1, resourcePath);
         resourcePath = "Resources";
