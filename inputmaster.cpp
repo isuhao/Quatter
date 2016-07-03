@@ -21,8 +21,10 @@
 #include "quattercam.h"
 #include "board.h"
 #include "piece.h"
+#include "square.h"
+#include "yad.h"
 
-InputMaster::InputMaster() : Master(),
+InputMaster::InputMaster(Context* context) : Master(context),
     pressedKeys_{},
     pressedMouseButtons_{},
     pressedJoystickButtons_{},
@@ -38,7 +40,7 @@ InputMaster::InputMaster() : Master(),
     mouseMoveSinceClick_{},
     smoothCamRotate_{},
     smoothCamZoom_{},
-    yad_{new Yad()},
+    yad_{},
     rayPiece_{},
     raySquare_{}
 {
@@ -57,21 +59,9 @@ InputMaster::InputMaster() : Master(),
 
 void InputMaster::ConstructYad()
 {
-    yad_->node_ = MC->world_.scene_->CreateChild("Yad");
-    StringVector tag{}; tag.Push(String("Yad"));
-    yad_->node_->SetTags(tag);
-    Node* lightNode{yad_->node_->CreateChild("Light")};
-    lightNode->SetPosition(Vector3::UP * 0.23f);
-    yad_->model_ = yad_->node_->CreateComponent<AnimatedModel>();
-    yad_->model_->SetModel(MC->GetModel("Yad"));
-    yad_->material_ = MC->GetMaterial("Glow")->Clone();
-    yad_->model_->SetMaterial(yad_->material_);
-    yad_->light_ = lightNode->CreateComponent<Light>();
-    yad_->light_->SetLightType(LIGHT_POINT);
-    yad_->light_->SetCastShadows(true);
-    yad_->light_->SetColor(COLOR_GLOW);
-    yad_->light_->SetRange(1.0f);
-    yad_->light_->SetBrightness(YAD_FULLBRIGHT);
+
+    Node* yadNode{ MC->world_.scene_->CreateChild("Yad") };
+    yad_ = yadNode->CreateComponent<Yad>();
 
     HideYad();
 }
@@ -205,7 +195,7 @@ void InputMaster::Step(Vector3 step)
         Square* selectedSquare{BOARD->GetSelectedSquare()};
         if (selectedSquare) {
             Vector3 resultingStep{Quaternion(quadrant, Vector3::UP) * step};
-            BOARD->SelectNearestSquare(selectedSquare->node_->GetPosition() + resultingStep);
+            BOARD->SelectNearestSquare(selectedSquare->GetNode()->GetPosition() + resultingStep);
         } else {
             BOARD->SelectLast();
         }
@@ -710,7 +700,7 @@ Square* InputMaster::RaycastToSquare()
     for (RayQueryResult r : results){
 
         for (Square* s : BOARD->GetSquares())
-            if (r.node_ == s->node_){
+            if (r.node_ == s->GetNode()){
                 raySquare_ = s;
                 return s;
             }

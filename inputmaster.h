@@ -32,24 +32,13 @@
 #define DRAG_THRESHOLD 0.023f
 
 class Square;
-
-typedef class Yad : public Object{
-    URHO3D_OBJECT(Yad, Object);
-public:
-    Yad() : Object(MC->GetContext()) {}
-    SharedPtr<Node> node_{};
-    SharedPtr<AnimatedModel> model_{};
-    SharedPtr<Material> material_{};
-    SharedPtr<Light> light_{};
-    bool hidden_{true};
-    bool dimmed_{false};
-}Yad;
+class Yad;
 
 class InputMaster : public Master
 {
     URHO3D_OBJECT(InputMaster, Master);
 public:
-    InputMaster();
+    InputMaster(Context* context);
     bool IsIdle() const noexcept { return idle_; }
     void ConstructYad();
 

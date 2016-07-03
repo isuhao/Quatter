@@ -49,6 +49,7 @@
 #include <Urho3D/Graphics/RenderPath.h>
 #include <Urho3D/Graphics/Skybox.h>
 #include <Urho3D/Graphics/StaticModel.h>
+#include <Urho3D/Graphics/Texture2D.h>
 #include <Urho3D/Graphics/Viewport.h>
 #include <Urho3D/Graphics/Zone.h>
 #include <Urho3D/Input/InputEvents.h>

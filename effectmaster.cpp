@@ -20,7 +20,7 @@
 
 using namespace Urho3D;
 
-EffectMaster::EffectMaster() : Master()
+EffectMaster::EffectMaster(Context* context) : Master(context)
 {
 }
 

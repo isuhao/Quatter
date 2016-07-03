@@ -35,18 +35,21 @@ enum class PieceState {FREE, SELECTED, PICKED, PUT};
 
 class Square;
 
-class Piece : public Object
+class Piece : public LogicComponent
 {
     URHO3D_OBJECT(Piece, Object);
 public:
-    typedef std::bitset<NUM_ATTRIBUTES> Attributes;
-    Piece(Attributes);
+    typedef std::bitset<NUM_ATTRIBUTES> PieceAttributes;
+    Piece(Context* context);
+    static void RegisterObject(Context* context);
+    virtual void OnNodeSet(Node* node);
+    void Init(PieceAttributes attributes);
 
-    Node* GetNode() const { return rootNode_; }
-    void SetPosition(Vector3 pos) { rootNode_->SetPosition(pos); }
-    Vector3 GetPosition() const { return rootNode_->GetPosition(); }
-    bool GetAttribute(int index) const { return attributes_[index]; }
-    Attributes GetAttributes() const { return attributes_; }
+    Node* GetNode() const { return node_; }
+    void SetPosition(Vector3 pos) { node_->SetPosition(pos); }
+    Vector3 GetPosition() const { return node_->GetPosition(); }
+    bool GetPieceAttribute(int index) const { return attributes_[index]; }
+    PieceAttributes GetPieceAttributes() const { return attributes_; }
     String GetCodon(int length = NUM_ATTRIBUTES) const;
     float GetAngle() const { return MC->AttributesToAngle(ToInt()); }
     void Select();
@@ -58,12 +61,13 @@ public:
 
     int ToInt() const { return static_cast<int>(attributes_.to_ulong()); }
 private:
-    SharedPtr<Node> rootNode_;
+    SharedPtr<StaticModel> pieceModel_;
     SharedPtr<StaticModel> outlineModel_;
     SharedPtr<Light> light_;
 
-    Attributes attributes_;
+    PieceAttributes attributes_;
     PieceState state_;
+
 };
 
 #endif // PIECE_H

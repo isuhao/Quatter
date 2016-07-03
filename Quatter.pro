@@ -26,7 +26,10 @@ SOURCES += \
     board.cpp \
     piece.cpp \
     master.cpp \
-    effectmaster.cpp
+    effectmaster.cpp \
+    square.cpp \
+    yad.cpp \
+    indicator.cpp
 
 HEADERS += \
     luckey.h \
@@ -36,7 +39,10 @@ HEADERS += \
     board.h \
     piece.h \
     master.h \
-    effectmaster.h
+    effectmaster.h \
+    square.h \
+    yad.h \
+    indicator.h
 
 unix {
     isEmpty(PREFIX) {

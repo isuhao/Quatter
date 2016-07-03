@@ -53,7 +53,7 @@ typedef struct GameWorld
 } GameWorld;
 
 #define MC MasterControl::GetInstance()
-#define FX MC->GetEffectMaster()
+#define FX GetSubsystem<EffectMaster>()
 #define CAMERA MC->world_.camera_
 #define BOARD MC->world_.board_
 #define NUM_PIECES 16
@@ -69,7 +69,6 @@ class MasterControl : public Application
 public:
     MasterControl(Context* context);
     static MasterControl* GetInstance();
-    EffectMaster* GetEffectMaster() const { return effectMaster_; }
 
     GameWorld world_;
 
@@ -115,8 +114,6 @@ public:
     float Cosine(const float freq, const float min = -1.0f, const float max = 1.0f, const float shift = 0.0f);
 private:
     static MasterControl* instance_;
-    InputMaster* inputMaster_;
-    EffectMaster* effectMaster_;
     SharedPtr<Node> leafyLightNode_;
     SharedPtr<Light> leafyLight_;
 

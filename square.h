@@ -1,4 +1,4 @@
-/* Quatter
+/* heXon
 // Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
@@ -16,9 +16,31 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "master.h"
+#ifndef SQUARE_H
+#define SQUARE_H
 
-Master::Master(Context* context): Object(context)
+#include <Urho3D/Urho3D.h>
+
+#include "luckey.h"
+
+class Piece;
+
+class Square : public LogicComponent
 {
-}
+    friend class Board;
+    URHO3D_OBJECT(Square, LogicComponent);
+public:
+    Square(Context* context);
+    static void RegisterObject(Context* context);
+    virtual void OnNodeSet(Node* node);
 
+private:
+    IntVector2 coords_;
+    SharedPtr<AnimatedModel> slot_;
+    SharedPtr<Light> light_;
+    Piece* piece_;
+    bool free_;
+    bool selected_;
+};
+
+#endif // SQUARE_H

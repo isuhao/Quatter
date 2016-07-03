@@ -19,19 +19,26 @@
 #include "quattercam.h"
 #include <initializer_list>
 
-QuatterCam::QuatterCam():
-    Object(MC->GetContext()),
+void QuatterCam::RegisterObject(Context *context)
+{
+    context->RegisterFactory<QuatterCam>();
+}
+
+QuatterCam::QuatterCam(Context* context) : LogicComponent(context),
     distance_{12.0f},
     aimDistance_{distance_},
     targetPosition_{Vector3::UP * 0.42f}
 {
-    rootNode_ = MC->world_.scene_->CreateChild("Camera");
-    rootNode_->SetPosition(Vector3(3.0f, 10.0f, -8.0f));
-    rootNode_->LookAt(Vector3::ZERO);
-    camera_ = rootNode_->CreateComponent<Camera>();
+}
+void QuatterCam::OnNodeSet(Node *node)
+{ (void)node;
+
+    node_->SetPosition(Vector3(3.0f, 10.0f, -8.0f));
+    node_->LookAt(Vector3::ZERO);
+    camera_ = node_->CreateComponent<Camera>();
     camera_->SetFarClip(1024.0f);
 
-    Zone* zone{rootNode_->CreateComponent<Zone>()};
+    Zone* zone{node_->CreateComponent<Zone>()};
     zone->SetFogColor(Color(0.20f, 0.17f, 0.13f));
     zone->SetFogStart(50.0f);
     zone->SetFogEnd(64.0f);
@@ -39,13 +46,13 @@ QuatterCam::QuatterCam():
 
     CreatePockets();
     SetupViewport();
-    SubscribeToEvent(E_SCENEUPDATE, URHO3D_HANDLER(QuatterCam, HandleSceneUpdate));
 }
+
 void QuatterCam::CreatePockets()
 {
     for (bool p : {true, false}){
 
-        Node* pocketNode{rootNode_->CreateChild("Pocket")};
+        Node* pocketNode{node_->CreateChild("Pocket")};
         pocketNode->SetPosition(Vector3(p?2.0f:-2.0f, 1.5f, 3.2f));
         pocketNode->SetRotation(Quaternion(-70.0f, Vector3::RIGHT));
         if (p)
@@ -72,24 +79,22 @@ void QuatterCam::SetupViewport()
     renderer->SetViewport(0, viewport_);
 }
 
-void QuatterCam::HandleSceneUpdate(StringHash eventType, VariantMap& eventData)
+void QuatterCam::Update(float timeStep)
 {
-    (void)eventType;
 
-    float t{eventData[SceneUpdate::P_TIMESTEP].GetFloat()};
     //Update distance
     if (aimDistance_ != distance_)
         distance_ = 0.1f * (9.0f * distance_ + aimDistance_);
 
-    Vector3 relativeToTarget{(rootNode_->GetPosition() - targetPosition_).Normalized()};
+    Vector3 relativeToTarget{(node_->GetPosition() - targetPosition_).Normalized()};
     if (relativeToTarget.Length() != distance_){
-            rootNode_->SetPosition(distance_ * relativeToTarget + targetPosition_);
+            node_->SetPosition(distance_ * relativeToTarget + targetPosition_);
             camera_->SetFov(Clamp(60.0f + distance_, 23.0f, 110.0f));
     }
     //Spin pockets
     float spinSpeed{23.0f};
-    pockets_.first_->Rotate(Quaternion(t * spinSpeed, Vector3::UP));
-    pockets_.second_->Rotate(Quaternion(-t * spinSpeed, Vector3::UP));
+    pockets_.first_->Rotate(Quaternion(timeStep * spinSpeed, Vector3::UP));
+    pockets_.second_->Rotate(Quaternion(-timeStep * spinSpeed, Vector3::UP));
     //Reposition pockets
     pockets_.first_->SetPosition(Vector3(-2.2f - 0.06f * (ZOOM_MAX - distance_), 1.4f, 3.2f));
     pockets_.second_->SetPosition(Vector3(2.2f + 0.06f * (ZOOM_MAX - distance_), 1.4f, 3.2f));
@@ -97,18 +102,18 @@ void QuatterCam::HandleSceneUpdate(StringHash eventType, VariantMap& eventData)
 
 void QuatterCam::Rotate(Vector2 rotation)
 {
-    rootNode_->LookAt(targetPosition_);
-    rootNode_->RotateAround(targetPosition_,
-                            Quaternion(rotation.x_, Vector3::UP) * Quaternion(rotation.y_, rootNode_->GetRight()),
+    node_->LookAt(targetPosition_);
+    node_->RotateAround(targetPosition_,
+                            Quaternion(rotation.x_, Vector3::UP) * Quaternion(rotation.y_, node_->GetRight()),
                             TS_WORLD);
     //Clamp pitch
     if (GetPitch() > PITCH_MAX)
-        rootNode_->RotateAround(targetPosition_,
-                                Quaternion(PITCH_MAX - GetPitch(), rootNode_->GetRight()),
+        node_->RotateAround(targetPosition_,
+                                Quaternion(PITCH_MAX - GetPitch(), node_->GetRight()),
                                 TS_WORLD);
     else if (GetPitch() < PITCH_MIN)
-        rootNode_->RotateAround(targetPosition_,
-                                Quaternion(PITCH_MIN - GetPitch(), rootNode_->GetRight()),
+        node_->RotateAround(targetPosition_,
+                                Quaternion(PITCH_MIN - GetPitch(), node_->GetRight()),
                                 TS_WORLD);
 }
 void QuatterCam::Zoom(float delta)

@@ -41,23 +41,26 @@ using namespace Urho3D;
 #define ZOOM_MAX 23.0f
 #define ZOOM_EDGE 7.0f
 
-class QuatterCam : public Object
+class QuatterCam : public LogicComponent
 {
-    URHO3D_OBJECT(QuatterCam, Object);
+    URHO3D_OBJECT(QuatterCam, LogicComponent);
     friend class MasterControl;
     friend class InputMaster;
 public:
-    QuatterCam();
+    QuatterCam(Context* context);
+    static void RegisterObject(Context* context);
+    virtual void OnNodeSet(Node* node);
+    virtual void Update(float timeStep);
 
     SharedPtr<Camera> camera_;
     SharedPtr<Viewport> viewport_;
     SharedPtr<RenderPath> effectRenderPath_;
 
-    Vector3 GetPosition() const { return rootNode_->GetPosition(); }
+    Vector3 GetPosition() const { return node_->GetPosition(); }
     Node* GetPocket(bool right) const { return right ? pockets_.second_ : pockets_.first_; }
 
-    float GetPitch() const { return rootNode_->GetRotation().EulerAngles().x_; }
-    float GetYaw() const { return rootNode_->GetRotation().EulerAngles().y_; }
+    float GetPitch() const { return node_->GetRotation().EulerAngles().x_; }
+    float GetYaw() const { return node_->GetRotation().EulerAngles().y_; }
 
     void SetDistance(float distance) { aimDistance_ = Clamp(distance, ZOOM_MIN, ZOOM_MAX); }
     float GetDistance() const { return distance_; }
@@ -66,7 +69,6 @@ public:
     void ZoomToTable() { SetDistance(13.0f); }
 
 private:
-    SharedPtr<Node> rootNode_;
     Pair<SharedPtr<Node>,
          SharedPtr<Node>> pockets_;
 
@@ -76,7 +78,6 @@ private:
 
 
     void SetupViewport();
-    void HandleSceneUpdate(StringHash eventType, VariantMap& eventData);
     void Rotate(Vector2 rotation);
     void CreatePockets();
 };

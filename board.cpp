@@ -17,8 +17,9 @@
 */
 
 #include "board.h"
+#include "piece.h"
+#include "indicator.h"
 #include "effectmaster.h"
-#include "quattercam.h"
 
 namespace Urho3D {
 template <> unsigned MakeHash(const IntVector2& value)
@@ -27,16 +28,24 @@ template <> unsigned MakeHash(const IntVector2& value)
   }
 }
 
-Board::Board(): Object(MC->GetContext()),
+void Board::RegisterObject(Context *context)
+{
+    context->RegisterFactory<Board>();
+}
+
+Board::Board(Context* context): LogicComponent(context),
     indicateSingle_{false},
     squares_{},
     selectedSquare_{},
     lastSelectedSquare_{}
 {
-    rootNode_ = MC->world_.scene_->CreateChild("Board");
+}
+void Board::OnNodeSet(Node *node)
+{ (void)node;
+
     StringVector tag{}; tag.Push(String("Board"));
-    rootNode_->SetTags(tag);
-    model_ = rootNode_->CreateComponent<StaticModel>();
+    node_->SetTags(tag);
+    model_ = node_->CreateComponent<StaticModel>();
     model_->SetModel(MC->GetModel("Board"));
     model_->SetMaterial(MC->GetMaterial("Board"));
     model_->SetCastShadows(true);
@@ -46,37 +55,15 @@ Board::Board(): Object(MC->GetContext()),
 
     SubscribeToEvent(E_SCENEUPDATE, URHO3D_HANDLER(Board, HandleSceneUpdate));
 }
+
 void Board::CreateSquares()
 {
     for (int i{0}; i < BOARD_WIDTH; ++i) for (int j{0}; j < BOARD_HEIGHT; ++j){
-        //Create base
-        Square* square{new Square};
-        square->coords_ = IntVector2(i, j);
-        square->node_ = rootNode_->CreateChild("Square");
-        StringVector tag{}; tag.Push(String("Square"));
-        square->node_->SetTags(tag);
-        square->node_->SetPosition(CoordsToPosition(square->coords_));
-        StaticModel* touchPlane{square->node_->CreateComponent<StaticModel>()};
-        touchPlane->SetModel(MC->GetModel("Plane"));
-        touchPlane->SetMaterial(MC->GetMaterial("Invisible"));
-        square->free_ = true;
-        square->piece_ = nullptr;
-        //Create slot
-        Node* slotNode{square->node_->CreateChild("Slot")};
-        slotNode->SetPosition(Vector3::UP * 0.05f);
-        square->slot_ = slotNode->CreateComponent<AnimatedModel>();
-        square->slot_->SetModel(MC->GetModel("Slot"));
-        square->slot_->SetMaterial(MC->GetMaterial("Glow")->Clone());
-        square->slot_->GetMaterial()->SetShaderParameter("MatDiffColor", Color(0.0f, 0.0f, 0.0f, 0.0f));
-        //Create light
-        Node* lightNode{slotNode->CreateChild("Light")};
-        lightNode->SetPosition(Vector3::UP * 0.23f);
-        square->light_ = lightNode->CreateComponent<Light>();
-        square->light_->SetColor(0.5f * COLOR_GLOW);
-        square->light_->SetBrightness(0.023f);
-        square->light_->SetRange(2.0f);
-        square->light_->SetCastShadows(false);
-
+        Node* squareNode{ node_->CreateChild("Square") };
+        Square* square{ squareNode->CreateComponent<Square>() };
+        IntVector2 coords{ i, j };
+        square->coords_ = coords;
+        squareNode->SetPosition(CoordsToPosition(coords));
         squares_[square->coords_] = square;
 
     }
@@ -84,59 +71,10 @@ void Board::CreateSquares()
 void Board::CreateIndicators()
 {
     for (int i{0}; i < 6; ++i){
-        //Create base
-        Indicator* indicator{new Indicator};
-        indicator->rootNode_ = rootNode_->CreateChild("Indicator");
-        indicator->rootNode_->SetPosition(GetThickness() * Vector3::UP);
-        if (i == 1)
-            indicator->rootNode_->Rotate(Quaternion(90.0f, Vector3::UP));
-        else if (i == 2)
-            indicator->rootNode_->Rotate(Quaternion(45.0f, Vector3::UP));
-        else if (i == 3)
-            indicator->rootNode_->Rotate(Quaternion(-45.0f, Vector3::UP));
-        else if (i == 5)
-            indicator->rootNode_->Rotate(Quaternion(90.0f, Vector3::UP));
-
-        indicator->glow_ = MC->GetMaterial("Glow")->Clone();
-        //Create models
-        Node* arrowNode1{indicator->rootNode_->CreateChild("Arrow")};
-        arrowNode1->SetPosition(Vector3::LEFT * (2.3f + 0.95f * (i == 2 || i == 3)) + Vector3::FORWARD * (i >= 4));
-        arrowNode1->Rotate(Quaternion(-90.0f, Vector3::UP));
-        indicator->model1_ = arrowNode1->CreateComponent<AnimatedModel>();
-        if (i < 4){
-            indicator->model1_->SetModel(MC->GetModel("Arrow"));
-            indicator->model1_->SetMorphWeight(0, static_cast<float>(i < 2));
-        } else {
-            indicator->model1_->SetModel(MC->GetModel("BlockIndicator"));
-        }
-        indicator->model1_->SetMaterial(indicator->glow_);
-        Node* arrowNode2{indicator->rootNode_->CreateChild("Arrow")};
-        arrowNode2->SetPosition(Vector3::RIGHT * (2.3f + 0.95f * (i == 2 || i == 3)));
-        arrowNode2->Rotate(Quaternion(90.0f, Vector3::UP));
-        indicator->model2_ = arrowNode2->CreateComponent<AnimatedModel>();
-        if (i < 4){
-            indicator->model2_->SetModel(MC->GetModel("Arrow"));
-            indicator->model2_->SetMorphWeight(0, static_cast<float>(i < 2));
-        } else {
-            indicator->model2_->SetModel(MC->GetModel("BlockIndicator"));
-        }
-        indicator->model2_->SetMaterial(indicator->glow_);
-        indicator->model2_->GetMaterial()->SetShaderParameter("MatDiffColor", Color(0.0f, 0.0f, 0.0f, 0.0f));
-        //Create light
-        Node* lightNode1{arrowNode1->CreateChild("Light")};
-        lightNode1->SetPosition(Vector3::UP * 0.23f);
-        indicator->light1_ = lightNode1->CreateComponent<Light>();
-        indicator->light1_->SetColor(COLOR_GLOW);
-        indicator->light1_->SetBrightness(0.023f);
-        indicator->light1_->SetRange(2.0f);
-        indicator->light1_->SetCastShadows(false);
-        Node* lightNode2{arrowNode2->CreateChild("Light")};
-        lightNode2->SetPosition(Vector3::UP * 0.23f);
-        indicator->light2_ = lightNode2->CreateComponent<Light>();
-        indicator->light2_->SetColor(COLOR_GLOW);
-        indicator->light2_->SetBrightness(0.023f);
-        indicator->light2_->SetRange(2.0f);
-        indicator->light2_->SetCastShadows(false);
+        Node* indicatorNode{ node_->CreateChild("Indicator") };
+        indicatorNode->SetPosition(GetThickness() * Vector3::UP);
+        Indicator* indicator{ indicatorNode->CreateComponent<Indicator>() };
+        indicator->Init(i);
 
         indicators_.Push(SharedPtr<Indicator>(indicator));
     }
@@ -213,7 +151,7 @@ bool Board::PutPiece(Piece* piece, Square* square)
         square->free_ = false;
         square->light_->SetEnabled(false);
 
-        piece->Put(square->node_->GetWorldPosition()
+        piece->Put(square->GetNode()->GetWorldPosition()
                    + Vector3(Random(-0.05f, 0.05f),
                              0.0f,
                              Random(-0.05f, 0.05f)));
@@ -325,14 +263,14 @@ bool Board::CheckQuatter()
 
     //Check rows
     for (int j{0}; j < BOARD_HEIGHT; ++j){
-        Piece::Attributes matching{};
+        Piece::PieceAttributes matching{};
         matching.flip();
-        Piece::Attributes first{};
+        Piece::PieceAttributes first{};
         for (int i{0}; i < BOARD_WIDTH; ++i){
             IntVector2 coords(i, j);
             Piece* piece{squares_[coords].Get()->piece_};
             if (piece){
-                Piece::Attributes attributes(piece->GetAttributes());
+                Piece::PieceAttributes attributes(piece->GetPieceAttributes());
                 if (i == 0) {
                     first = attributes;
                 } else {
@@ -355,14 +293,14 @@ bool Board::CheckQuatter()
 
     //Check columns
     for (int i{0}; i < BOARD_WIDTH; ++i){
-        Piece::Attributes matching{};
+        Piece::PieceAttributes matching{};
         matching.flip();
-        Piece::Attributes first{};
+        Piece::PieceAttributes first{};
         for (int j{0}; j < BOARD_HEIGHT; ++j){
             IntVector2 coords(i, j);
             Piece* piece{squares_[coords].Get()->piece_};
             if (piece){
-                Piece::Attributes attributes{piece->GetAttributes()};
+                Piece::PieceAttributes attributes{piece->GetPieceAttributes()};
                 if (j == 0) {
                     first = attributes;
                 } else {
@@ -384,14 +322,14 @@ bool Board::CheckQuatter()
     }
     //Check diagonals
     for (bool direction : {true, false}){
-        Piece::Attributes matching{};
+        Piece::PieceAttributes matching{};
         matching.flip();
-        Piece::Attributes first{};
+        Piece::PieceAttributes first{};
         for (int i{0}; i < BOARD_WIDTH; ++i){
             IntVector2 coords(i, direction ? i : (BOARD_WIDTH - i - 1));
             Piece* piece{squares_[coords].Get()->piece_};
             if (piece){
-                Piece::Attributes attributes(piece->GetAttributes());
+                Piece::PieceAttributes attributes(piece->GetPieceAttributes());
                 if (i == 0) {
                     first = attributes;
                 } else {
@@ -416,14 +354,14 @@ bool Board::CheckQuatter()
     if (checkBlocks){
         for (int k{0}; k < BOARD_WIDTH - 1; ++k){
             for (int l{0}; l < BOARD_HEIGHT - 1; ++l){
-                Piece::Attributes matching{};
+                Piece::PieceAttributes matching{};
                 matching.flip();
-                Piece::Attributes first{};
+                Piece::PieceAttributes first{};
                 for (int m : {0, 1}) for (int n : {0, 1}){
                     IntVector2 coords(k + m, l + n);
                     Piece* piece{squares_[coords].Get()->piece_};
                     if (piece){
-                        Piece::Attributes attributes(piece->GetAttributes());
+                        Piece::PieceAttributes attributes(piece->GetPieceAttributes());
                         if (m == 0 && n == 0) {
                             first = attributes;
                         } else {
@@ -456,26 +394,26 @@ void Board::Indicate(IntVector2 first, IntVector2 last)
     if (last == IntVector2(-1, -1)){
         if (indicateSingle_){
             FadeInIndicator(indicators_[0]);
-            FX->TransformTo(indicators_[0]->rootNode_,
+            FX->TransformTo(indicators_[0]->GetNode(),
                     CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f),
-                    indicators_[0]->rootNode_->GetRotation(),
+                    indicators_[0]->GetNode()->GetRotation(),
                     0.23f);
             FadeInIndicator(indicators_[1]);
-            FX->TransformTo(indicators_[1]->rootNode_,
+            FX->TransformTo(indicators_[1]->GetNode(),
                     CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f),
-                    indicators_[1]->rootNode_->GetRotation(),
+                    indicators_[1]->GetNode()->GetRotation(),
                     0.23f);
         }
     //Indicate row
     } else if (first.y_ == last.y_){
         FadeInIndicator(indicators_[0]);
-        indicators_[0]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
+        indicators_[0]->GetNode()->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
         indicators_[0]->model1_->SetMorphWeight(1, static_cast<float>(first.y_ > 0 && first.y_ < 3));
         indicators_[0]->model2_->SetMorphWeight(1, static_cast<float>(first.y_ > 0 && first.y_ < 3));
     //Indicate column
     } else if (first.x_ == last.x_){
         FadeInIndicator(indicators_[1]);
-        indicators_[1]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
+        indicators_[1]->GetNode()->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
         indicators_[1]->model1_->SetMorphWeight(1, static_cast<float>(first.x_ > 0 && first.x_ < 3));
         indicators_[1]->model2_->SetMorphWeight(1, static_cast<float>(first.x_ > 0 && first.x_ < 3));
     //Indicate first diagonal
@@ -484,9 +422,9 @@ void Board::Indicate(IntVector2 first, IntVector2 last)
     //Indicate 2x2 blocks
     } else if (last.x_ - first.x_ == 1) {
         FadeInIndicator(indicators_[4]);
-        indicators_[4]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
+        indicators_[4]->GetNode()->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
         FadeInIndicator(indicators_[5]);
-        indicators_[5]->rootNode_->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
+        indicators_[5]->GetNode()->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
     //Indicate other diagonal
     } else
         FadeInIndicator(indicators_[2]);

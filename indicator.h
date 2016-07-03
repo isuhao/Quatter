@@ -16,9 +16,33 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "master.h"
+#ifndef INDICATOR_H
+#define INDICATOR_H
 
-Master::Master(Context* context): Object(context)
+#include <Urho3D/Urho3D.h>
+
+#include "mastercontrol.h"
+#include "luckey.h"
+
+class Indicator : public LogicComponent
 {
-}
+    friend class Board;
+    URHO3D_OBJECT(Indicator, LogicComponent);
+public:
+    Indicator(Context* context);
+    static void RegisterObject(Context* context);
+    virtual void OnNodeSet(Node* node);
 
+private:
+    Node* arrowNode1_;
+    Node* arrowNode2_;
+    SharedPtr<Material> glow_;
+    SharedPtr<AnimatedModel> model1_;
+    SharedPtr<AnimatedModel> model2_;
+    SharedPtr<Light> light1_;
+    SharedPtr<Light> light2_;
+
+    void Init(int nth);
+};
+
+#endif // INDICATOR_H

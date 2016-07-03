@@ -16,9 +16,28 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "master.h"
+#ifndef YAD_H
+#define YAD_H
 
-Master::Master(Context* context): Object(context)
+#include <Urho3D/Urho3D.h>
+
+#include "mastercontrol.h"
+#include "luckey.h"
+
+class Yad : public LogicComponent
 {
-}
+    friend class InputMaster;
+    URHO3D_OBJECT(Yad, LogicComponent);
+public:
+    Yad(Context* context);
+    static void RegisterObject(Context* context);
+    virtual void OnNodeSet(Node* node);
+private:
+    SharedPtr<AnimatedModel> model_;
+    SharedPtr<Material> material_;
+    SharedPtr<Light> light_;
+    bool hidden_;
+    bool dimmed_;
+};
 
+#endif // YAD_H

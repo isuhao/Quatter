@@ -28,7 +28,7 @@ class EffectMaster : public Master
 {
     URHO3D_OBJECT(EffectMaster, Master);
 public:
-    EffectMaster();
+    EffectMaster(Context* context);
 
     void FadeTo(Material* material, Color color, float duration = 0.23f, float delay = 0.0f);
     void FadeTo(Light* light, float brightness, float duration = 0.23f);

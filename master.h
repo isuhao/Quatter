@@ -36,8 +36,7 @@ class Master : public Object
     friend class MasterControl;
     URHO3D_OBJECT(Master, Object);
 public:
-    Master();
-protected:
+    Master(Context* context);
 };
 
 #endif // MASTER_H

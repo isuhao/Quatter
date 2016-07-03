@@ -22,7 +22,7 @@
 #include <Urho3D/Urho3D.h>
 
 #include "mastercontrol.h"
-#include "piece.h"
+#include "square.h"
 #include "quattercam.h"
 
 namespace Urho3D {
@@ -34,37 +34,17 @@ using namespace Urho3D;
 #define BOARD_WIDTH 4
 #define BOARD_HEIGHT 4
 
-typedef class Square : public Object{
-    URHO3D_OBJECT(Square, Object);
-public:
-    Square() : Object(MC->GetContext()) {}
-    IntVector2 coords_;
-    SharedPtr<Node> node_;
-    SharedPtr<AnimatedModel> slot_;
-    SharedPtr<Light> light_;
-    Piece* piece_;
-    bool free_;
-    bool selected_;
-}Square;
+class Piece;
+class Indicator;
 
-typedef class Indicator : public Object{
-    URHO3D_OBJECT(Indicator, Object);
-public:
-    Indicator() : Object(MC->GetContext()) {}
-    SharedPtr<Node> rootNode_;
-    SharedPtr<Material> glow_;
-    SharedPtr<AnimatedModel> model1_;
-    SharedPtr<AnimatedModel> model2_;
-    SharedPtr<Light> light1_;
-    SharedPtr<Light> light2_;
-}Indicator;
-
-class Board : public Object
+class Board : public LogicComponent
 {
-    URHO3D_OBJECT(Board, Object);
+    URHO3D_OBJECT(Board, LogicComponent);
 public:
-    Board();
-    Node* GetRootNode() const { return rootNode_; }
+    Board(Context* context);
+    static void RegisterObject(Context* context);
+    virtual void OnNodeSet(Node* node);
+
     float GetThickness() const { return model_->GetBoundingBox().Size().y_; }
 
     bool PutPiece(Piece* piece, Square* square);
@@ -92,7 +72,6 @@ public:
     void HideIndicators();
 private:
     bool indicateSingle_;
-    SharedPtr<Node> rootNode_;
     StaticModel* model_;
 
     HashMap<IntVector2, SharedPtr<Square>> squares_;

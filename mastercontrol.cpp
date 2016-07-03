@@ -20,9 +20,11 @@
 #include "inputmaster.h"
 #include "effectmaster.h"
 #include "quattercam.h"
+#include "piece.h"
 #include "board.h"
-#include <Urho3D/Graphics/Texture2D.h>
-#include <Urho3D/Graphics/Terrain.h>
+#include "square.h"
+#include "indicator.h"
+#include "yad.h"
 
 URHO3D_DEFINE_APPLICATION_MAIN(MasterControl);
 
@@ -48,6 +50,13 @@ MasterControl::MasterControl(Context *context):
     lastReset_{0.0f}
 {
     instance_ = this;
+
+    QuatterCam::RegisterObject(context_);
+    Piece::RegisterObject(context_);
+    Board::RegisterObject(context_);
+    Square::RegisterObject(context_);
+    Indicator::RegisterObject(context_);
+    Yad::RegisterObject(context_);
 }
 
 void MasterControl::Setup()
@@ -59,9 +68,11 @@ void MasterControl::Setup()
     engineParameters_["WindowIcon"] = "icon.png";
 
     //Add resource path
-    Vector<String> resourcePaths{FILES->GetAppPreferencesDir("luckey", "quatter"),
-                                "Resources",
-                                "../Quatter/Resources"};
+    Vector<String> resourcePaths{};
+    resourcePaths.Push(FILES->GetAppPreferencesDir("luckey", "quatter"));
+    resourcePaths.Push("Resources");
+    resourcePaths.Push("../Quatter/Resources");
+
     for (String path : resourcePaths)
         if (FILES->DirExists(path)){
             engineParameters_["ResourcePaths"] = path;
@@ -75,8 +86,9 @@ void MasterControl::Setup()
 }
 void MasterControl::Start()
 {
-    inputMaster_ = new InputMaster();
-    effectMaster_ = new EffectMaster();
+    context_->RegisterSubsystem(new InputMaster(context_));
+    context_->RegisterSubsystem(new EffectMaster(context_));
+
 
     CreateScene();
 
@@ -98,7 +110,9 @@ void MasterControl::CreateScene()
 {
     world_.scene_ = new Scene(context_);
     world_.scene_->CreateComponent<Octree>();
-    world_.camera_ = new QuatterCam();
+
+    Node* cameraNode{ world_.scene_->CreateChild("Camera") };
+    world_.camera_ = cameraNode->CreateComponent<QuatterCam>();
 
     CreateLights();
     CreateSkybox();
@@ -106,7 +120,7 @@ void MasterControl::CreateScene()
     CreateTable();
     CreateBoardAndPieces();
 
-    inputMaster_->ConstructYad();
+    GetSubsystem<InputMaster>()->ConstructYad();
 }
 void MasterControl::CreateLights()
 {
@@ -189,11 +203,15 @@ void MasterControl::CreateTable()
 }
 void MasterControl::CreateBoardAndPieces()
 {
-    world_.board_ = new Board();
+    Node* boardNode{ world_.scene_->CreateChild("Board") };
+    world_.board_ = boardNode->CreateComponent<Board>();
     world_.pieces_.Reserve(NUM_PIECES);
     for (int p{0}; p < NUM_PIECES; ++p){
 
-        Piece* newPiece = new Piece(Piece::Attributes(p));
+        Node* pieceNode{ world_.scene_->CreateChild("Piece") };
+        Piece* newPiece = pieceNode->CreateComponent<Piece>();
+        newPiece->Init(Piece::PieceAttributes(p));
+
         world_.pieces_.Push(SharedPtr<Piece>(newPiece));
         newPiece->SetPosition(AttributesToPosition(newPiece->ToInt())
                               + Vector3(Random(0.05f),
@@ -203,12 +221,12 @@ void MasterControl::CreateBoardAndPieces()
 }
 
 Sound* MasterControl::GetMusic(String name) const {
-    Sound* song{CACHE->GetResource<Sound>("Music/"+name+".ogg")};
+    Sound* song{ CACHE->GetResource<Sound>("Music/"+name+".ogg") };
     song->SetLooped(true);
     return song;
 }
 Sound* MasterControl::GetSample(String name) const {
-    Sound* sample{CACHE->GetResource<Sound>("Samples/"+name+".ogg")};
+    Sound* sample{ CACHE->GetResource<Sound>("Samples/"+name+".ogg") };
     sample->SetLooped(false);
     return sample;
 }
@@ -216,7 +234,7 @@ Sound* MasterControl::GetSample(String name) const {
 void MasterControl::HandleUpdate(StringHash eventType, VariantMap& eventData)
 { (void)eventType; (void)eventData;
 
-    if (selectionMode_ == SM_CAMERA && !inputMaster_->IsIdle())
+    if (selectionMode_ == SM_CAMERA && !GetSubsystem<InputMaster>()->IsIdle())
         CameraSelectPiece();
 
     //Wave leafy light

@@ -21,40 +21,57 @@
 #include "board.h"
 #include "piece.h"
 
-Piece::Piece(Attributes attributes): Object(MC->GetContext()),
-    attributes_{attributes},
+void Piece::RegisterObject(Context *context)
+{
+    context->RegisterFactory<Piece>();
+}
+
+Piece::Piece(Context* context): LogicComponent(context),
+    attributes_{},
     state_{PieceState::FREE }
 {
-    rootNode_ = MC->world_.scene_->CreateChild("Piece_"+GetCodon(4));
-    rootNode_->SetRotation(Quaternion(Random(360.0f), Vector3::UP));
+}
+void Piece::OnNodeSet(Node* node)
+{ (void)node;
+
+    node_->SetRotation(Quaternion(Random(360.0f), Vector3::UP));
     StringVector tag{}; tag.Push(String("Piece"));
-    rootNode_->SetTags(tag);
+    node_->SetTags(tag);
 
-    StaticModel* pieceModel{rootNode_->CreateComponent<StaticModel>()};
-    pieceModel->SetCastShadows(true);
-    pieceModel->SetModel(MC->GetModel("Piece_"+GetCodon(3)));
-    if (attributes[3]){
-        pieceModel->SetMaterial(MC->GetMaterial("Wood_light"));
-    }
-    else pieceModel->SetMaterial(MC->GetMaterial("Wood_dark"));
+    pieceModel_ = node_->CreateComponent<StaticModel>();
+    pieceModel_->SetCastShadows(true);
 
-    outlineModel_ = rootNode_->CreateComponent<StaticModel>();
+    outlineModel_ = node_->CreateComponent<StaticModel>();
     outlineModel_->SetCastShadows(false);
-    outlineModel_->SetModel(MC->GetModel("Piece_"+GetCodon(2)+"_outline"));
-    outlineModel_->SetMaterial(MC->GetMaterial("Glow")->Clone());
-    outlineModel_->GetMaterial()->SetShaderParameter("MatDiffColor", Color(0.0f, 0.0f, 0.0f));
-    outlineModel_->SetEnabled(false);
 
-    Node* lightNode{rootNode_->CreateChild("Light")};
+    Node* lightNode{node_->CreateChild("Light")};
     lightNode->SetPosition(Vector3::UP * 0.5f);
     light_ = lightNode->CreateComponent<Light>();
     light_->SetColor(Color(0.0f, 0.8f, 0.5f));
     light_->SetBrightness(0.0f);
     light_->SetRange(3.0f);
 }
+
+
+void Piece::Init(PieceAttributes attributes)
+{
+    attributes_ = attributes;
+
+    pieceModel_->SetModel(MC->GetModel("Piece_" + GetCodon(3)));
+    if (attributes[3]){
+        pieceModel_->SetMaterial(MC->GetMaterial("Wood_light"));
+    }
+    else pieceModel_->SetMaterial(MC->GetMaterial("Wood_dark"));
+
+    outlineModel_->SetModel(MC->GetModel("Piece_"+GetCodon(2)+"_outline"));
+    outlineModel_->SetMaterial(MC->GetMaterial("Glow")->Clone());
+    outlineModel_->GetMaterial()->SetShaderParameter("MatDiffColor", Color(0.0f, 0.0f, 0.0f));
+    outlineModel_->SetEnabled(false);
+}
+
 void Piece::Reset()
 {
-    rootNode_->SetParent(MC->world_.scene_);
+    node_->SetParent(MC->world_.scene_);
 
     if (MC->GetSelectedPiece() == this)
         MC->DeselectPiece();
@@ -63,7 +80,7 @@ void Piece::Reset()
 
     if (state_ != PieceState::FREE){
         state_ = PieceState::FREE;
-        FX->ArchTo(rootNode_,
+        FX->ArchTo(node_,
                    MC->AttributesToPosition(ToInt()),
                    Quaternion(Random(360.0f), Vector3::UP),
                    attributes_[0] ? 2.0f : 1.3f + attributes_[1] ? 0.5f : 1.0f + Random(0.23f),
@@ -120,11 +137,11 @@ void Piece::Pick()
         state_ = PieceState::PICKED;
         MC->SetPickedPiece(this);
         if (MC->GetGameState() == GameState::PLAYER1PICKS)
-            rootNode_->SetParent(CAMERA->GetPocket(false));
+            node_->SetParent(CAMERA->GetPocket(false));
         if (MC->GetGameState() == GameState::PLAYER2PICKS)
-            rootNode_->SetParent(CAMERA->GetPocket(true));
+            node_->SetParent(CAMERA->GetPocket(true));
 
-        FX->ArchTo(rootNode_, Vector3::DOWN, Quaternion(10.0f, Vector3(1.0f, 0.0f, 0.5f)), 1.0f, 0.8f);
+        FX->ArchTo(node_, Vector3::DOWN, Quaternion(10.0f, Vector3(1.0f, 0.0f, 0.5f)), 1.0f, 0.8f);
 
         FX->FadeOut(outlineModel_->GetMaterial());
         FX->FadeOut(light_);
@@ -138,7 +155,7 @@ void Piece::Put(Vector3 position)
 
         state_ = PieceState::PUT;
         MC->SetPickedPiece(nullptr);
-        rootNode_->SetParent(MC->world_.scene_);
-        FX->ArchTo(rootNode_, position, Quaternion(Random(-13.0f, 13.0f), Vector3::UP), 2.3f, 0.5f);
+        node_->SetParent(MC->world_.scene_);
+        FX->ArchTo(node_, position, Quaternion(Random(-13.0f, 13.0f), Vector3::UP), 2.3f, 0.5f);
     }
 }
