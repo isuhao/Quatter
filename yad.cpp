@@ -17,8 +17,7 @@
 */
 
 #include "yad.h"
-
-#define YAD_FULLBRIGHT 0.5f
+#include "effectmaster.h"
 
 void Yad::RegisterObject(Context *context)
 {
@@ -53,7 +52,26 @@ void Yad::OnNodeSet(Node *node)
     light_->SetBrightness(YAD_FULLBRIGHT);
 
 }
-
+void Yad::Dim()
+{
+    FX->FadeTo(light_, YAD_DIMMED);
+}
+void Yad::Hide()
+{
+    hidden_ = true;
+    FX->FadeOut(light_);
+    FX->FadeOut(material_, 0.1f);
+}
+void Yad::Reveal()
+{
+    hidden_ = false;
+    Restore();
+}
+void Yad::Restore()
+{
+    FX->FadeTo(light_, YAD_FULLBRIGHT);
+    FX->FadeTo(material_, COLOR_GLOW, 0.1f);
+}
 
 
 

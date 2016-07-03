@@ -63,7 +63,7 @@ void InputMaster::ConstructYad()
     Node* yadNode{ MC->world_.scene_->CreateChild("Yad") };
     yad_ = yadNode->CreateComponent<Yad>();
 
-    HideYad();
+    yad_->Hide();
 }
 
 void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
@@ -78,7 +78,7 @@ void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
         SetIdle();
 
     if (mouseIdleTime_ > IDLE_THRESHOLD * 0.23f)
-        HideYad();
+        yad_->Hide();
 
     HandleCameraMovement(t);
 
@@ -223,7 +223,7 @@ void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData)
     {
         drag_ = true;
         INPUT->SetMouseMode(MM_WRAP);
-        HideYad();
+        yad_->Hide();
     }
 
     MC->SetSelectionMode(SM_YAD);
@@ -269,10 +269,10 @@ void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventDat
     if (!drag_){
         if (MC->InPickState() && MC->GetSelectedPiece()){
             MC->GetSelectedPiece()->Pick();
-            RestoreYad();
+            yad_->Restore();
         } else if (MC->InPutState() && BOARD->GetSelectedSquare()){
             BOARD->PutPiece(MC->GetPickedPiece(), BOARD->GetSelectedSquare());
-            RestoreYad();
+            yad_->Restore();
         //Zoom
         } else if (boardClick_ && RaycastToBoard()){
             CAMERA->ZoomToBoard();
@@ -303,20 +303,9 @@ void InputMaster::UpdateYad()
         if (mouseIdleTime_ > IDLE_THRESHOLD * 0.5f
          || hide)
         {
-            HideYad();
+            yad_->Hide();
         }
     }
-}
-void InputMaster::HideYad()
-{
-    yad_->hidden_ = true;
-    FX->FadeOut(yad_->light_);
-    FX->FadeOut(yad_->material_, 0.1f);
-}
-void InputMaster::RevealYad()
-{
-    yad_->hidden_ = false;
-    RestoreYad();
 }
 Vector3 InputMaster::YadRaycast(bool& none)
 {
@@ -330,7 +319,7 @@ Vector3 InputMaster::YadRaycast(bool& none)
             if (MC->InPickState()){
                 MC->SelectPiece(rayPiece_);
                 if (!yad_->hidden_)
-                    HideYad();
+                    yad_->Hide();
                 return yad_->node_->GetPosition(); //return
             }
             //Select square and dim yad when hovering over a square in a put state
@@ -339,9 +328,9 @@ Vector3 InputMaster::YadRaycast(bool& none)
             if (MC->InPutState()){
                 BOARD->Select(raySquare_);
                 if (yad_->hidden_)
-                    RevealYad();
+                    yad_->Reveal();
                 else if (!yad_->dimmed_)
-                    DimYad();
+                    yad_->Dim();
             }
         }
     }
@@ -360,10 +349,10 @@ Vector3 InputMaster::YadRaycast(bool& none)
         {
             BOARD->Deselect();
             if (yad_->dimmed_)
-                RestoreYad();
+                yad_->Restore();
         }
         if (yad_->hidden_ && !drag_)
-            RevealYad();
+            yad_->Reveal();
         if (!r.node_->HasTag("Piece")
          && !r.node_->HasTag("Square")
          && !r.node_->HasTag("Yad"))
@@ -371,15 +360,6 @@ Vector3 InputMaster::YadRaycast(bool& none)
     }
     none = true;
     return Vector3::ZERO; //return
-}
-void InputMaster::DimYad()
-{
-    FX->FadeTo(yad_->light_, YAD_DIMMED);
-}
-void InputMaster::RestoreYad()
-{
-    FX->FadeTo(yad_->light_, YAD_FULLBRIGHT);
-    FX->FadeTo(yad_->material_, COLOR_GLOW, 0.1f);
 }
 
 void InputMaster::SelectionButtonPressed()

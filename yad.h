@@ -24,6 +24,10 @@
 #include "mastercontrol.h"
 #include "luckey.h"
 
+#define YAD_FULLBRIGHT 0.5f
+#define YAD_DIMMED 0.1f
+
+
 class Yad : public LogicComponent
 {
     friend class InputMaster;
@@ -38,6 +42,11 @@ private:
     SharedPtr<Light> light_;
     bool hidden_;
     bool dimmed_;
+
+    void Dim();
+    void Hide();
+    void Reveal();
+    void Restore();
 };
 
 #endif // YAD_H

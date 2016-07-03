@@ -27,8 +27,6 @@
 #define DEADZONE 0.34f
 #define MOUSESPEED 0.23f
 
-#define YAD_FULLBRIGHT 0.5f
-#define YAD_DIMMED 0.1f
 #define DRAG_THRESHOLD 0.023f
 
 class Square;
@@ -67,8 +65,6 @@ private:
     void ResetIdle();
     void SetIdle();
     Ray MouseRay();
-    void HideYad();
-    void RevealYad();
 
     Piece* RaycastToPiece();
     Square* RaycastToSquare();
@@ -104,8 +100,6 @@ private:
     void HandleRightArrowPressed();
     void HandleLeftArrowPressed();
     bool CorrectJoystickId(int joystickId);
-    void DimYad();
-    void RestoreYad();
     void SelectionButtonPressed();
 };
 
