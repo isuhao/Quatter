@@ -28,7 +28,7 @@ void Piece::RegisterObject(Context *context)
 
 Piece::Piece(Context* context): LogicComponent(context),
     attributes_{},
-    state_{PieceState::FREE }
+    state_{PieceState::FREE}
 {
 }
 void Piece::OnNodeSet(Node* node)

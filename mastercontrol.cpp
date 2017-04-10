@@ -67,17 +67,25 @@ void MasterControl::Setup()
     engineParameters_["WindowTitle"] = "Quatter";
     engineParameters_["WindowIcon"] = "icon.png";
 
-    //Add resource path
-    Vector<String> resourcePaths{};
-    resourcePaths.Push(FILES->GetAppPreferencesDir("luckey", "quatter"));
-    resourcePaths.Push("Resources");
-    resourcePaths.Push("../Quatter/Resources");
+    //Add resource paths
+    String resourcePaths{};
 
-    for (String path : resourcePaths)
-        if (FILES->DirExists(path)){
-            engineParameters_["ResourcePaths"] = path;
-            break;
-        }
+    if (FILES->DirExists(FILES->GetAppPreferencesDir("luckey", "quatter")))
+        resourcePaths = FILES->GetAppPreferencesDir("luckey", "quatter");
+    else if (FILES->DirExists("Resources"))
+        resourcePaths = "Resources";
+    else if (FILES->DirExists("../Quatter/Resources"))
+        resourcePaths = "../Quatter/Resources";
+
+    resourceFolder_ = resourcePaths;
+    resourcePaths += ";";
+
+    if (FILES->DirExists("Data"))
+        resourcePaths += "Data;";
+    if (FILES->DirExists("CoreData"))
+        resourcePaths += "CoreData;";
+
+    engineParameters_[EP_RESOURCE_PATHS] = resourcePaths;
 
     //    engineParameters_["FullScreen"] = false;
     //    engineParameters_["WindowWidth"] = 1280;

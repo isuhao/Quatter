@@ -40,6 +40,7 @@ Board::Board(Context* context): LogicComponent(context),
     lastSelectedSquare_{}
 {
 }
+
 void Board::OnNodeSet(Node *node)
 { (void)node;
 

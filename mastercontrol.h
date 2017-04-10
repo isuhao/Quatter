@@ -69,6 +69,7 @@ class MasterControl : public Application
 public:
     MasterControl(Context* context);
     static MasterControl* GetInstance();
+    String GetResourceFolder() const { return resourceFolder_; }
 
     GameWorld world_;
 
@@ -114,6 +115,8 @@ public:
     float Cosine(const float freq, const float min = -1.0f, const float max = 1.0f, const float shift = 0.0f);
 private:
     static MasterControl* instance_;
+    String resourceFolder_;
+
     SharedPtr<Node> leafyLightNode_;
     SharedPtr<Light> leafyLight_;
 

@@ -41,7 +41,7 @@ void Indicator::OnNodeSet(Node *node)
     arrowNode2_->Rotate(Quaternion(90.0f, Vector3::UP));
     model2_ = arrowNode2_->CreateComponent<AnimatedModel>();
 
-    //Create light
+    //Create lights
     Node* lightNode1{arrowNode1_->CreateChild("Light")};
     lightNode1->SetPosition(Vector3::UP * 0.23f);
     light1_ = lightNode1->CreateComponent<Light>();
@@ -49,6 +49,7 @@ void Indicator::OnNodeSet(Node *node)
     light1_->SetBrightness(0.023f);
     light1_->SetRange(2.0f);
     light1_->SetCastShadows(false);
+
     Node* lightNode2{arrowNode2_->CreateChild("Light")};
     lightNode2->SetPosition(Vector3::UP * 0.23f);
     light2_ = lightNode2->CreateComponent<Light>();
@@ -60,28 +61,37 @@ void Indicator::OnNodeSet(Node *node)
 
 void Indicator::Init(int nth)
 {
-    arrowNode1_->SetPosition(Vector3::LEFT * (2.3f + 0.95f * (nth == 2 || nth == 3)) + Vector3::FORWARD * (nth >= 4));
+    arrowNode1_->SetPosition(Vector3::LEFT  * (2.3f + 0.95f * (nth == 2 || nth == 3)) + Vector3::FORWARD * (nth >= 4));
     arrowNode2_->SetPosition(Vector3::RIGHT * (2.3f + 0.95f * (nth == 2 || nth == 3)));
 
-    if (nth == 1)
+    switch (nth) {
+    case 1: case 5:
         node_->Rotate(Quaternion(90.0f, Vector3::UP));
-    else if (nth == 2)
+        break;
+    case 2:
         node_->Rotate(Quaternion(45.0f, Vector3::UP));
-    else if (nth == 3)
+        break;
+    case 3:
         node_->Rotate(Quaternion(-45.0f, Vector3::UP));
-    else if (nth == 5)
-        node_->Rotate(Quaternion(90.0f, Vector3::UP));
+        break;
+    default:
+        break;
+    }
 
-    if (nth < 4){
+    if (nth < 4) {
+
         model1_->SetModel(MC->GetModel("Arrow"));
         model1_->SetMorphWeight(0, static_cast<float>(nth < 2));
 
         model2_->SetModel(MC->GetModel("Arrow"));
         model2_->SetMorphWeight(0, static_cast<float>(nth < 2));
+
     } else {
+
         model1_->SetModel(MC->GetModel("BlockIndicator"));
         model2_->SetModel(MC->GetModel("BlockIndicator"));
     }
+
     model1_->SetMaterial(glow_);
     model2_->SetMaterial(glow_);
     model2_->GetMaterial()->SetShaderParameter("MatDiffColor", Color(0.0f, 0.0f, 0.0f, 0.0f));

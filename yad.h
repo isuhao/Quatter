@@ -27,7 +27,6 @@
 #define YAD_FULLBRIGHT 0.5f
 #define YAD_DIMMED 0.1f
 
-
 class Yad : public LogicComponent
 {
     friend class InputMaster;

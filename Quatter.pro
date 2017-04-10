@@ -5,8 +5,6 @@ LIBS += ../Quatter/Urho3D/lib/libUrho3D.a \
     -ldl \
     -lGL
 
-DEFINES += URHO3D_COMPILE_QT
-
 QMAKE_CXXFLAGS += -std=c++1y
 
 INCLUDEPATH += \
