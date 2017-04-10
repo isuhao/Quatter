@@ -43,6 +43,7 @@ void QuatterCam::OnNodeSet(Node *node)
     zone->SetFogStart(50.0f);
     zone->SetFogEnd(64.0f);
     zone->SetAmbientColor(Color(0.2f, 0.2f, 0.2f));
+    zone->SetZoneTexture(GetScene()->GetChild("Sky")->GetComponent<Skybox>()->GetMaterial(0)->GetTexture(TU_DIFFUSE));
 
     CreatePockets();
     SetupViewport();

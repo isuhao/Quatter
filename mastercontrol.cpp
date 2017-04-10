@@ -119,11 +119,12 @@ void MasterControl::CreateScene()
     world_.scene_ = new Scene(context_);
     world_.scene_->CreateComponent<Octree>();
 
+    CreateSkybox();
+
     Node* cameraNode{ world_.scene_->CreateChild("Camera") };
     world_.camera_ = cameraNode->CreateComponent<QuatterCam>();
 
     CreateLights();
-    CreateSkybox();
     CreateJukebox();
     CreateTable();
     CreateBoardAndPieces();
@@ -172,7 +173,7 @@ void MasterControl::CreateSkybox()
 {
     Node* skyNode{world_.scene_->CreateChild("Sky")};
     Skybox* skybox{skyNode->CreateComponent<Skybox>()};
-    skybox->SetModel(GetModel("Box"));
+    skybox->SetModel(GetModel("Sphere"));
     skybox->SetMaterial(GetMaterial("LeafyKnoll"));
 }
 void MasterControl::CreateJukebox()
