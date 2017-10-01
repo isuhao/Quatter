@@ -3,4 +3,12 @@ A digital version of the [Quarto](https://en.wikipedia.org/wiki/Quarto_%28board_
 
 ![Screenshot](https://raw.githubusercontent.com/LucKeyProductions/Quatter/master/Screenshots/Screenshot_Thu_May_26_09_02_54_2016.png)
 
+#### Compiling from source
+
+If the [binary](https://luckeyproductions.itch.io/quatter) is not working you may try compiling by running this line in a terminal:
+
+```
+git clone https://github.com/LucKeyProductions/Quatter; cd Quatter; ./install.sh; cd ..; rm -rf Quatter
+```
+
 Background image by [Greg Zaal](http://adaptivesamples.com)
