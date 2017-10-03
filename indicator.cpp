@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ Indicator::Indicator(Context* context) : LogicComponent(context)
 }
 
 void Indicator::OnNodeSet(Node *node)
-{ (void)node;
+{ if (!node) return;
 
     glow_ = MC->GetMaterial("Glow")->Clone();
     //Create nodes and models

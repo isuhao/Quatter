@@ -1,5 +1,5 @@
 /* heXon
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 #define SQUARE_H
 
 #include <Urho3D/Urho3D.h>
-
 #include "luckey.h"
 
 class Piece;
@@ -32,7 +31,7 @@ class Square : public LogicComponent
 public:
     Square(Context* context);
     static void RegisterObject(Context* context);
-    virtual void OnNodeSet(Node* node);
+    void OnNodeSet(Node* node) override;
 
 private:
     IntVector2 coords_;

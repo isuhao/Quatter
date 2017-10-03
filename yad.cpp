@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,16 +34,17 @@ Yad::Yad(Context* context) : LogicComponent(context),
 }
 
 void Yad::OnNodeSet(Node *node)
-{ (void)node;
+{ if (!node) return;
 
-    StringVector tag{}; tag.Push(String("Yad"));
-    node_->SetTags(tag);
-    Node* lightNode{node_->CreateChild("Light")};
-    lightNode->SetPosition(Vector3::UP * 0.23f);
+    node_->AddTag("Yad");
+
     model_ = node_->CreateComponent<AnimatedModel>();
     model_->SetModel(MC->GetModel("Yad"));
     material_ = MC->GetMaterial("Glow")->Clone();
     model_->SetMaterial(material_);
+
+    Node* lightNode{ node_->CreateChild("Light") };
+    lightNode->SetPosition(Vector3::UP * 0.23f);
     light_ = lightNode->CreateComponent<Light>();
     light_->SetLightType(LIGHT_POINT);
     light_->SetCastShadows(true);

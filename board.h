@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -40,10 +40,11 @@ class Indicator;
 class Board : public LogicComponent
 {
     URHO3D_OBJECT(Board, LogicComponent);
+
 public:
     Board(Context* context);
     static void RegisterObject(Context* context);
-    virtual void OnNodeSet(Node* node);
+    void OnNodeSet(Node* node) override;
 
     float GetThickness() const { return model_->GetBoundingBox().Size().y_; }
 
@@ -70,8 +71,8 @@ public:
     bool IsEmpty() const;
     bool IsFull() const;
     void HideIndicators();
+
 private:
-    bool indicateSingle_;
     StaticModel* model_;
 
     HashMap<IntVector2, SharedPtr<Square>> squares_;

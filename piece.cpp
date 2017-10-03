@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,11 +32,10 @@ Piece::Piece(Context* context): LogicComponent(context),
 {
 }
 void Piece::OnNodeSet(Node* node)
-{ (void)node;
+{ if (!node) return;
 
     node_->SetRotation(Quaternion(Random(360.0f), Vector3::UP));
-    StringVector tag{}; tag.Push(String("Piece"));
-    node_->SetTags(tag);
+    node_->AddTag("Piece");
 
     pieceModel_ = node_->CreateComponent<StaticModel>();
     pieceModel_->SetCastShadows(true);
@@ -44,7 +43,7 @@ void Piece::OnNodeSet(Node* node)
     outlineModel_ = node_->CreateComponent<StaticModel>();
     outlineModel_->SetCastShadows(false);
 
-    Node* lightNode{node_->CreateChild("Light")};
+    Node* lightNode{ node_->CreateChild("Light") };
     lightNode->SetPosition(Vector3::UP * 0.5f);
     light_ = lightNode->CreateComponent<Light>();
     light_->SetColor(Color(0.0f, 0.8f, 0.5f));
@@ -56,12 +55,16 @@ void Piece::OnNodeSet(Node* node)
 void Piece::Init(PieceAttributes attributes)
 {
     attributes_ = attributes;
-
     pieceModel_->SetModel(MC->GetModel("Piece_" + GetCodon(3)));
-    if (attributes[3]){
+
+    if (attributes[3]) {
+
         pieceModel_->SetMaterial(MC->GetMaterial("Wood_light"));
+
+    } else {
+
+        pieceModel_->SetMaterial(MC->GetMaterial("Wood_dark"));
     }
-    else pieceModel_->SetMaterial(MC->GetMaterial("Wood_dark"));
 
     outlineModel_->SetModel(MC->GetModel("Piece_"+GetCodon(2)+"_outline"));
     outlineModel_->SetMaterial(MC->GetMaterial("Glow")->Clone());
@@ -96,13 +99,13 @@ String Piece::GetCodon(int length) const
 
     String codon{};
 
-        codon += !attributes_[0] ? "S" : "T"; //Tall  : Short
+        codon += attributes_[0] ? "T" : "S"; //Tall  : Short
     if (length > 1)
-        codon += !attributes_[1] ? "S" : "R"; //Round : Square
+        codon += attributes_[1] ? "R" : "S"; //Round : Square
     if (length > 2)
-        codon += !attributes_[2] ? "S" : "H"; //Hole  : Solid
+        codon += attributes_[2] ? "H" : "S"; //Hole  : Solid
     if (length == NUM_ATTRIBUTES)
-        codon += !attributes_[3] ? "D" : "L"; //Light : Dark
+        codon += attributes_[3] ? "L" : "D"; //Light : Dark
 
     return codon;
 }
@@ -113,17 +116,18 @@ void Piece::Select()
          MC->GetGameState() == GameState::PLAYER2PICKS))
     {
         outlineModel_->SetEnabled(true);
-        if (state_ == PieceState::FREE){
+
+        if (state_ == PieceState::FREE) {
+
             state_ = PieceState::SELECTED;
-            FX->FadeTo(outlineModel_->GetMaterial(),
-                                      COLOR_GLOW);
+            FX->FadeTo(outlineModel_->GetMaterial(), COLOR_GLOW);
             FX->FadeTo(light_, 0.666f);
         }
     }
 }
 void Piece::Deselect()
 {
-    if (state_ == PieceState::SELECTED){
+    if (state_ == PieceState::SELECTED) {
 
         state_ = PieceState::FREE;
         FX->FadeOut(outlineModel_->GetMaterial());
@@ -132,10 +136,11 @@ void Piece::Deselect()
 }
 void Piece::Pick()
 {
-    if (state_ != PieceState::PUT){
+    if (state_ != PieceState::PUT) {
 
         state_ = PieceState::PICKED;
         MC->SetPickedPiece(this);
+
         if (MC->GetGameState() == GameState::PLAYER1PICKS)
             node_->SetParent(CAMERA->GetPocket(false));
         if (MC->GetGameState() == GameState::PLAYER2PICKS)
@@ -151,7 +156,7 @@ void Piece::Pick()
 }
 void Piece::Put(Vector3 position)
 {
-    if (state_ == PieceState::PICKED){
+    if (state_ == PieceState::PICKED) {
 
         state_ = PieceState::PUT;
         MC->SetPickedPiece(nullptr);

@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,9 +35,9 @@ class EffectMaster;
 class Board;
 class Piece;
 
-enum class GameState{PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS, QUATTER};
-enum MusicState{MUSIC_SONG1, MUSIC_SONG2, MUSIC_OFF};
-enum SelectionMode{SM_CAMERA, SM_STEP, SM_YAD};
+enum class GameState{ PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS, QUATTER };
+enum MusicState{ MUSIC_SONG1, MUSIC_SONG2, MUSIC_OFF };
+enum SelectionMode{ SM_CAMERA, SM_STEP, SM_YAD };
 
 typedef struct GameWorld
 {
@@ -45,11 +45,6 @@ typedef struct GameWorld
     SharedPtr<Scene> scene_;
     SharedPtr<Board> board_;
     Vector< SharedPtr<Piece> > pieces_;
-    struct {
-        SharedPtr<Node> sceneCursor_;
-        SharedPtr<Cursor> uiCursor_;
-        PODVector<RayQueryResult> hitResults_;
-    } cursor_;
 } GameWorld;
 
 #define MC MasterControl::GetInstance()
@@ -66,6 +61,7 @@ class MasterControl : public Application
 {
     URHO3D_OBJECT(MasterControl, Application);
     friend class InputMaster;
+
 public:
     MasterControl(Context* context);
     static MasterControl* GetInstance();
@@ -73,9 +69,9 @@ public:
 
     GameWorld world_;
 
-    virtual void Setup();
-    virtual void Start();
-    virtual void Stop();
+    void Setup() override;
+    void Start() override;
+    void Stop() override;
 
     void Exit();
     void CreateLights();
@@ -93,15 +89,15 @@ public:
     void NextMusicState();
     void TakeScreenshot();
 
-    float AttributesToAngle(int attributes) const { return (360.0f/NUM_PIECES * attributes) + 180.0f/NUM_PIECES + 23.5f; }
+    float AttributesToAngle(int attributes) const { return (360.0f/NUM_PIECES * attributes) + 180.0f / NUM_PIECES + 23.5f; }
     Vector3 AttributesToPosition(int attributes) const {
         return Quaternion(AttributesToAngle(attributes), Vector3::UP) * Vector3::BACK * 7.0f
                 + Vector3::DOWN * TABLE_DEPTH;
     }
 
-    Material* GetMaterial(String name) const { return CACHE->GetResource<Material>("Materials/"+name+".xml"); }
-    Model* GetModel(String name) const { return CACHE->GetResource<Model>("Models/"+name+".mdl"); }
-    Texture* GetTexture(String name) const { return CACHE->GetResource<Texture>("Textures/"+name+".png"); }
+    Material* GetMaterial(String name) const { return CACHE->GetResource<Material>("Materials/" + name + ".xml"); }
+    Model* GetModel(String name) const { return CACHE->GetResource<Model>("Models/" + name + ".mdl"); }
+    Texture* GetTexture(String name) const { return CACHE->GetResource<Texture>("Textures/" + name + ".png"); }
     Sound* GetMusic(String name) const;
     Sound* GetSample(String name) const;
 
@@ -113,6 +109,7 @@ public:
 
     float Sine(const float freq, const float min = -1.0f, const float max = 1.0f, const float shift = 0.0f);
     float Cosine(const float freq, const float min = -1.0f, const float max = 1.0f, const float shift = 0.0f);
+
 private:
     static MasterControl* instance_;
     String resourceFolder_;

@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -144,10 +144,11 @@ void MasterControl::CreateLights()
     leafyLight_->SetShapeTexture(static_cast<Texture*>(CACHE->GetResource<Texture2D>("Textures/LeafyMask.png")));
 
     //Add a directional light to the world. Enable cascaded shadows on it
-    Node* downardsLightNode{world_.scene_->CreateChild("DirectionalLight")};
+    Node* downardsLightNode{ world_.scene_->CreateChild("DirectionalLight") };
     downardsLightNode->SetPosition(Vector3(2.0f, 23.0f, 3.0f));
-    downardsLightNode->LookAt(Vector3(0.0f, 0.0f, 0.0f));
-    Light* downwardsLight{downardsLightNode->CreateComponent<Light>()};
+    downardsLightNode->LookAt(Vector3::ZERO);
+
+    Light* downwardsLight{ downardsLightNode->CreateComponent<Light>() };
     downwardsLight->SetLightType(LIGHT_DIRECTIONAL);
     downwardsLight->SetBrightness(0.34f);
     downwardsLight->SetColor(Color(0.8f, 0.9f, 0.95f));
@@ -156,10 +157,12 @@ void MasterControl::CreateLights()
     downwardsLight->SetShadowCascade(CascadeParameters(7.0f, 13.0f, 23.0f, 42.0f, 0.6));
 
     //Create point lights
-    for (Vector3 pos : {Vector3(-10.0f, 8.0f, -23.0f), Vector3(-20.0f, -8.0f, 23.0f), Vector3(20.0f, -7.0f, 23.0f)}){
-        Node* pointLightNode_{world_.scene_->CreateChild("PointLight")};
+    for (Vector3 pos : { Vector3(-10.0f, 8.0f, -23.0f), Vector3(-20.0f, -8.0f, 23.0f), Vector3(20.0f, -7.0f, 23.0f) }) {
+
+        Node* pointLightNode_{ world_.scene_->CreateChild("PointLight") };
         pointLightNode_->SetPosition(pos);
-        Light* pointLight{pointLightNode_->CreateComponent<Light>()};
+
+        Light* pointLight{ pointLightNode_->CreateComponent<Light>() };
         pointLight->SetLightType(LIGHT_POINT);
         pointLight->SetBrightness(0.42f);
         pointLight->SetRange(42.0f);
@@ -171,16 +174,16 @@ void MasterControl::CreateLights()
 }
 void MasterControl::CreateSkybox()
 {
-    Node* skyNode{world_.scene_->CreateChild("Sky")};
-    Skybox* skybox{skyNode->CreateComponent<Skybox>()};
+    Node* skyNode{ world_.scene_->CreateChild("Sky") };
+    Skybox* skybox{ skyNode->CreateComponent<Skybox>() };
     skybox->SetModel(GetModel("Sphere"));
     skybox->SetMaterial(GetMaterial("LeafyKnoll"));
 }
 void MasterControl::CreateJukebox()
 {
-    Sound* song1{GetMusic("Angelight - The Knowledge River")};
-    Sound* song2{GetMusic("Cao Sao Vang - Days Of Yore")};
-    Node* musicNode{world_.scene_->CreateChild("Music")};
+    Sound* song1{ GetMusic("Angelight - The Knowledge River") };
+    Sound* song2{ GetMusic("Angelight - The Knowledge River") };
+    Node* musicNode{ world_.scene_->CreateChild("Music") };
 
     musicSource1_ = musicNode->CreateComponent<SoundSource>();
     musicSource1_->SetSoundType(SOUND_MUSIC);
@@ -194,19 +197,21 @@ void MasterControl::CreateJukebox()
 }
 void MasterControl::CreateTable()
 {
-    Node* tableNode{world_.scene_->CreateChild("Table")};
-    StringVector tag{}; tag.Push(String("Table"));
-    tableNode->SetTags(tag);
+    Node* tableNode{ world_.scene_->CreateChild("Table") };
+    tableNode->AddTag("Table");
     tableNode->SetRotation(Quaternion(23.5f, Vector3::UP));
-    StaticModel* tableModel = tableNode->CreateComponent<StaticModel>();
+
+    StaticModel* tableModel{ tableNode->CreateComponent<StaticModel>() };
     tableModel->SetModel(GetModel("Table"));
     tableModel->SetMaterial(GetMaterial("Table"));
     tableModel->GetMaterial()->SetShaderParameter("MatDiffColor", Vector4(0.32f, 0.40f, 0.42f, 1.0f));
     tableModel->SetCastShadows(true);
-    Node* hitNode{world_.scene_->CreateChild("HitPlane")};
+
+    Node* hitNode{ world_.scene_->CreateChild("HitPlane") };
     hitNode->SetPosition(Vector3::DOWN * 1.23f);
     hitNode->SetScale(128.0f);
-    StaticModel* hitPlane{hitNode->CreateComponent<StaticModel>()};
+
+    StaticModel* hitPlane{ hitNode->CreateComponent<StaticModel>() };
     hitPlane->SetModel(MC->GetModel("Plane"));
     hitPlane->SetMaterial(MC->GetMaterial("Invisible"));
 }
@@ -215,10 +220,11 @@ void MasterControl::CreateBoardAndPieces()
     Node* boardNode{ world_.scene_->CreateChild("Board") };
     world_.board_ = boardNode->CreateComponent<Board>();
     world_.pieces_.Reserve(NUM_PIECES);
+
     for (int p{0}; p < NUM_PIECES; ++p){
 
         Node* pieceNode{ world_.scene_->CreateChild("Piece") };
-        Piece* newPiece = pieceNode->CreateComponent<Piece>();
+        Piece* newPiece{ pieceNode->CreateComponent<Piece>() };
         newPiece->Init(Piece::PieceAttributes(p));
 
         world_.pieces_.Push(SharedPtr<Piece>(newPiece));
@@ -229,14 +235,18 @@ void MasterControl::CreateBoardAndPieces()
     }
 }
 
-Sound* MasterControl::GetMusic(String name) const {
+Sound* MasterControl::GetMusic(String name) const
+{
     Sound* song{ CACHE->GetResource<Sound>("Music/"+name+".ogg") };
     song->SetLooped(true);
+
     return song;
 }
-Sound* MasterControl::GetSample(String name) const {
+Sound* MasterControl::GetSample(String name) const
+{
     Sound* sample{ CACHE->GetResource<Sound>("Samples/"+name+".ogg") };
     sample->SetLooped(false);
+
     return sample;
 }
 
@@ -263,8 +273,9 @@ void MasterControl::CameraSelectPiece(bool force)
     if (!force && IsLame())
         return;
 
-    Piece* nearest{selectedPiece_};
-    for (Piece* piece: world_.pieces_){
+    Piece* nearest{ selectedPiece_ };
+
+    for (Piece* piece : world_.pieces_) {
         if (!nearest
          && (piece->GetState() == PieceState::FREE || piece->GetState() == PieceState::SELECTED))
         {
@@ -276,23 +287,27 @@ void MasterControl::CameraSelectPiece(bool force)
             nearest = piece;
         }
     }
-    if (nearest != selectedPiece_){
+
+    if (nearest != selectedPiece_) {
         SelectPiece(nearest);
     }
 }
 bool MasterControl::SelectLastPiece()
 {
-    if (lastSelectedPiece_){
+    if (lastSelectedPiece_) {
+
         SelectPiece(lastSelectedPiece_);
         return true;
+
     } else
+
         return false;
 }
 void MasterControl::StepSelectPiece(bool next)
 {
     SetSelectionMode(SM_STEP);
 
-    if (selectedPiece_){
+    if (selectedPiece_) {
         int selectInt{selectedPiece_->ToInt()};
 
         while (world_.pieces_.At(selectInt)->GetState() != PieceState::FREE){
@@ -362,7 +377,7 @@ void MasterControl::Reset()
 {
     lastReset_ = TIME->GetElapsedTime();
 
-    for (Piece* p: world_.pieces_){
+    for (Piece* p : world_.pieces_){
 
         p->Reset();
     }
@@ -468,7 +483,7 @@ void MasterControl::MusicGainDown(float step)
 
 void MasterControl::TakeScreenshot()
 {
-    Image screenshot{context_};
+    Image screenshot{ context_ };
     GRAPHICS->TakeScreenShot(screenshot);
     //Here we save in the Screenshots folder with date and time appended
     String fileName{GetSubsystem<FileSystem>()->GetProgramDir() + "Screenshots/Screenshot_" +
@@ -479,13 +494,15 @@ void MasterControl::TakeScreenshot()
 
 float MasterControl::Sine(const float freq, const float min, const float max, const float shift)
 {
-    float phase{freq * world_.scene_->GetElapsedTime() + shift};
-    float add{0.5f * (min + max)};
+    float phase{ freq * world_.scene_->GetElapsedTime() + shift };
+    float add{ 0.5f * (min + max) };
+
     return LucKey::Sine(phase) * 0.5f * (max - min) + add;
 }
 float MasterControl::Cosine(const float freq, const float min, const float max, const float shift)
 {
-    float phase{freq * world_.scene_->GetElapsedTime() + shift};
-    float add{0.5f * (min + max)};
+    float phase{ freq * world_.scene_->GetElapsedTime() + shift };
+    float add{ 0.5f * (min + max) };
+
     return LucKey::Cosine(phase) * 0.5f * (max - min) + add;
 }

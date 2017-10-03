@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@ void Board::RegisterObject(Context *context)
 }
 
 Board::Board(Context* context): LogicComponent(context),
-    indicateSingle_{false},
     squares_{},
     selectedSquare_{},
     lastSelectedSquare_{}
@@ -42,10 +41,9 @@ Board::Board(Context* context): LogicComponent(context),
 }
 
 void Board::OnNodeSet(Node *node)
-{ (void)node;
+{ if (!node) return;
 
-    StringVector tag{}; tag.Push(String("Board"));
-    node_->SetTags(tag);
+    node_->AddTag("Board");
     model_ = node_->CreateComponent<StaticModel>();
     model_->SetModel(MC->GetModel("Board"));
     model_->SetMaterial(MC->GetMaterial("Board"));
@@ -59,19 +57,22 @@ void Board::OnNodeSet(Node *node)
 
 void Board::CreateSquares()
 {
-    for (int i{0}; i < BOARD_WIDTH; ++i) for (int j{0}; j < BOARD_HEIGHT; ++j){
-        Node* squareNode{ node_->CreateChild("Square") };
-        Square* square{ squareNode->CreateComponent<Square>() };
-        IntVector2 coords{ i, j };
-        square->coords_ = coords;
-        squareNode->SetPosition(CoordsToPosition(coords));
-        squares_[square->coords_] = square;
+    for (int i{0}; i < BOARD_WIDTH; ++i)
+        for (int j{0}; j < BOARD_HEIGHT; ++j) {
 
+            Node* squareNode{ node_->CreateChild("Square") };
+            Square* square{ squareNode->CreateComponent<Square>() };
+            IntVector2 coords{ i, j };
+
+            square->coords_ = coords;
+            squareNode->SetPosition(CoordsToPosition(coords));
+            squares_[square->coords_] = square;
     }
 }
 void Board::CreateIndicators()
 {
-    for (int i{0}; i < 6; ++i){
+    for (int i{0}; i < 6; ++i) {
+
         Node* indicatorNode{ node_->CreateChild("Indicator") };
         indicatorNode->SetPosition(GetThickness() * Vector3::UP);
         Indicator* indicator{ indicatorNode->CreateComponent<Indicator>() };
@@ -82,7 +83,7 @@ void Board::CreateIndicators()
 }
 void Board::Reset()
 {
-    for (Square* s: squares_.Values()){
+    for (Square* s: squares_.Values()) {
 
         s->free_ = true;
         s->piece_ = nullptr;
@@ -95,27 +96,33 @@ void Board::Reset()
 
 void Board::Refuse()
 {
-    if (selectedSquare_){
-        Material* glow{selectedSquare_->slot_->GetMaterial()};
+    if (selectedSquare_) {
+
+        Material* glow{ selectedSquare_->slot_->GetMaterial() };
         glow->SetShaderParameter("MatDiffColor", Color(1.0f, 0.0f, 0.0f, 1.0f));
         if (selectedSquare_->free_)
             FX->FadeTo(glow, COLOR_GLOW, 0.23f);
         else
-            FX->FadeTo(glow,Color(1.0f, 0.8f, 0.0f, 0.5f), 0.23f);
+            FX->FadeTo(glow, Color(1.0f, 0.8f, 0.0f, 0.5f), 0.23f);
     }
 }
 
 bool Board::IsEmpty() const
 {
-    for (Square* s: squares_.Values())
-        if (!s->free_) return false;
+    for (Square* s : squares_.Values()) {
+
+        if (!s->free_)
+            return false;
+    }
 
     return true;
 }
 bool Board::IsFull() const
 {
-    for (Square* s: squares_.Values())
+    for (Square* s : squares_.Values()) {
+
         if (s->free_) return false;
+    }
 
     return true;
 }
@@ -128,10 +135,9 @@ Vector3 Board::CoordsToPosition(IntVector2 coords)
 }
 
 void Board::HandleSceneUpdate(StringHash eventType, VariantMap& eventData)
-{
-    (void)eventType;
+{ (void)eventType; (void)eventData;
 
-    for (Square* s: squares_.Values()){
+    for (Square* s : squares_.Values()){
 
         s->slot_->SetMorphWeight(0, MC->Sine(2.3f, 0.0f, 1.0f));
 
@@ -140,11 +146,12 @@ void Board::HandleSceneUpdate(StringHash eventType, VariantMap& eventData)
 
 bool Board::PutPiece(Piece* piece, Square* square)
 {
-    if (!square){
+    if (!square) {
+
         return PutPiece(piece);
     }
 
-    if (piece && square->free_){
+    if (piece && square->free_) {
 
         MC->DeselectPiece();
 
@@ -260,124 +267,171 @@ void Board::Step(IntVector2 step)
 
 bool Board::CheckQuatter()
 {
-    bool checkBlocks{true};
+    bool checkBlocks{ true };
 
     //Check rows
-    for (int j{0}; j < BOARD_HEIGHT; ++j){
+    for (int j{0}; j < BOARD_HEIGHT; ++j) {
+
         Piece::PieceAttributes matching{};
         matching.flip();
         Piece::PieceAttributes first{};
-        for (int i{0}; i < BOARD_WIDTH; ++i){
+
+        for (int i{0}; i < BOARD_WIDTH; ++i) {
+
             IntVector2 coords(i, j);
             Piece* piece{squares_[coords].Get()->piece_};
-            if (piece){
-                Piece::PieceAttributes attributes(piece->GetPieceAttributes());
+
+            if (piece) {
+
+                Piece::PieceAttributes attributes{ piece->GetPieceAttributes() };
+
                 if (i == 0) {
+
                     first = attributes;
+
                 } else {
+
                     for (int a{0}; a < NUM_ATTRIBUTES; ++a)
                         if (first[a] != attributes[a])
                             matching[a] = false;
                 }
             //Full row required
             } else {
+
                 matching.reset();
                 break;
             }
         }
         //Quatter!
-        if (matching.any()){
+        if (matching.any()) {
+
             Indicate(IntVector2(0, j), IntVector2(BOARD_WIDTH - 1, j));
             return true;
         }
     }
 
     //Check columns
-    for (int i{0}; i < BOARD_WIDTH; ++i){
+    for (int i{0}; i < BOARD_WIDTH; ++i) {
+
         Piece::PieceAttributes matching{};
         matching.flip();
         Piece::PieceAttributes first{};
-        for (int j{0}; j < BOARD_HEIGHT; ++j){
-            IntVector2 coords(i, j);
-            Piece* piece{squares_[coords].Get()->piece_};
-            if (piece){
-                Piece::PieceAttributes attributes{piece->GetPieceAttributes()};
+
+        for (int j{0}; j < BOARD_HEIGHT; ++j) {
+
+            IntVector2 coords{ i, j };
+            Piece* piece{ squares_[coords].Get()->piece_ };
+
+            if (piece) {
+
+                Piece::PieceAttributes attributes{ piece->GetPieceAttributes() };
+
                 if (j == 0) {
+
                     first = attributes;
+
                 } else {
+
                     for (int a{0}; a < NUM_ATTRIBUTES; ++a)
                         if (first[a] != attributes[a])
                             matching[a] = false;
                 }
             //Full column required
             } else {
+
                 matching.reset();
                 break;
             }
         }
         //Quatter!
-        if (matching.any()){
-            Indicate(IntVector2(i, 0), IntVector2(i, BOARD_HEIGHT - 1));
+        if (matching.any()) {
+
+            Indicate(IntVector2{i, 0}, IntVector2{i, BOARD_HEIGHT - 1});
             return true;
         }
     }
+
     //Check diagonals
-    for (bool direction : {true, false}){
+    for (bool direction : { true, false }) {
+
         Piece::PieceAttributes matching{};
         matching.flip();
         Piece::PieceAttributes first{};
-        for (int i{0}; i < BOARD_WIDTH; ++i){
-            IntVector2 coords(i, direction ? i : (BOARD_WIDTH - i - 1));
-            Piece* piece{squares_[coords].Get()->piece_};
-            if (piece){
-                Piece::PieceAttributes attributes(piece->GetPieceAttributes());
+
+        for (int i{0}; i < BOARD_WIDTH; ++i) {
+
+            IntVector2 coords{ i, direction ? i : (BOARD_WIDTH - i - 1) };
+            Piece* piece{ squares_[coords].Get()->piece_ };
+
+            if (piece) {
+
+                Piece::PieceAttributes attributes{ piece->GetPieceAttributes() };
+
                 if (i == 0) {
+
                     first = attributes;
+
                 } else {
+
                     for (int a{0}; a < NUM_ATTRIBUTES; ++a)
                         if (first[a] != attributes[a])
                             matching[a] = false;
                 }
                 //Full line required
             } else {
+
                 matching.reset();
                 break;
             }
         }
         //Quatter!
-        if (matching.any()){
-            Indicate(IntVector2(0, direction * (BOARD_HEIGHT - 1)),
-                     IntVector2(BOARD_WIDTH - 1, !direction * (BOARD_HEIGHT - 1)));
+        if (matching.any()) {
+
+            Indicate(IntVector2{ 0, direction * (BOARD_HEIGHT - 1) },
+                     IntVector2{ BOARD_WIDTH - 1, !direction * (BOARD_HEIGHT - 1) });
             return true;
         }
     }
+
     //Check 2x2 blocks
-    if (checkBlocks){
-        for (int k{0}; k < BOARD_WIDTH - 1; ++k){
-            for (int l{0}; l < BOARD_HEIGHT - 1; ++l){
+    if (checkBlocks) {
+
+        for (int k{0}; k < BOARD_WIDTH - 1; ++k) {
+            for (int l{0}; l < BOARD_HEIGHT - 1; ++l) {
+
                 Piece::PieceAttributes matching{};
                 matching.flip();
                 Piece::PieceAttributes first{};
-                for (int m : {0, 1}) for (int n : {0, 1}){
+
+                for (int m : {0, 1}) for (int n : {0, 1}) {
+
                     IntVector2 coords(k + m, l + n);
                     Piece* piece{squares_[coords].Get()->piece_};
-                    if (piece){
+
+                    if (piece) {
+
                         Piece::PieceAttributes attributes(piece->GetPieceAttributes());
+
                         if (m == 0 && n == 0) {
+
                             first = attributes;
+
                         } else {
+
                             for (int a{0}; a < NUM_ATTRIBUTES; ++a)
                                 if (first[a] != attributes[a])
                                     matching[a] = false;
                         }
                         //Full block required
                     } else {
+
                         matching.reset();
                         break;
                     }
                 }
                 //Quatter!
-                if (matching.any()){
+                if (matching.any()) {
+
                     Indicate(IntVector2(k, l),
                              IntVector2(k + 1, l + 1));
                     return true;
@@ -391,43 +445,38 @@ bool Board::CheckQuatter()
 }
 void Board::Indicate(IntVector2 first, IntVector2 last)
 {
-    //Indicate single square
-    if (last == IntVector2(-1, -1)){
-        if (indicateSingle_){
-            FadeInIndicator(indicators_[0]);
-            FX->TransformTo(indicators_[0]->GetNode(),
-                    CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f),
-                    indicators_[0]->GetNode()->GetRotation(),
-                    0.23f);
-            FadeInIndicator(indicators_[1]);
-            FX->TransformTo(indicators_[1]->GetNode(),
-                    CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f),
-                    indicators_[1]->GetNode()->GetRotation(),
-                    0.23f);
-        }
     //Indicate row
-    } else if (first.y_ == last.y_){
+    if (first.y_ == last.y_) {
+
         FadeInIndicator(indicators_[0]);
         indicators_[0]->GetNode()->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
         indicators_[0]->model1_->SetMorphWeight(1, static_cast<float>(first.y_ > 0 && first.y_ < 3));
         indicators_[0]->model2_->SetMorphWeight(1, static_cast<float>(first.y_ > 0 && first.y_ < 3));
+
     //Indicate column
-    } else if (first.x_ == last.x_){
+    } else if (first.x_ == last.x_) {
+
         FadeInIndicator(indicators_[1]);
         indicators_[1]->GetNode()->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
         indicators_[1]->model1_->SetMorphWeight(1, static_cast<float>(first.x_ > 0 && first.x_ < 3));
         indicators_[1]->model2_->SetMorphWeight(1, static_cast<float>(first.x_ > 0 && first.x_ < 3));
+
     //Indicate first diagonal
-    } else if (first.x_ == 0 && last.y_ == 0){
+    } else if (first.x_ == 0 && last.y_ == 0) {
+
         FadeInIndicator(indicators_[3]);
+
     //Indicate 2x2 blocks
     } else if (last.x_ - first.x_ == 1) {
+
         FadeInIndicator(indicators_[4]);
         indicators_[4]->GetNode()->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
         FadeInIndicator(indicators_[5]);
         indicators_[5]->GetNode()->SetPosition(CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f));
+
     //Indicate other diagonal
     } else
+
         FadeInIndicator(indicators_[2]);
 }
 void Board::FadeInIndicator(Indicator* indicator)

@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ class Yad;
 class InputMaster : public Master
 {
     URHO3D_OBJECT(InputMaster, Master);
+
 public:
     InputMaster(Context* context);
     bool IsIdle() const noexcept { return idle_; }

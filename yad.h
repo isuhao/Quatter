@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,8 +20,6 @@
 #define YAD_H
 
 #include <Urho3D/Urho3D.h>
-
-#include "mastercontrol.h"
 #include "luckey.h"
 
 #define YAD_FULLBRIGHT 0.5f
@@ -31,10 +29,12 @@ class Yad : public LogicComponent
 {
     friend class InputMaster;
     URHO3D_OBJECT(Yad, LogicComponent);
+
 public:
     Yad(Context* context);
     static void RegisterObject(Context* context);
-    virtual void OnNodeSet(Node* node);
+    void OnNodeSet(Node* node) override;
+
 private:
     SharedPtr<AnimatedModel> model_;
     SharedPtr<Material> material_;

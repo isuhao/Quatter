@@ -1,5 +1,5 @@
 /*
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -98,11 +98,11 @@ class Camera;
 using namespace Urho3D;
 namespace LucKey {
 
-enum SixaxisButton {  SB_SELECT, SB_LEFTSTICK, SB_RIGHTSTICK, SB_START,
-                      SB_DPAD_UP, SB_DPAD_RIGHT, SB_DPAD_DOWN, SB_DPAD_LEFT,
-                      SB_L2, SB_R2, SB_L1, SB_R1,
-                      SB_TRIANGLE, SB_CIRCLE, SB_CROSS, SB_SQUARE,
-                      SB_PS };
+enum SixaxisButton { SB_SELECT, SB_LEFTSTICK, SB_RIGHTSTICK, SB_START,
+                     SB_DPAD_UP, SB_DPAD_RIGHT, SB_DPAD_DOWN, SB_DPAD_LEFT,
+                     SB_L2, SB_R2, SB_L1, SB_R1,
+                     SB_TRIANGLE, SB_CIRCLE, SB_CROSS, SB_SQUARE,
+                     SB_PS };
 
 unsigned IntVector2ToHash(IntVector2 vec);
 

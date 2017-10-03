@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ void InputMaster::ConstructYad()
 void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
 
-    float t{eventData[Update::P_TIMESTEP].GetFloat()};
+    float t{ eventData[Update::P_TIMESTEP].GetFloat() };
     idleTime_ += t;
     mouseIdleTime_ += t;
     sinceStep_ += t;
@@ -88,23 +88,29 @@ void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
 
 void InputMaster::HandleKeys()
 {
-    for (int key: pressedKeys_){
-        switch (key){
-        case KEY_SPACE:{
+    for (int key : pressedKeys_) {
+
+        switch (key) {
+        case KEY_SPACE:
             ActionButtonPressed();
-        } break;
-        case KEY_TAB: {
+            break;
+        case KEY_TAB:
             SelectionButtonPressed();
-        }
-        case KEY_UP:{ Step(Vector3::UP);
-        } break;
-        case KEY_DOWN:{ Step(Vector3::DOWN);
-        } break;
-        case KEY_RIGHT:{ Step(Vector3::RIGHT);
-        } break;
-        case KEY_LEFT:{ Step(Vector3::LEFT);
-        } break;
-        default: break;
+            break;
+        case KEY_UP:
+            Step(Vector3::UP);
+            break;
+        case KEY_DOWN:
+            Step(Vector3::DOWN);
+            break;
+        case KEY_RIGHT:
+            Step(Vector3::RIGHT);
+            break;
+        case KEY_LEFT:
+            Step(Vector3::LEFT);
+            break;
+        default:
+            break;
         }
     }
 }
@@ -113,30 +119,28 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
 
     ResetIdle();
 
-    int key{eventData[KeyDown::P_KEY].GetInt()};
+    int key{ eventData[KeyDown::P_KEY].GetInt() };
     pressedKeys_.Insert(key);
 
-    switch (key){
-    case KEY_ESCAPE:{
-        if (!BOARD->IsEmpty()
-         || MC->GetSelectedPiece()
-         || MC->GetPickedPiece())
-        {
+    switch (key) {
+    case KEY_ESCAPE:
+        if (!BOARD->IsEmpty() || MC->GetSelectedPiece() || MC->GetPickedPiece()) {
             MC->Reset();
+
         } else MC->Exit();
-    } break;
-    case KEY_9:{
+        break;
+    case KEY_9:
         MC->TakeScreenshot();
-    } break;
-    case KEY_M: {
+        break;
+    case KEY_M:
         MC->NextMusicState();
-    } break;
-    case KEY_KP_PLUS: {
+        break;
+    case KEY_KP_PLUS:
         MC->MusicGainUp(VOLUME_STEP);
-    } break;
-    case KEY_KP_MINUS: {
+        break;
+    case KEY_KP_MINUS:
         MC->MusicGainDown(VOLUME_STEP);
-    } break;
+        break;
     default: break;
     }
 }
@@ -145,10 +149,10 @@ void InputMaster::HandleKeyUp(StringHash eventType, VariantMap &eventData)
 
     ResetIdle();
 
-    using namespace KeyUp;
-    int key{eventData[P_KEY].GetInt()};
+    int key{ eventData[KeyUp::P_KEY].GetInt() };
 
-    if (key == KEY_SPACE) actionDone_ = false;
+    if (key == KEY_SPACE)
+        actionDone_ = false;
 
     if (key == KEY_UP
      || key == KEY_DOWN
@@ -158,7 +162,8 @@ void InputMaster::HandleKeyUp(StringHash eventType, VariantMap &eventData)
         sinceStep_ = STEP_INTERVAL;
     }
 
-    if (pressedKeys_.Contains(key)) pressedKeys_.Erase(key);
+    if (pressedKeys_.Contains(key))
+        pressedKeys_.Erase(key);
 }
 
 void InputMaster::Step(Vector3 step)
@@ -167,7 +172,7 @@ void InputMaster::Step(Vector3 step)
         return;
 
 
-    if (MC->InPickState()){
+    if (MC->InPickState()) {
 
             sinceStep_ = 0.0f;
             if (step == Vector3::RIGHT || step == Vector3::UP)
@@ -175,28 +180,30 @@ void InputMaster::Step(Vector3 step)
             else if (step == Vector3::LEFT || step == Vector3::DOWN)
                 MC->StepSelectPiece(false);
 
-    } else if (MC->InPutState()){
+    } else if (MC->InPutState()) {
 
-        Square* previouslySelected{BOARD->GetSelectedSquare()};
+        Square* previouslySelected{ BOARD->GetSelectedSquare() };
         //Correct for semantics
-        step = Quaternion(90.0f, Vector3::RIGHT) * step; ///Asks for Vector3& operator *=(Quaternion rhs)
+        step = Quaternion(90.0f, Vector3::RIGHT) * step;
         //Correct step according to view angle
-        float quadrant{0.0f};
-        for (float angle: {90.0f, 180.0f, 270.0f}){
+        float quadrant{ 0.0f };
+        for (float angle: { 90.0f, 180.0f, 270.0f }) {
 
             if (LucKey::Delta(CAMERA->GetYaw(), angle, true) <
                 LucKey::Delta(CAMERA->GetYaw(), quadrant, true))
             {
                 quadrant = angle;
             }
-
         }
 
-        Square* selectedSquare{BOARD->GetSelectedSquare()};
+        Square* selectedSquare{ BOARD->GetSelectedSquare() };
         if (selectedSquare) {
+
             Vector3 resultingStep{Quaternion(quadrant, Vector3::UP) * step};
             BOARD->SelectNearestSquare(selectedSquare->GetNode()->GetPosition() + resultingStep);
+
         } else {
+
             BOARD->SelectLast();
         }
 
@@ -215,6 +222,7 @@ void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData)
 
     mouseMoveSinceClick_.x_ += eventData[MouseMove::P_DX].GetFloat() / GRAPHICS->GetWidth();
     mouseMoveSinceClick_.y_ += eventData[MouseMove::P_DY].GetFloat() / GRAPHICS->GetHeight();
+
     if (!drag_
      && mouseMoveSinceClick_.Length() > DRAG_THRESHOLD
      && (pressedMouseButtons_.Contains(MOUSEB_LEFT)
@@ -236,8 +244,7 @@ void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData)
 void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
 
-    using namespace MouseButtonDown;
-    int button{eventData[P_BUTTON].GetInt()};
+    int button{eventData[MouseButtonDown::P_BUTTON].GetInt()};
     pressedMouseButtons_.Insert(button);
     mouseMoveSinceClick_ = Vector2::ZERO;
 
@@ -254,8 +261,8 @@ void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventD
 void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
 
-    using namespace MouseButtonUp;
-    int button{eventData[P_BUTTON].GetInt()};
+    int button{eventData[MouseButtonUp::P_BUTTON].GetInt()};
+
     if (pressedMouseButtons_.Contains(button))
         pressedMouseButtons_.Erase(button);
 
@@ -266,20 +273,28 @@ void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventDat
     mouseIdleTime_ = 0.0f;
     ResetIdle();
 
-    if (!drag_){
-        if (MC->InPickState() && MC->GetSelectedPiece()){
+    if (!drag_) {
+
+        if (MC->InPickState() && MC->GetSelectedPiece()) {
+
             MC->GetSelectedPiece()->Pick();
             yad_->Restore();
-        } else if (MC->InPutState() && BOARD->GetSelectedSquare()){
+
+        } else if (MC->InPutState() && BOARD->GetSelectedSquare()) {
+
             BOARD->PutPiece(MC->GetPickedPiece(), BOARD->GetSelectedSquare());
             yad_->Restore();
         //Zoom
-        } else if (boardClick_ && RaycastToBoard()){
+        } else if (boardClick_ && RaycastToBoard()) {
+
             CAMERA->ZoomToBoard();
-        } else if (tableClick_ && RaycastToTable()){
+
+        } else if (tableClick_ && RaycastToTable()) {
+
             CAMERA->ZoomToTable();
         }
     }
+
     drag_ = false;
     INPUT->SetMouseMode(MM_FREE);
 }
@@ -291,42 +306,50 @@ void InputMaster::HandleMouseWheel(StringHash eventType, VariantMap &eventData)
 
 void InputMaster::UpdateYad()
 {
-    bool hide{false};
-    Vector3 yadPos{YadRaycast(hide)};
-    if (!yad_->hidden_){
-        if (yadPos.Length())
-        {
+    bool hide{ false };
+    Vector3 yadPos{ YadRaycast(hide) };
+
+    if (!yad_->hidden_) {
+
+        if (yadPos.Length()) {
+
             yad_->node_->SetPosition(Vector3(0.5f * (yadPos.x_ + yad_->node_->GetPosition().x_),
                                              yadPos.y_,
                                              0.5f * (yadPos.z_ + yad_->node_->GetPosition().z_)));
         }
-        if (mouseIdleTime_ > IDLE_THRESHOLD * 0.5f
-         || hide)
-        {
+
+        if (mouseIdleTime_ > IDLE_THRESHOLD * 0.5f || hide) {
+
             yad_->Hide();
         }
     }
 }
 Vector3 InputMaster::YadRaycast(bool& none)
 {
-    bool square{false};
-    if (!drag_){
+    bool square{ false };
+
+    if (!drag_) {
         //Select piece and hide yad when hovering over a piece in a pick state
-        if (MC->InPickState()
-                && RaycastToPiece()
-                && (rayPiece_->GetState() == PieceState::FREE
-                    || rayPiece_->GetState() == PieceState::SELECTED)){
-            if (MC->InPickState()){
+        if (MC->InPickState() && RaycastToPiece()
+         && (rayPiece_->GetState() == PieceState::FREE
+          || rayPiece_->GetState() == PieceState::SELECTED))
+        {
+            if (MC->InPickState()) {
+
                 MC->SelectPiece(rayPiece_);
+
                 if (!yad_->hidden_)
                     yad_->Hide();
                 return yad_->node_->GetPosition(); //return
             }
-            //Select square and dim yad when hovering over a square in a put state
-        } else if (MC->InPutState() && RaycastToSquare()){
+        //Select square and dim yad when hovering over a square in a put state
+        } else if (MC->InPutState() && RaycastToSquare()) {
+
             square = true;
-            if (MC->InPutState()){
+            if (MC->InPutState()) {
+
                 BOARD->Select(raySquare_);
+
                 if (yad_->hidden_)
                     yad_->Reveal();
                 else if (!yad_->dimmed_)
@@ -335,17 +358,18 @@ Vector3 InputMaster::YadRaycast(bool& none)
         }
     }
 
-    Ray cameraRay{MouseRay()};
-    PODVector<RayQueryResult> results;
-    RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 1000.0f, DRAWABLE_GEOMETRY);
+    Ray cameraRay{ MouseRay() };
+    PODVector<RayQueryResult> results{};
+    RayOctreeQuery query{ results, cameraRay, RAY_TRIANGLE, 1000.0f, DRAWABLE_GEOMETRY };
     MC->world_.scene_->GetComponent<Octree>()->Raycast(query);
 
-    for (RayQueryResult r : results){
-        if (MC->InPickState()){
+    for (RayQueryResult r : results) {
+
+        if (MC->InPickState()) {
+
             MC->DeselectPiece();
-        } else if (MC->InPutState()
-                && !square
-                && BOARD->GetSelectedSquare())
+
+        } else if (MC->InPutState() && !square && BOARD->GetSelectedSquare())
         {
             BOARD->Deselect();
             if (yad_->dimmed_)

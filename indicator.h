@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,16 +22,16 @@
 #include <Urho3D/Urho3D.h>
 
 #include "mastercontrol.h"
-#include "luckey.h"
 
 class Indicator : public LogicComponent
 {
     friend class Board;
     URHO3D_OBJECT(Indicator, LogicComponent);
+
 public:
     Indicator(Context* context);
     static void RegisterObject(Context* context);
-    virtual void OnNodeSet(Node* node);
+    void OnNodeSet(Node* node) override;
 
 private:
     Node* arrowNode1_;

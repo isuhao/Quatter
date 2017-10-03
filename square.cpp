@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,28 +26,29 @@ void Square::RegisterObject(Context *context)
 
 Square::Square(Context* context) : LogicComponent(context)
 {
-
 }
 
 void Square::OnNodeSet(Node *node)
-{ (void)node;
+{ if (!node) return;
 
-    StringVector tag{}; tag.Push(String("Square"));
-    node_->SetTags(tag);
-    StaticModel* touchPlane{node_->CreateComponent<StaticModel>()};
+    node_->AddTag("Square");
+
+    StaticModel* touchPlane{ node_->CreateComponent<StaticModel>() };
     touchPlane->SetModel(MC->GetModel("Plane"));
     touchPlane->SetMaterial(MC->GetMaterial("Invisible"));
     free_ = true;
     piece_ = nullptr;
+
     //Create slot
-    Node* slotNode{node_->CreateChild("Slot")};
+    Node* slotNode{ node_->CreateChild("Slot") };
     slotNode->SetPosition(Vector3::UP * 0.05f);
     slot_ = slotNode->CreateComponent<AnimatedModel>();
     slot_->SetModel(MC->GetModel("Slot"));
     slot_->SetMaterial(MC->GetMaterial("Glow")->Clone());
     slot_->GetMaterial()->SetShaderParameter("MatDiffColor", Color(0.0f, 0.0f, 0.0f, 0.0f));
+
     //Create light
-    Node* lightNode{slotNode->CreateChild("Light")};
+    Node* lightNode{ slotNode->CreateChild("Light") };
     lightNode->SetPosition(Vector3::UP * 0.23f);
     light_ = lightNode->CreateComponent<Light>();
     light_->SetColor(0.5f * COLOR_GLOW);

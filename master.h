@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,8 +33,9 @@ using namespace Urho3D;
 
 class Master : public Object
 {
-    friend class MasterControl;
     URHO3D_OBJECT(Master, Object);
+    friend class MasterControl;
+
 public:
     Master(Context* context);
 };

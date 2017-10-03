@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ QuatterCam::QuatterCam(Context* context) : LogicComponent(context),
 {
 }
 void QuatterCam::OnNodeSet(Node *node)
-{ (void)node;
+{ if (!node) return;
 
     node_->SetPosition(Vector3(3.0f, 10.0f, -8.0f));
     node_->LookAt(Vector3::ZERO);

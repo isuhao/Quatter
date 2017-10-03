@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ public:
     void FadeTo(Light* light, float brightness, float duration = 0.23f);
     void FadeTo(SoundSource* soundSource, float gain, float duration = 2.3f);
 
-    void FadeOut(Material* material, float duration = 0.23f) {FadeTo(material, material->GetShaderParameter("MatDiffColor").GetColor() * 0.0f, duration); }
+    void FadeOut(Material* material, float duration = 0.23f) { FadeTo(material, material->GetShaderParameter("MatDiffColor").GetColor() * 0.0f, duration); }
     void FadeOut(Light* light) { FadeTo(light, 0.0f); }
     void FadeOut(SoundSource* soundSource, float duration = 5.0f);
 

@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #define QUATTERCAM_H
 
 #include <Urho3D/Urho3D.h>
-#include "mastercontrol.h"
+#include "luckey.h"
 
 namespace Urho3D {
 class Drawable;
@@ -46,11 +46,12 @@ class QuatterCam : public LogicComponent
     URHO3D_OBJECT(QuatterCam, LogicComponent);
     friend class MasterControl;
     friend class InputMaster;
+
 public:
     QuatterCam(Context* context);
     static void RegisterObject(Context* context);
-    virtual void OnNodeSet(Node* node);
-    virtual void Update(float timeStep);
+    void OnNodeSet(Node* node) override;
+    void Update(float timeStep) override;
 
     SharedPtr<Camera> camera_;
     SharedPtr<Viewport> viewport_;
@@ -75,7 +76,6 @@ private:
     float distance_;
     float aimDistance_;
     Vector3 targetPosition_;
-
 
     void SetupViewport();
     void Rotate(Vector2 rotation);

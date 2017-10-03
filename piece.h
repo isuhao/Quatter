@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,11 +38,12 @@ class Square;
 class Piece : public LogicComponent
 {
     URHO3D_OBJECT(Piece, Object);
+
 public:
     typedef std::bitset<NUM_ATTRIBUTES> PieceAttributes;
     Piece(Context* context);
     static void RegisterObject(Context* context);
-    virtual void OnNodeSet(Node* node);
+    void OnNodeSet(Node* node) override;
     void Init(PieceAttributes attributes);
 
     Node* GetNode() const { return node_; }
@@ -60,6 +61,7 @@ public:
     void Reset();
 
     int ToInt() const { return static_cast<int>(attributes_.to_ulong()); }
+
 private:
     SharedPtr<StaticModel> pieceModel_;
     SharedPtr<StaticModel> outlineModel_;
@@ -67,7 +69,6 @@ private:
 
     PieceAttributes attributes_;
     PieceState state_;
-
 };
 
 #endif // PIECE_H
