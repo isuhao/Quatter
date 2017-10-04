@@ -82,6 +82,7 @@
 #define CACHE GetSubsystem<ResourceCache>()
 #define INPUT GetSubsystem<Input>()
 #define GRAPHICS GetSubsystem<Graphics>()
+#define RENDERER GetSubsystem<Renderer>()
 #define TIME GetSubsystem<Time>()
 #define FILES GetSubsystem<FileSystem>()
 

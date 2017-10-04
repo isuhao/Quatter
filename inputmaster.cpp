@@ -91,7 +91,7 @@ void InputMaster::HandleKeys()
     for (int key : pressedKeys_) {
 
         switch (key) {
-        case KEY_SPACE:
+        case KEY_SPACE: case KEY_RETURN: case KEY_RETURN2:
             ActionButtonPressed();
             break;
         case KEY_TAB:
@@ -151,8 +151,12 @@ void InputMaster::HandleKeyUp(StringHash eventType, VariantMap &eventData)
 
     int key{ eventData[KeyUp::P_KEY].GetInt() };
 
-    if (key == KEY_SPACE)
+    if (key == KEY_SPACE
+     || key == KEY_RETURN
+     || key == KEY_RETURN2)
+    {
         actionDone_ = false;
+    }
 
     if (key == KEY_UP
      || key == KEY_DOWN
@@ -491,9 +495,8 @@ void InputMaster::HandleJoystickButtonDown(StringHash eventType, VariantMap &eve
 void InputMaster::HandleJoystickButtonUp(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
 
-    using namespace JoystickButtonUp;
-    int joystickId{eventData[P_JOYSTICKID].GetInt()};
-    int button{eventData[P_BUTTON].GetInt()};
+    int joystickId{ eventData[JoystickButtonUp::P_JOYSTICKID].GetInt() };
+    int button{ eventData[JoystickButtonUp::P_BUTTON].GetInt() };
 
     if (CorrectJoystickId(joystickId) && button == LucKey::SB_CROSS)
         actionDone_ = false;
@@ -510,7 +513,7 @@ void InputMaster::ActionButtonPressed()
 
     if (MC->InPickState()){
 
-        Piece* selectedPiece{MC->GetSelectedPiece()};
+        Piece* selectedPiece{ MC->GetSelectedPiece() };
         if (selectedPiece){
             selectedPiece->Pick();
             BOARD->SelectNearestFreeSquare();
@@ -746,7 +749,7 @@ bool InputMaster::RaycastToTable()
 }
 Ray InputMaster::MouseRay()
 {
-    Ray mouseRay{CAMERA->camera_->GetScreenRay(mousePos_.x_, mousePos_.y_)};
+    Ray mouseRay{CAMERA->GetScreenRay(mousePos_.x_, mousePos_.y_)};
 
     return mouseRay;
 }

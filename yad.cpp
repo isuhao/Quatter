@@ -53,6 +53,7 @@ void Yad::OnNodeSet(Node *node)
     light_->SetBrightness(YAD_FULLBRIGHT);
 
 }
+
 void Yad::Dim()
 {
     FX->FadeTo(light_, YAD_DIMMED);
@@ -73,6 +74,3 @@ void Yad::Restore()
     FX->FadeTo(light_, YAD_FULLBRIGHT);
     FX->FadeTo(material_, COLOR_GLOW, 0.1f);
 }
-
-
-

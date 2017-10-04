@@ -25,8 +25,8 @@
 
 class Indicator : public LogicComponent
 {
-    friend class Board;
     URHO3D_OBJECT(Indicator, LogicComponent);
+    friend class Board;
 
 public:
     Indicator(Context* context);

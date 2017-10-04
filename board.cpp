@@ -36,7 +36,8 @@ void Board::RegisterObject(Context *context)
 Board::Board(Context* context): LogicComponent(context),
     squares_{},
     selectedSquare_{},
-    lastSelectedSquare_{}
+    lastSelectedSquare_{},
+    indicators_{}
 {
 }
 
@@ -305,7 +306,8 @@ bool Board::CheckQuatter()
         //Quatter!
         if (matching.any()) {
 
-            Indicate(IntVector2(0, j), IntVector2(BOARD_WIDTH - 1, j));
+            Indicate(IntVector2(0, j),
+                     IntVector2(BOARD_WIDTH - 1, j));
             return true;
         }
     }
@@ -346,7 +348,8 @@ bool Board::CheckQuatter()
         //Quatter!
         if (matching.any()) {
 
-            Indicate(IntVector2{i, 0}, IntVector2{i, BOARD_HEIGHT - 1});
+            Indicate(IntVector2(i, 0),
+                     IntVector2(i, BOARD_HEIGHT - 1));
             return true;
         }
     }
@@ -387,8 +390,8 @@ bool Board::CheckQuatter()
         //Quatter!
         if (matching.any()) {
 
-            Indicate(IntVector2{ 0, direction * (BOARD_HEIGHT - 1) },
-                     IntVector2{ BOARD_WIDTH - 1, !direction * (BOARD_HEIGHT - 1) });
+            Indicate(IntVector2( 0,                direction * (BOARD_HEIGHT - 1) ),
+                     IntVector2( BOARD_WIDTH - 1, !direction * (BOARD_HEIGHT - 1) ));
             return true;
         }
     }
@@ -405,12 +408,12 @@ bool Board::CheckQuatter()
 
                 for (int m : {0, 1}) for (int n : {0, 1}) {
 
-                    IntVector2 coords(k + m, l + n);
-                    Piece* piece{squares_[coords].Get()->piece_};
+                    IntVector2 coords{ k + m, l + n };
+                    Piece* piece{ squares_[coords].Get()->piece_ };
 
                     if (piece) {
 
-                        Piece::PieceAttributes attributes(piece->GetPieceAttributes());
+                        Piece::PieceAttributes attributes{ piece->GetPieceAttributes() };
 
                         if (m == 0 && n == 0) {
 
@@ -445,8 +448,26 @@ bool Board::CheckQuatter()
 }
 void Board::Indicate(IntVector2 first, IntVector2 last)
 {
-    //Indicate row
-    if (first.y_ == last.y_) {
+    //Indicate single square (for keyboard selection)
+    if (last == IntVector2(-1, -1)) {
+        FadeInIndicator(indicators_[0], true);
+        FX->TransformTo(indicators_[0]->GetNode(),
+                CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f),
+                indicators_[0]->GetNode()->GetRotation(),
+                0.05f);
+        indicators_[0]->model1_->SetMorphWeight(1, static_cast<float>(first.y_ > 0 && first.y_ < 3));
+        indicators_[0]->model2_->SetMorphWeight(1, static_cast<float>(first.y_ > 0 && first.y_ < 3));
+
+        FadeInIndicator(indicators_[1], true);
+        FX->TransformTo(indicators_[1]->GetNode(),
+                CoordsToPosition(first) * Vector3(1.0f, 1.0f, 0.0f),
+                indicators_[1]->GetNode()->GetRotation(),
+                0.05f);
+        indicators_[1]->model1_->SetMorphWeight(1, static_cast<float>(first.x_ > 0 && first.x_ < 3));
+        indicators_[1]->model2_->SetMorphWeight(1, static_cast<float>(first.x_ > 0 && first.x_ < 3));
+
+        //Indicate row
+    } else if (first.y_ == last.y_) {
 
         FadeInIndicator(indicators_[0]);
         indicators_[0]->GetNode()->SetPosition(CoordsToPosition(first) * Vector3(0.0f, 1.0f, 1.0f));
@@ -479,9 +500,9 @@ void Board::Indicate(IntVector2 first, IntVector2 last)
 
         FadeInIndicator(indicators_[2]);
 }
-void Board::FadeInIndicator(Indicator* indicator)
+void Board::FadeInIndicator(Indicator* indicator, bool fast)
 {
-    FX->FadeTo(indicator->glow_, COLOR_GLOW, 2.3f, 1.0f);
+    FX->FadeTo(indicator->glow_, COLOR_GLOW, fast? 0.23f : 2.3f, fast ? 0.0f : 1.0f);
 }
 void Board::HideIndicators()
 {

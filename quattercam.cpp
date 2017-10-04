@@ -17,7 +17,7 @@
 */
 
 #include "quattercam.h"
-#include <initializer_list>
+//#include <initializer_list>
 
 void QuatterCam::RegisterObject(Context *context)
 {
@@ -30,6 +30,7 @@ QuatterCam::QuatterCam(Context* context) : LogicComponent(context),
     targetPosition_{Vector3::UP * 0.42f}
 {
 }
+
 void QuatterCam::OnNodeSet(Node *node)
 { if (!node) return;
 
@@ -51,21 +52,22 @@ void QuatterCam::OnNodeSet(Node *node)
 
 void QuatterCam::CreatePockets()
 {
-    for (bool p : {true, false}){
+    for (bool left : { true, false }){
 
-        Node* pocketNode{node_->CreateChild("Pocket")};
-        pocketNode->SetPosition(Vector3(p?2.0f:-2.0f, 1.5f, 3.2f));
+        Node* pocketNode{ node_->CreateChild("Pocket") };
+        pocketNode->SetPosition(Vector3(left ? -2.0f : 2.0f, 1.5f, 3.2f));
         pocketNode->SetRotation(Quaternion(-70.0f, Vector3::RIGHT));
-        if (p)
+
+        if (left)
             pockets_.first_ = pocketNode;
         else
             pockets_.second_ = pocketNode;
     }
 }
+
 void QuatterCam::SetupViewport()
 {
-    SharedPtr<Viewport> viewport(new Viewport(context_, MC->world_.scene_, camera_));
-    viewport_ = viewport;
+    viewport_ = new Viewport(context_, GetScene(), camera_);
 
     //Add anti-asliasing and bloom
     effectRenderPath_ = viewport_->GetRenderPath();
@@ -73,32 +75,37 @@ void QuatterCam::SetupViewport()
     effectRenderPath_->SetEnabled("FXAA3", true);
     effectRenderPath_->Append(CACHE->GetResource<XMLFile>("PostProcess/BloomHDR.xml"));
     effectRenderPath_->SetShaderParameter("BloomHDRThreshold", 0.4f);
-    effectRenderPath_->SetShaderParameter("BloomHDRMix", Vector2(1.0f, 1.25f));
+    effectRenderPath_->SetShaderParameter("BloomHDRMix", Vector2(1.0f, 0.7f));
     effectRenderPath_->SetEnabled("BloomHDR", true);
 
-    Renderer* renderer{GetSubsystem<Renderer>()};
-    renderer->SetViewport(0, viewport_);
+    RENDERER->SetViewport(0, viewport_);
 }
 
 void QuatterCam::Update(float timeStep)
 {
-
     //Update distance
     if (aimDistance_ != distance_)
         distance_ = 0.1f * (9.0f * distance_ + aimDistance_);
 
-    Vector3 relativeToTarget{(node_->GetPosition() - targetPosition_).Normalized()};
+    Vector3 relativeToTarget{ (node_->GetPosition() - targetPosition_).Normalized() };
     if (relativeToTarget.Length() != distance_){
             node_->SetPosition(distance_ * relativeToTarget + targetPosition_);
             camera_->SetFov(Clamp(60.0f + distance_, 23.0f, 110.0f));
     }
+
     //Spin pockets
+    UpdatePockets(timeStep);
+}
+
+void QuatterCam::UpdatePockets(float timeStep)
+{
     float spinSpeed{23.0f};
+
     pockets_.first_->Rotate(Quaternion(timeStep * spinSpeed, Vector3::UP));
     pockets_.second_->Rotate(Quaternion(-timeStep * spinSpeed, Vector3::UP));
     //Reposition pockets
-    pockets_.first_->SetPosition(Vector3(-2.2f - 0.06f * (ZOOM_MAX - distance_), 1.4f, 3.2f));
-    pockets_.second_->SetPosition(Vector3(2.2f + 0.06f * (ZOOM_MAX - distance_), 1.4f, 3.2f));
+    pockets_.first_->SetPosition(Vector3(-2.2f - 0.06f * (ZOOM_MAX - distance_), 1.4f - GetPitch() * 0.01f, 3.2f));
+    pockets_.second_->SetPosition(Vector3(2.2f + 0.06f * (ZOOM_MAX - distance_), 1.4f - GetPitch() * 0.01f, 3.2f));
 }
 
 void QuatterCam::Rotate(Vector2 rotation)
@@ -107,18 +114,20 @@ void QuatterCam::Rotate(Vector2 rotation)
     node_->RotateAround(targetPosition_,
                             Quaternion(rotation.x_, Vector3::UP) * Quaternion(rotation.y_, node_->GetRight()),
                             TS_WORLD);
+    Vector3 camRight{ node_->GetRight() };
+
     //Clamp pitch
     if (GetPitch() > PITCH_MAX)
         node_->RotateAround(targetPosition_,
-                                Quaternion(PITCH_MAX - GetPitch(), node_->GetRight()),
+                                Quaternion(PITCH_MAX - GetPitch(), camRight),
                                 TS_WORLD);
     else if (GetPitch() < PITCH_MIN)
         node_->RotateAround(targetPosition_,
-                                Quaternion(PITCH_MIN - GetPitch(), node_->GetRight()),
+                                Quaternion(PITCH_MIN - GetPitch(), camRight),
                                 TS_WORLD);
 }
+
 void QuatterCam::Zoom(float delta)
 {
     aimDistance_ = Clamp(aimDistance_ - delta, ZOOM_MIN, ZOOM_MAX);
 }
-

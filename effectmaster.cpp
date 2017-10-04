@@ -26,7 +26,7 @@ EffectMaster::EffectMaster(Context* context) : Master(context)
 
 void EffectMaster::FadeTo(Material* material, Color color, float duration, float delay)
 {
-    Color startColor{material->GetShaderParameter("MatDiffColor").GetColor()};
+    Color startColor{ material->GetShaderParameter("MatDiffColor").GetColor() };
     ValueAnimation* fade{ new ValueAnimation(context_) };
 
     fade->SetKeyFrame(0.0f, startColor);
@@ -47,7 +47,7 @@ void EffectMaster::FadeTo(Light* light, float brightness, float duration)
 
 void EffectMaster::FadeTo(SoundSource* soundSource, float gain, float duration)
 {
-    ValueAnimation* fade{new ValueAnimation(context_)};
+    ValueAnimation* fade{ new ValueAnimation(context_) };
     fade->SetKeyFrame(0.0f, soundSource->GetGain());
     fade->SetKeyFrame(0.42f * duration, Lerp(soundSource->GetGain(), gain, 0.5f));
     fade->SetKeyFrame(duration, gain);
@@ -57,7 +57,7 @@ void EffectMaster::FadeOut(SoundSource* soundSource, float duration)
 {
     float lastGain{ soundSource->GetGain() };
 
-    ValueAnimation* fade{new ValueAnimation(context_)};
+    ValueAnimation* fade{ new ValueAnimation(context_) };
     fade->SetKeyFrame(0.0f, lastGain);
     fade->SetKeyFrame(0.2f * duration, 0.5f * lastGain);
     fade->SetKeyFrame(0.46f * duration, 0.1f * lastGain);
@@ -68,11 +68,13 @@ void EffectMaster::FadeOut(SoundSource* soundSource, float duration)
 void EffectMaster::TransformTo(Node* node, Vector3 pos, Quaternion rot, float duration)
 {
     ValueAnimation* posAnim{ new ValueAnimation(context_) };
+
     posAnim->SetKeyFrame(0.0f, node->GetPosition());
     posAnim->SetKeyFrame(duration, pos);
     node->SetAttributeAnimation("Position", posAnim, WM_ONCE);
 
     ValueAnimation* rotAnim{ new ValueAnimation(context_) };
+
     rotAnim->SetKeyFrame(0.0f, node->GetRotation());
     rotAnim->SetKeyFrame(duration, rot);
     node->SetAttributeAnimation("Rotation", rotAnim, WM_ONCE);
@@ -80,13 +82,13 @@ void EffectMaster::TransformTo(Node* node, Vector3 pos, Quaternion rot, float du
 
 void EffectMaster::ArchTo(Node* node, Vector3 pos, Quaternion rot, float archHeight, float duration, float delay)
 {
-    ValueAnimation* posAnim{new ValueAnimation(context_)};
+    ValueAnimation* posAnim{ new ValueAnimation(context_) };
     posAnim->SetKeyFrame(0.0f, node->GetPosition());
 
     for (int i{0}; i < WAYPOINTS - 1; ++i) {
 
-        float t{static_cast<float>(i) / WAYPOINTS};
-        float t2 = 0.5f * (t + (0.5f + 0.5f * pow(2.0f * (t - 0.5f), 3.0f)));
+        float t{ static_cast<float>(i) / WAYPOINTS };
+        float t2{ 0.5f * (t + (0.5f + 0.5f * pow(2.0f * (t - 0.5f), 3.0f))) };
         posAnim->SetKeyFrame(delay + (duration * t2),
                              node->GetPosition().Lerp(pos, t) + archHeight * Vector3::UP * Arch(t));
     }
@@ -94,6 +96,7 @@ void EffectMaster::ArchTo(Node* node, Vector3 pos, Quaternion rot, float archHei
     node->SetAttributeAnimation("Position", posAnim, WM_ONCE);
 
     ValueAnimation* rotAnim{ new ValueAnimation(context_) };
+
     rotAnim->SetKeyFrame(0.0f, node->GetRotation());
     if (delay != 0.0f)
         rotAnim->SetKeyFrame(delay, node->GetRotation());

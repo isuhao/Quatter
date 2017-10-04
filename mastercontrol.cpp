@@ -70,9 +70,9 @@ void MasterControl::Setup()
     //Add resource paths
     String resourcePaths{};
 
-    if (FILES->DirExists(FILES->GetAppPreferencesDir("luckey", "quatter")))
+    /*if (FILES->DirExists(FILES->GetAppPreferencesDir("luckey", "quatter")))
         resourcePaths = FILES->GetAppPreferencesDir("luckey", "quatter");
-    else if (FILES->DirExists("Resources"))
+    else */if (FILES->DirExists("Resources"))
         resourcePaths = "Resources";
     else if (FILES->DirExists("../Quatter/Resources"))
         resourcePaths = "../Quatter/Resources";
@@ -367,12 +367,14 @@ void MasterControl::NextPhase()
     } break;
     }
 }
+
 void MasterControl::Quatter()
 {
     previousGameState_ = gameState_;
 
     gameState_ = GameState::QUATTER;
 }
+
 void MasterControl::Reset()
 {
     lastReset_ = TIME->GetElapsedTime();
@@ -418,6 +420,7 @@ void MasterControl::NextSelectionMode()
     default: break;
     }
 }
+
 void MasterControl::SetSelectionMode(SelectionMode mode)
 {
     if (selectionMode_ == mode) return;
@@ -462,6 +465,7 @@ void MasterControl::NextMusicState()
         FX->FadeTo(musicSource2_, Max(musicGain_, 0.1f));
     }
 }
+
 void MasterControl::MusicGainUp(float step)
 {
     musicGain_ = Clamp(musicGain_ + step, step, 1.0f);

@@ -84,7 +84,7 @@ private:
     void Indicate(IntVector2 first, IntVector2 last = IntVector2(-1, -1));
     void CreateSquares();
     void CreateIndicators();
-    void FadeInIndicator(Indicator* indicator);
+    void FadeInIndicator(Indicator* indicator, bool fast = false);
 };
 
 #endif // BOARD_H

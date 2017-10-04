@@ -31,6 +31,7 @@ Piece::Piece(Context* context): LogicComponent(context),
     state_{PieceState::FREE}
 {
 }
+
 void Piece::OnNodeSet(Node* node)
 { if (!node) return;
 
@@ -51,7 +52,6 @@ void Piece::OnNodeSet(Node* node)
     light_->SetRange(3.0f);
 }
 
-
 void Piece::Init(PieceAttributes attributes)
 {
     attributes_ = attributes;
@@ -59,11 +59,11 @@ void Piece::Init(PieceAttributes attributes)
 
     if (attributes[3]) {
 
-        pieceModel_->SetMaterial(MC->GetMaterial("Wood_light"));
+        pieceModel_->SetMaterial(MC->GetMaterial("WoodLight"));
 
     } else {
 
-        pieceModel_->SetMaterial(MC->GetMaterial("Wood_dark"));
+        pieceModel_->SetMaterial(MC->GetMaterial("WoodDark"));
     }
 
     outlineModel_->SetModel(MC->GetModel("Piece_"+GetCodon(2)+"_outline"));
@@ -134,6 +134,7 @@ void Piece::Deselect()
         FX->FadeOut(light_);
     }
 }
+
 void Piece::Pick()
 {
     if (state_ != PieceState::PUT) {

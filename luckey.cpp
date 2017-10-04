@@ -80,14 +80,7 @@ Color LucKey::RandomColor()
 
 float LucKey::Sine(float x)
 {
-    if (x < -M_PI){
-        while (x < -M_PI) {
-            x += 2.0f * M_PI;
-        }
-    } else while (x > M_PI) {
-        x -= 2.0f * M_PI;
-    }
-
+    x = Cycle(x, -M_PI, M_PI);
 
     float sin{};
 

@@ -1,5 +1,5 @@
 /* Quatter
-// Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
+// Copyright (C) 2016 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #define QUATTERCAM_H
 
 #include <Urho3D/Urho3D.h>
-#include "luckey.h"
+#include "mastercontrol.h"
 
 namespace Urho3D {
 class Drawable;
@@ -45,7 +45,6 @@ class QuatterCam : public LogicComponent
 {
     URHO3D_OBJECT(QuatterCam, LogicComponent);
     friend class MasterControl;
-    friend class InputMaster;
 
 public:
     QuatterCam(Context* context);
@@ -53,23 +52,25 @@ public:
     void OnNodeSet(Node* node) override;
     void Update(float timeStep) override;
 
-    SharedPtr<Camera> camera_;
-    SharedPtr<Viewport> viewport_;
-    SharedPtr<RenderPath> effectRenderPath_;
-
     Vector3 GetPosition() const { return node_->GetPosition(); }
-    Node* GetPocket(bool right) const { return right ? pockets_.second_ : pockets_.first_; }
+    Node* GetPocket(bool left) const { return left ? pockets_.first_ : pockets_.second_; }
 
+    void Rotate(Vector2 rotation);
     float GetPitch() const { return node_->GetRotation().EulerAngles().x_; }
     float GetYaw() const { return node_->GetRotation().EulerAngles().y_; }
 
     void SetDistance(float distance) { aimDistance_ = Clamp(distance, ZOOM_MIN, ZOOM_MAX); }
-    float GetDistance() const { return distance_; }
     void Zoom(float delta);
     void ZoomToBoard() { SetDistance(6.0f); }
     void ZoomToTable() { SetDistance(13.0f); }
+    float GetDistance() const { return distance_; }
 
+    Ray GetScreenRay(float x, float y) const { return camera_->GetScreenRay(x, y); }
 private:
+    SharedPtr<Camera> camera_;
+    SharedPtr<Viewport> viewport_;
+    SharedPtr<RenderPath> effectRenderPath_;
+
     Pair<SharedPtr<Node>,
          SharedPtr<Node>> pockets_;
 
@@ -78,8 +79,8 @@ private:
     Vector3 targetPosition_;
 
     void SetupViewport();
-    void Rotate(Vector2 rotation);
     void CreatePockets();
+    void UpdatePockets(float timeStep);
 };
 
 #endif // QUATTERCAM_H
