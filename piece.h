@@ -43,7 +43,7 @@ public:
     typedef std::bitset<NUM_ATTRIBUTES> PieceAttributes;
     Piece(Context* context);
     static void RegisterObject(Context* context);
-    void OnNodeSet(Node* node) override;
+    virtual void OnNodeSet(Node* node);
     void Init(PieceAttributes attributes);
 
     Node* GetNode() const { return node_; }

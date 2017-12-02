@@ -33,7 +33,7 @@ Yad::Yad(Context* context) : LogicComponent(context),
 {
 }
 
-void Yad::OnNodeSet(Node *node)
+void Yad::OnNodeSet(Node* node)
 { if (!node) return;
 
     node_->AddTag("Yad");
@@ -43,7 +43,7 @@ void Yad::OnNodeSet(Node *node)
     material_ = MC->GetMaterial("Glow")->Clone();
     model_->SetMaterial(material_);
 
-    Node* lightNode{ node_->CreateChild("Light") };
+    Node* lightNode{ node_->CreateChild("Light", LOCAL) };
     lightNode->SetPosition(Vector3::UP * 0.23f);
     light_ = lightNode->CreateComponent<Light>();
     light_->SetLightType(LIGHT_POINT);
@@ -52,6 +52,7 @@ void Yad::OnNodeSet(Node *node)
     light_->SetRange(1.0f);
     light_->SetBrightness(YAD_FULLBRIGHT);
 
+    Hide();
 }
 
 void Yad::Dim()

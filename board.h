@@ -44,7 +44,7 @@ class Board : public LogicComponent
 public:
     Board(Context* context);
     static void RegisterObject(Context* context);
-    void OnNodeSet(Node* node) override;
+    virtual void OnNodeSet(Node* node);
 
     float GetThickness() const { return model_->GetBoundingBox().Size().y_; }
 
@@ -56,7 +56,7 @@ public:
     bool CheckQuatter();
 
     void Step(IntVector2 step);
-    Vector<SharedPtr<Square>> GetSquares() const { return squares_.Values(); }
+    Vector<Square*> GetSquares() const { return squares_.Values(); }
     Square* GetNearestSquare(Vector3 pos, bool free = true);
     Square* GetSelectedSquare() const { return selectedSquare_; }
     Square* GetLastSelectedSquare() const { return lastSelectedSquare_; }
@@ -75,10 +75,10 @@ public:
 private:
     StaticModel* model_;
 
-    HashMap<IntVector2, SharedPtr<Square>> squares_;
+    HashMap<IntVector2, Square*> squares_;
     Square* selectedSquare_;
     Square* lastSelectedSquare_;
-    Vector<SharedPtr<Indicator>> indicators_;
+    Vector<Indicator*> indicators_;
     Vector3 CoordsToPosition(IntVector2 coords);
     void HandleSceneUpdate(StringHash eventType, VariantMap& eventData);
     void Indicate(IntVector2 first, IntVector2 last = IntVector2(-1, -1));

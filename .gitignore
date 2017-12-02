@@ -37,3 +37,7 @@ quatter
 # Blender
 
 *.blend*
+
+# Settings
+
+Resources/Settings.xml

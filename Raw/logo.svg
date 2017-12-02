@@ -154,8 +154,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.35"
-     inkscape:cx="269.96837"
-     inkscape:cy="431.31558"
+     inkscape:cx="730.10813"
+     inkscape:cy="239.18064"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -166,7 +166,7 @@
      units="px"
      inkscape:showpageshadow="false"
      inkscape:window-width="1920"
-     inkscape:window-height="1056"
+     inkscape:window-height="1061"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1" />
@@ -178,7 +178,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -192,7 +192,10 @@
        d="m -358.66054,-171.36312 c -37.85009,0.40391 -74.09962,15.609 -100.9336,42.44336 -41.45066,41.450757 -53.85067,103.789187 -31.41797,157.947257 22.43305,54.15854 75.28163,89.470833 133.90235,89.470703 l 0,50.77929 c 54.15094,-0.092 105.84362,-22.61561 142.7813,-62.21289 20.2392,10.28532 42.6117,15.67222 65.3144,15.72657 37.1471,-0.0403 72.860601,-14.34218 99.767601,-39.953133 0.089,0.0984 0.2676,0.29492 0.2676,0.29492 l 102.0449,-98.78319 194.964799,189.468743 89.6563,-89.656253 0,1.94531 170.4101,0 c 27.1423,27.112763 63.927,42.358183 102.291,42.394533 l 0,-144.935533 102.4844,-102.484377 c -46.3855,-46.3853 -118.1434,-55.83167 -174.9531,-23.03125 -32.4042,18.78526 -56.2776,49.386007 -66.6152,85.386717 -25.2503,-23.66241 -56.3229,-40.20694 -90.0508,-47.947257 -63.6702,-59.09982 -158.678,-69.15695 -233.3106,-24.69727 -26.272,-22.60887 -59.776599,-35.05391 -94.437499,-35.07813 -37.148,0.0403 -72.8623,14.34294 -99.7695,39.95508 -0.089,-0.0991 -0.1782,-0.19804 -0.2676,-0.29687 l -101.459001,93.505857 -96.34371,-86.341797 c -15.21876,-18.85809 -34.92309,-33.59923 -57.31055,-42.875 -16.92635,-7.01133 -35.02857,-10.74989 -53.34765,-11.01758 -1.22404,-0.0179 -2.447,-0.0208 -3.66797,-0.008 z m 696.34768,120.402337 0,51.06835951 C 325.99384,-5.9245835 313.72214,-10.762203 301.05824,-14.331873 Z"
        id="path4880"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="sssccccccccccccccccccccccccsscccc" />
+       sodipodi:nodetypes="sssccccccccccccccccccccccccsscccc"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:url(#radialGradient4861);fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        id="path4741"
@@ -203,7 +206,10 @@
        sodipodi:ry="195.71428"
        sodipodi:start="0"
        sodipodi:end="1.5707963"
-       d="M -161.39522,-44.750351 A 195.71428,195.71428 0 0 1 -357.10949,150.96393 l -1e-5,-195.714281 z" />
+       d="M -161.39522,-44.750351 A 195.71428,195.71428 0 0 1 -357.10949,150.96393 l -1e-5,-195.714281 z"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        id="path4743"
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:url(#radialGradient4859);fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
@@ -214,7 +220,10 @@
        sodipodi:ry="144.93436"
        sodipodi:start="1.5707963"
        sodipodi:end="0"
-       d="m -357.10949,100.18401 a 144.93436,144.93436 0 0 1 -133.90189,-89.470381 144.93436,144.93436 0 0 1 31.41782,-157.948049 144.93436,144.93436 0 0 1 157.94804,-31.41782 144.93436,144.93436 0 0 1 89.47038,133.901889 l -144.93436,0 z" />
+       d="m -357.10949,100.18401 a 144.93436,144.93436 0 0 1 -133.90189,-89.470381 144.93436,144.93436 0 0 1 31.41782,-157.948049 144.93436,144.93436 0 0 1 157.94804,-31.41782 144.93436,144.93436 0 0 1 89.47038,133.901889 l -144.93436,0 z"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        d="m -357.1084,49.645882 a 94.395134,94.395134 0 0 1 -87.20973,-58.2716787 94.395134,94.395134 0 0 1 20.46229,-102.8708933 94.395134,94.395134 0 0 1 102.87089,-20.46229 94.395134,94.395134 0 0 1 58.27169,87.209728"
        sodipodi:end="0"
@@ -226,7 +235,10 @@
        sodipodi:type="arc"
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        id="path4757"
-       sodipodi:open="true" />
+       sodipodi:open="true"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        d="M 133.9771,68.172455 A 144.93437,144.93437 0 0 1 0.07519787,-21.297931 144.93437,144.93437 0 0 1 31.493018,-179.24599 144.93437,144.93437 0 0 1 189.44108,-210.66382 144.93437,144.93437 0 0 1 278.91147,-76.761917 l -144.93437,0 z"
        sodipodi:end="0"
@@ -238,7 +250,10 @@
        sodipodi:type="arc"
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:url(#radialGradient4857);fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        id="path4745"
-       transform="matrix(-0.70710678,-0.70710678,0.70710678,-0.70710678,0,0)" />
+       transform="matrix(-0.70710678,-0.70710678,0.70710678,-0.70710678,0,0)"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        id="path4759"
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
@@ -251,7 +266,10 @@
        sodipodi:end="6.2526355"
        d="m 131.83086,19.775345 a 94.395142,94.395142 0 0 1 -94.390251,-93.433906 94.395142,94.395142 0 0 1 92.467881,-95.336799 94.395142,94.395142 0 0 1 96.27346,91.492258"
        transform="matrix(-0.70710678,-0.70710678,0.70710678,-0.70710678,0,0)"
-       sodipodi:open="true" />
+       sodipodi:open="true"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)"
        id="path4747"
@@ -263,7 +281,10 @@
        sodipodi:ry="144.93437"
        sodipodi:start="1.5707963"
        sodipodi:end="0"
-       d="M 11.200891,80.466736 A 144.93437,144.93437 0 0 1 -122.70101,-9.0036505 144.93437,144.93437 0 0 1 -91.283192,-166.95171 144.93437,144.93437 0 0 1 66.664869,-198.36954 144.93437,144.93437 0 0 1 156.13526,-64.467636 l -144.934373,0 z" />
+       d="M 11.200891,80.466736 A 144.93437,144.93437 0 0 1 -122.70101,-9.0036505 144.93437,144.93437 0 0 1 -91.283192,-166.95171 144.93437,144.93437 0 0 1 66.664869,-198.36954 144.93437,144.93437 0 0 1 156.13526,-64.467636 l -144.934373,0 z"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        transform="matrix(-0.70710678,-0.70710678,0.70710678,-0.70710678,0,0)"
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:url(#radialGradient4849);fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
@@ -275,12 +296,19 @@
        sodipodi:ry="195.71429"
        sodipodi:start="0"
        sodipodi:end="1.5707963"
-       d="M 49.490585,204.54369 A 195.71429,195.71429 0 0 1 -146.2237,400.25798 l -1e-5,-195.71429 z" />
+       d="M 49.490585,204.54369 A 195.71429,195.71429 0 0 1 -146.2237,400.25798 l -1e-5,-195.71429 z"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:22.99999809;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-       d="m -40.516259,-42.831643 188.571399,0"
+       d="m -38.373402,-42.831643 186.428542,0"
        id="path4794"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909"
+       sodipodi:nodetypes="cc" />
     <path
        sodipodi:open="true"
        d="M -21.161156,205.16399 A 125.64217,125.64217 0 0 1 -136.6876,330.39828"
@@ -293,7 +321,10 @@
        sodipodi:type="arc"
        id="path4781"
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23.00318527;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-       transform="matrix(-0.71537791,-0.69873776,0.71537791,-0.69873776,0,0)" />
+       transform="matrix(-0.71537791,-0.69873776,0.71537791,-0.69873776,0,0)"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        transform="matrix(0.70710678,0.70710678,-0.70710678,0.70710678,0,0)"
        d="M 11.487266,27.35408 A 94.395142,94.395142 0 0 1 -75.722475,-30.917603 94.395142,94.395142 0 0 1 -55.260182,-133.78851 94.395142,94.395142 0 0 1 47.61072,-154.2508 94.395142,94.395142 0 0 1 105.88241,-67.041061"
@@ -306,12 +337,18 @@
        sodipodi:type="arc"
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        id="path4761"
-       sodipodi:open="true" />
+       sodipodi:open="true"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        inkscape:connector-curvature="0"
        id="path4783"
        d="m 248.02994,-163.63512 0,125.714277"
-       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        d="M -89.626984,65.426132 A 195.71429,195.71429 0 0 1 -285.34127,261.14043 l -10e-6,-195.714298 z"
        sodipodi:end="1.5707963"
@@ -323,7 +360,10 @@
        sodipodi:type="arc"
        id="path4749"
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:url(#radialGradient4853);fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-       transform="matrix(-0.70710678,-0.70710678,0.70710678,-0.70710678,0,0)" />
+       transform="matrix(-0.70710678,-0.70710678,0.70710678,-0.70710678,0,0)"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        d="m 127.92094,337.68658 a 195.71429,195.71429 0 0 1 -195.714285,195.7143 l -5e-6,-195.7143 z"
        sodipodi:end="1.5707963"
@@ -335,13 +375,19 @@
        sodipodi:type="arc"
        id="path4753"
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:url(#radialGradient4851);fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-       transform="matrix(0,-1,1,0,0,0)" />
+       transform="matrix(0,-1,1,0,0,0)"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        d="m 521.84434,16.065987 -134.3503,0 0,-45.80349 125.7788,0"
        id="rect4801"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cccc" />
+       sodipodi:nodetypes="cccc"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        d="M 353.69533,509.52335 A 144.93437,144.93437 0 0 1 330.66257,334.57209 144.93437,144.93437 0 0 1 493.69119,267.04342 144.93437,144.93437 0 0 1 601.11378,407.03928 l -144.93437,0 z"
        sodipodi:end="0"
@@ -355,7 +401,10 @@
        id="path4755"
        transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,0,0)"
        inkscape:transform-center-x="-107.07849"
-       inkscape:transform-center-y="-76.781411" />
+       inkscape:transform-center-y="-76.781411"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        transform="matrix(-0.71537791,-0.69873776,0.71537791,-0.69873776,0,0)"
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23.00318527;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
@@ -368,12 +417,18 @@
        sodipodi:start="0.053550511"
        sodipodi:end="1.5195268"
        d="M -159.42218,68.402123 A 125.64217,125.64217 0 0 1 -278.44545,187.15422"
-       sodipodi:open="true" />
+       sodipodi:open="true"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
        d="m 248.02994,31.988747 0,113.664513"
        id="path4765"
-       inkscape:connector-curvature="0" />
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <path
        transform="matrix(-0.80502133,-0.59324587,0.61202463,-0.7908387,0,0)"
        style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#47108b;stroke-width:23.00318527;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
@@ -388,7 +443,10 @@
        d="m -390.31129,326.43144 a 95.989021,95.989014 0 0 1 10.73208,101.21528 95.989021,95.989014 0 0 1 -86.30009,53.96299"
        sodipodi:open="true"
        inkscape:transform-center-x="-109.80723"
-       inkscape:transform-center-y="-117.0758" />
+       inkscape:transform-center-y="-117.0758"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
     <g
        id="g6105"
        transform="translate(361.56654,-470.62941)"
@@ -430,5 +488,15 @@
          id="path6099"
          sodipodi:open="true" />
     </g>
+    <rect
+       style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:0.5;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:0.16470588;fill-rule:nonzero;stroke:none;stroke-width:2.1824913;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;marker:none;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       id="rect4170"
+       width="1290.975"
+       height="1290.975"
+       x="-538.89966"
+       y="-687.41101"
+       inkscape:export-filename="/home/frode/Creations/Games/Quatter/Resources/Textures/Logo.png"
+       inkscape:export-xdpi="71.387909"
+       inkscape:export-ydpi="71.387909" />
   </g>
 </svg>

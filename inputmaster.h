@@ -92,7 +92,7 @@ private:
     void HandleJoystickButtons();
 
     void SmoothCameraMovement(Vector2 camRot, float camZoom);
-    void HandleCameraMovement(float t);
+    void HandleCameraMovement(float timeStep);
 
     void Screenshot();
     void ActionButtonPressed();
@@ -102,6 +102,7 @@ private:
     void HandleLeftArrowPressed();
     bool CorrectJoystickId(int joystickId);
     void SelectionButtonPressed();
+    void AnyKey();
 };
 
 #endif // INPUTMASTER_H

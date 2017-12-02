@@ -1,4 +1,4 @@
-/* heXon
+/* Quatter
 // Copyright (C) 2017 LucKey Productions (luckeyproductions.nl)
 //
 // This program is free software; you can redistribute it and/or modify
@@ -16,30 +16,33 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#ifndef SQUARE_H
-#define SQUARE_H
+
+
+#ifndef GUIMASTER_H
+#define GUIMASTER_H
 
 #include <Urho3D/Urho3D.h>
-#include "luckey.h"
+#include "master.h"
 
-class Piece;
-
-class Square : public LogicComponent
+class GUIMaster : public Master
 {
-    friend class Board;
-    URHO3D_OBJECT(Square, LogicComponent);
+    URHO3D_OBJECT(GUIMaster, Master);
 public:
-    Square(Context* context);
-    static void RegisterObject(Context* context);
-    virtual void OnNodeSet(Node* node);
+    GUIMaster(Context* context);
+    void EnterMenu();
 
+    int GetActiveSide() const { return activeSide_; }
+    void SetLogoVisible(bool enable);
 private:
-    IntVector2 coords_;
-    AnimatedModel* slot_;
-    Light* light_;
-    Piece* piece_;
-    bool free_;
-    bool selected_;
+    int activeSide_;
+    Sprite* logoSprite_;
+
+    void Init3DGUI();
+    void CreateLogo();
+
+    Vector<Node*> faces_;
+    void HandleUpdate(StringHash eventType, VariantMap& eventData);
+    void HandleClick(StringHash eventType, VariantMap& eventData);
 };
 
-#endif // SQUARE_H
+#endif // GUIMASTER_H

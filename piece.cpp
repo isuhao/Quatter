@@ -44,7 +44,7 @@ void Piece::OnNodeSet(Node* node)
     outlineModel_ = node_->CreateComponent<StaticModel>();
     outlineModel_->SetCastShadows(false);
 
-    Node* lightNode{ node_->CreateChild("Light") };
+    Node* lightNode{ node_->CreateChild("Light", LOCAL) };
     lightNode->SetPosition(Vector3::UP * 0.5f);
     light_ = lightNode->CreateComponent<Light>();
     light_->SetColor(Color(0.0f, 0.8f, 0.5f));

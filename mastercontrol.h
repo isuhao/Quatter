@@ -35,16 +35,18 @@ class EffectMaster;
 class Board;
 class Piece;
 
-enum class GameState{ PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS, QUATTER };
+enum class GameState{ SPLASH, MENU, PLAYER1PICKS, PLAYER2PUTS, PLAYER2PICKS, PLAYER1PUTS, QUATTER };
+enum GameMode{ GM_PVP_LOCAL, GM_PVP_NETWORK, GM_PVC, GM_CVC};
 enum MusicState{ MUSIC_SONG1, MUSIC_SONG2, MUSIC_OFF };
 enum SelectionMode{ SM_CAMERA, SM_STEP, SM_YAD };
 
 typedef struct GameWorld
 {
-    SharedPtr<QuatterCam> camera_;
-    SharedPtr<Scene> scene_;
-    SharedPtr<Board> board_;
-    Vector< SharedPtr<Piece> > pieces_;
+    QuatterCam* camera_;
+    Scene* scene_;
+    Board* board_;
+    Node* tableNode_;
+    Vector< Piece* > pieces_;
 } GameWorld;
 
 #define MC MasterControl::GetInstance()
@@ -76,12 +78,14 @@ public:
     void Exit();
     void CreateLights();
 
-    inline GameState GetGameState() const noexcept { return gameState_; }
-    inline GameState GetPreviousGameState() const noexcept { return previousGameState_; }
-    inline bool InPickState() const noexcept { return gameState_ == GameState::PLAYER1PICKS || gameState_ == GameState::PLAYER2PICKS; }
-    inline bool InPutState() const noexcept { return gameState_ == GameState::PLAYER1PUTS || gameState_ == GameState::PLAYER2PUTS; }
-    inline bool InPlayer1State() const noexcept { return gameState_ == GameState::PLAYER1PICKS || gameState_ == GameState::PLAYER1PUTS; }
-    inline bool InPlayer2State() const noexcept { return gameState_ == GameState::PLAYER2PICKS || gameState_ == GameState::PLAYER2PUTS; }
+    GameMode GetGameMode() const noexcept { return gameMode_; }
+    GameState GetGameState() const noexcept { return gameState_; }
+    GameState GetPreviousGameState() const noexcept { return previousGameState_; }
+    bool InMenu() const noexcept { return gameState_ == GameState::MENU || gameState_ == GameState::SPLASH; }
+    bool InPickState() const noexcept { return gameState_ == GameState::PLAYER1PICKS || gameState_ == GameState::PLAYER2PICKS; }
+    bool InPutState() const noexcept { return gameState_ == GameState::PLAYER1PUTS || gameState_ == GameState::PLAYER2PUTS; }
+    bool InPlayer1State() const noexcept { return gameState_ == GameState::PLAYER1PICKS || gameState_ == GameState::PLAYER1PUTS; }
+    bool InPlayer2State() const noexcept { return gameState_ == GameState::PLAYER2PICKS || gameState_ == GameState::PLAYER2PUTS; }
 
     void NextPhase();
     void NextSelectionMode();
@@ -89,7 +93,7 @@ public:
     void NextMusicState();
     void TakeScreenshot();
 
-    float AttributesToAngle(int attributes) const { return (360.0f/NUM_PIECES * attributes) + 180.0f / NUM_PIECES + 23.5f; }
+    float AttributesToAngle(int attributes) const { return (360.0f / NUM_PIECES * attributes) + 180.0f / NUM_PIECES + 23.5f; }
     Vector3 AttributesToPosition(int attributes) const {
         return Quaternion(AttributesToAngle(attributes), Vector3::UP) * Vector3::BACK * 7.0f
                 + Vector3::DOWN * TABLE_DEPTH;
@@ -110,17 +114,21 @@ public:
     float Sine(const float freq, const float min = -1.0f, const float max = 1.0f, const float shift = 0.0f);
     float Cosine(const float freq, const float min = -1.0f, const float max = 1.0f, const float shift = 0.0f);
 
+    void EnterMenu();
+    void Reset();
+
 private:
     static MasterControl* instance_;
     String resourceFolder_;
 
-    SharedPtr<Node> leafyLightNode_;
-    SharedPtr<Light> leafyLight_;
+    Node* leafyLightNode_;
+    Light* leafyLight_;
 
-    SharedPtr<SoundSource> musicSource1_;
-    SharedPtr<SoundSource> musicSource2_;
+    SoundSource* musicSource1_;
+    SoundSource* musicSource2_;
     float musicGain_;
 
+    GameMode gameMode_;
     GameState gameState_;
     GameState previousGameState_;
     GameState startGameState_;
@@ -133,7 +141,6 @@ private:
     Piece* pickedPiece_;
 
     void CreateScene();
-    void Reset();
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
 
     void CameraSelectPiece(bool force = false);
@@ -152,6 +159,8 @@ private:
     void CreateSkybox();
     void CreateTable();
     void CreateBoardAndPieces();
+    void LoadSettings();
+    void SaveSettings();
 };
 
 #endif // MASTERCONTROL_H

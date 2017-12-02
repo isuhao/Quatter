@@ -16,6 +16,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include "guimaster.h"
+
 #include "quattercam.h"
 //#include <initializer_list>
 
@@ -25,19 +27,21 @@ void QuatterCam::RegisterObject(Context *context)
 }
 
 QuatterCam::QuatterCam(Context* context) : LogicComponent(context),
-    distance_{12.0f},
+    distance_{16.0f},
     aimDistance_{distance_},
-    targetPosition_{Vector3::UP * 0.42f}
+    targetPosition_{TARGET_BOARD * 23.0f},
+    aimTargetPosition_{targetPosition_}
 {
 }
 
 void QuatterCam::OnNodeSet(Node *node)
 { if (!node) return;
 
-    node_->SetPosition(Vector3(3.0f, 10.0f, -8.0f));
-    node_->LookAt(Vector3::ZERO);
+    node_->SetPosition(Vector3(3.0f, 8.0f, -10.0f).Normalized() * distance_);
+    node_->LookAt(targetPosition_);
     camera_ = node_->CreateComponent<Camera>();
     camera_->SetFarClip(1024.0f);
+    UpdateFov();
 
     Zone* zone{node_->CreateComponent<Zone>()};
     zone->SetFogColor(Color(0.20f, 0.17f, 0.13f));
@@ -54,7 +58,7 @@ void QuatterCam::CreatePockets()
 {
     for (bool left : { true, false }){
 
-        Node* pocketNode{ node_->CreateChild("Pocket") };
+        Node* pocketNode{ node_->CreateChild("Pocket", LOCAL) };
         pocketNode->SetPosition(Vector3(left ? -2.0f : 2.0f, 1.5f, 3.2f));
         pocketNode->SetRotation(Quaternion(-70.0f, Vector3::RIGHT));
 
@@ -75,22 +79,59 @@ void QuatterCam::SetupViewport()
     effectRenderPath_->SetEnabled("FXAA3", true);
     effectRenderPath_->Append(CACHE->GetResource<XMLFile>("PostProcess/BloomHDR.xml"));
     effectRenderPath_->SetShaderParameter("BloomHDRThreshold", 0.4f);
-    effectRenderPath_->SetShaderParameter("BloomHDRMix", Vector2(1.0f, 0.7f));
+    effectRenderPath_->SetShaderParameter("BloomHDRMix", Vector2(0.0f, 2.3f));
     effectRenderPath_->SetEnabled("BloomHDR", true);
 
     RENDERER->SetViewport(0, viewport_);
 }
 
+void QuatterCam::UpdateFov()
+{
+    camera_->SetFov(Clamp(60.0f + distance_, 23.0f, 110.0f));
+}
+
 void QuatterCam::Update(float timeStep)
 {
+    if (effectRenderPath_->GetShaderParameter("BloomHDRMix").GetVector2().y_ != 0.7f)
+        effectRenderPath_->SetShaderParameter("BloomHDRMix", Vector2(Clamp(TIME->GetElapsedTime() * 0.5f - 1.0f, 0.0f, 1.0f), Max(0.7f, 2.3f - TIME->GetElapsedTime() * 0.25f)));
+
+    if (MC->InMenu()) {
+
+        if (aimTargetPosition_.y_ > 1.0f) {
+
+            node_->RotateAround(targetPosition_, Quaternion(timeStep, Vector3::UP), TS_WORLD);
+
+        } else {
+
+            if (node_->GetWorldPosition().y_ - aimTargetPosition_.y_ > 0.0f)
+                node_->Translate(Vector3::DOWN * (node_->GetWorldPosition().y_ - aimTargetPosition_.y_) * timeStep * 4.2f);
+
+            int side{ GetSubsystem<GUIMaster>()->GetActiveSide() };//Floor(TIME->GetElapsedTime() * 0.5f) };
+            Vector3 tableSideCrossProduct{ node_->GetDirection().CrossProduct(Quaternion(-90.0f * side, Vector3::UP) * MC->world_.tableNode_->GetDirection()) };
+
+            if (tableSideCrossProduct.Length()) {
+
+                node_->RotateAround(targetPosition_, Quaternion(tableSideCrossProduct.Length() * 235.0f * timeStep, tableSideCrossProduct), TS_WORLD);
+                node_->LookAt(targetPosition_, 0.5f * (node_->GetUp() + Vector3::UP));
+            }
+
+            aimDistance_ = ZOOM_MENU * (1.0f + 0.23f * tableSideCrossProduct.Length());
+        }
+    }
+
     //Update distance
-    if (aimDistance_ != distance_)
+    if (distance_ != aimDistance_)
         distance_ = 0.1f * (9.0f * distance_ + aimDistance_);
 
+    //Update target position
+    if (targetPosition_ != aimTargetPosition_)
+        targetPosition_ = 0.2f * (4.0f * targetPosition_ + aimTargetPosition_);
+
     Vector3 relativeToTarget{ (node_->GetPosition() - targetPosition_).Normalized() };
-    if (relativeToTarget.Length() != distance_){
+    if (relativeToTarget.Length() != distance_) {
+
             node_->SetPosition(distance_ * relativeToTarget + targetPosition_);
-            camera_->SetFov(Clamp(60.0f + distance_, 23.0f, 110.0f));
+            UpdateFov();
     }
 
     //Spin pockets
@@ -99,7 +140,7 @@ void QuatterCam::Update(float timeStep)
 
 void QuatterCam::UpdatePockets(float timeStep)
 {
-    float spinSpeed{23.0f};
+    float spinSpeed{ 23.0f };
 
     pockets_.first_->Rotate(Quaternion(timeStep * spinSpeed, Vector3::UP));
     pockets_.second_->Rotate(Quaternion(-timeStep * spinSpeed, Vector3::UP));
@@ -110,10 +151,14 @@ void QuatterCam::UpdatePockets(float timeStep)
 
 void QuatterCam::Rotate(Vector2 rotation)
 {
+    if (MC->InMenu())
+        return;
+
     node_->LookAt(targetPosition_);
     node_->RotateAround(targetPosition_,
-                            Quaternion(rotation.x_, Vector3::UP) * Quaternion(rotation.y_, node_->GetRight()),
-                            TS_WORLD);
+                        Quaternion(rotation.x_, Vector3::UP) * Quaternion(rotation.y_, node_->GetRight()),
+                        TS_WORLD);
+
     Vector3 camRight{ node_->GetRight() };
 
     //Clamp pitch
@@ -129,5 +174,18 @@ void QuatterCam::Rotate(Vector2 rotation)
 
 void QuatterCam::Zoom(float delta)
 {
+    if (MC->InMenu())
+        return;
+
     aimDistance_ = Clamp(aimDistance_ - delta, ZOOM_MIN, ZOOM_MAX);
+}
+
+void QuatterCam::TargetMenu()
+{
+    aimTargetPosition_ = TARGET_MENU;
+}
+
+void QuatterCam::TargetBoard()
+{
+    aimTargetPosition_ = TARGET_BOARD;
 }

@@ -19,6 +19,7 @@
 #include "mastercontrol.h"
 #include "inputmaster.h"
 #include "effectmaster.h"
+#include "guimaster.h"
 #include "quattercam.h"
 #include "piece.h"
 #include "board.h"
@@ -38,7 +39,8 @@ MasterControl* MasterControl::GetInstance()
 MasterControl::MasterControl(Context *context):
     Application(context),
     musicGain_{1.0f},
-    gameState_{GameState::PLAYER1PICKS},
+    gameMode_{GM_PVP_LOCAL},
+    gameState_{GameState::SPLASH},
     previousGameState_{},
     startGameState_{gameState_},
     musicState_{MUSIC_SONG1},
@@ -63,7 +65,7 @@ void MasterControl::Setup()
 {
     SetRandomSeed(TIME->GetSystemTime());
 
-    engineParameters_["LogName"] = FILES->GetAppPreferencesDir("urho3d", "logs")+"Quatter.log";
+    engineParameters_["LogName"] = FILES->GetAppPreferencesDir("urho3d", "logs") + "Quatter.log";
     engineParameters_["WindowTitle"] = "Quatter";
     engineParameters_["WindowIcon"] = "icon.png";
 
@@ -87,9 +89,9 @@ void MasterControl::Setup()
 
     engineParameters_[EP_RESOURCE_PATHS] = resourcePaths;
 
-    //    engineParameters_["FullScreen"] = false;
-    //    engineParameters_["WindowWidth"] = 1280;
-    //    engineParameters_["WindowHeight"] = 1024;
+    LoadSettings();
+
+
     //    engineParameters_["borderless"] = true;
 }
 void MasterControl::Start()
@@ -97,13 +99,18 @@ void MasterControl::Start()
     context_->RegisterSubsystem(new InputMaster(context_));
     context_->RegisterSubsystem(new EffectMaster(context_));
 
-
     CreateScene();
+
+    context_->RegisterSubsystem(new GUIMaster(context_));
 
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(MasterControl, HandleUpdate));
 }
+
+
 void MasterControl::Stop()
 {
+    SaveSettings();
+
     engine_->DumpResources(true);
 }
 void MasterControl::Exit()
@@ -114,6 +121,43 @@ void MasterControl::Exit()
     engine_->Exit();
 }
 
+void MasterControl::LoadSettings()
+{
+    if (FILES->FileExists("Resources/Settings.xml")){
+        File file(context_, "Resources/Settings.xml", FILE_READ);
+        XMLFile configFile(context_);
+        configFile.Load(file);
+        XMLElement graphics{ configFile.GetRoot().GetChild("Graphics") };
+        XMLElement audio{ configFile.GetRoot().GetChild("Audio") };
+
+        if (graphics) {
+
+            engineParameters_[EP_WINDOW_WIDTH] = graphics.GetInt("Width");
+            engineParameters_[EP_WINDOW_HEIGHT] = graphics.GetInt("Height");
+            engineParameters_[EP_FULL_SCREEN] = graphics.GetBool("Fullscreen");
+        }
+        if (audio) {
+
+            musicGain_ = audio.GetFloat("MusicGain");
+        }
+    }
+}
+void MasterControl::SaveSettings()
+{
+    XMLFile file(context_);
+    XMLElement root(file.CreateRoot("Settings"));
+
+    XMLElement graphicsElement(root.CreateChild("Graphics"));
+    graphicsElement.SetInt("Width", GRAPHICS->GetWidth());
+    graphicsElement.SetInt("Height", GRAPHICS->GetHeight());
+    graphicsElement.SetBool("Fullscreen", GRAPHICS->GetFullscreen());
+
+    XMLElement audioElement(root.CreateChild("Audio"));
+    audioElement.SetFloat("MusicGain", musicGain_);
+
+    file.SaveFile("Resources/Settings.xml");
+}
+
 void MasterControl::CreateScene()
 {
     world_.scene_ = new Scene(context_);
@@ -121,7 +165,7 @@ void MasterControl::CreateScene()
 
     CreateSkybox();
 
-    Node* cameraNode{ world_.scene_->CreateChild("Camera") };
+    Node* cameraNode{ world_.scene_->CreateChild("Camera", LOCAL) };
     world_.camera_ = cameraNode->CreateComponent<QuatterCam>();
 
     CreateLights();
@@ -134,7 +178,7 @@ void MasterControl::CreateScene()
 void MasterControl::CreateLights()
 {
     //Add leafy light source
-    leafyLightNode_ = world_.scene_->CreateChild("DirectionalLight");
+    leafyLightNode_ = world_.scene_->CreateChild("DirectionalLight", LOCAL);
     leafyLightNode_->SetPosition(Vector3(6.0f, 96.0f, 9.0f));
     leafyLightNode_->LookAt(Vector3(0.0f, 0.0f, 0.0f));
     leafyLight_ = leafyLightNode_->CreateComponent<Light>();
@@ -144,10 +188,9 @@ void MasterControl::CreateLights()
     leafyLight_->SetShapeTexture(static_cast<Texture*>(CACHE->GetResource<Texture2D>("Textures/LeafyMask.png")));
 
     //Add a directional light to the world. Enable cascaded shadows on it
-    Node* downardsLightNode{ world_.scene_->CreateChild("DirectionalLight") };
+    Node* downardsLightNode{ world_.scene_->CreateChild("DirectionalLight", LOCAL) };
     downardsLightNode->SetPosition(Vector3(2.0f, 23.0f, 3.0f));
     downardsLightNode->LookAt(Vector3::ZERO);
-
     Light* downwardsLight{ downardsLightNode->CreateComponent<Light>() };
     downwardsLight->SetLightType(LIGHT_DIRECTIONAL);
     downwardsLight->SetBrightness(0.34f);
@@ -159,7 +202,7 @@ void MasterControl::CreateLights()
     //Create point lights
     for (Vector3 pos : { Vector3(-10.0f, 8.0f, -23.0f), Vector3(-20.0f, -8.0f, 23.0f), Vector3(20.0f, -7.0f, 23.0f) }) {
 
-        Node* pointLightNode_{ world_.scene_->CreateChild("PointLight") };
+        Node* pointLightNode_{ world_.scene_->CreateChild("PointLight", LOCAL) };
         pointLightNode_->SetPosition(pos);
 
         Light* pointLight{ pointLightNode_->CreateComponent<Light>() };
@@ -174,7 +217,7 @@ void MasterControl::CreateLights()
 }
 void MasterControl::CreateSkybox()
 {
-    Node* skyNode{ world_.scene_->CreateChild("Sky") };
+    Node* skyNode{ world_.scene_->CreateChild("Sky", LOCAL) };
     Skybox* skybox{ skyNode->CreateComponent<Skybox>() };
     skybox->SetModel(GetModel("Sphere"));
     skybox->SetMaterial(GetMaterial("LeafyKnoll"));
@@ -183,7 +226,7 @@ void MasterControl::CreateJukebox()
 {
     Sound* song1{ GetMusic("Angelight - The Knowledge River") };
     Sound* song2{ GetMusic("Angelight - The Knowledge River") };
-    Node* musicNode{ world_.scene_->CreateChild("Music") };
+    Node* musicNode{ world_.scene_->CreateChild("Music", LOCAL) };
 
     musicSource1_ = musicNode->CreateComponent<SoundSource>();
     musicSource1_->SetSoundType(SOUND_MUSIC);
@@ -197,17 +240,17 @@ void MasterControl::CreateJukebox()
 }
 void MasterControl::CreateTable()
 {
-    Node* tableNode{ world_.scene_->CreateChild("Table") };
-    tableNode->AddTag("Table");
-    tableNode->SetRotation(Quaternion(23.5f, Vector3::UP));
+    world_.tableNode_ = world_.scene_->CreateChild("Table", LOCAL);
+    world_.tableNode_->AddTag("Table");
+    world_.tableNode_->SetRotation(Quaternion(23.5f, Vector3::UP));
 
-    StaticModel* tableModel{ tableNode->CreateComponent<StaticModel>() };
+    StaticModel* tableModel{ world_.tableNode_->CreateComponent<StaticModel>() };
     tableModel->SetModel(GetModel("Table"));
     tableModel->SetMaterial(GetMaterial("Table"));
     tableModel->GetMaterial()->SetShaderParameter("MatDiffColor", Vector4(0.32f, 0.40f, 0.42f, 1.0f));
     tableModel->SetCastShadows(true);
 
-    Node* hitNode{ world_.scene_->CreateChild("HitPlane") };
+    Node* hitNode{ world_.scene_->CreateChild("HitPlane", LOCAL) };
     hitNode->SetPosition(Vector3::DOWN * 1.23f);
     hitNode->SetScale(128.0f);
 
@@ -217,17 +260,17 @@ void MasterControl::CreateTable()
 }
 void MasterControl::CreateBoardAndPieces()
 {
-    Node* boardNode{ world_.scene_->CreateChild("Board") };
+    Node* boardNode{ world_.scene_->CreateChild("Board", LOCAL) };
     world_.board_ = boardNode->CreateComponent<Board>();
     world_.pieces_.Reserve(NUM_PIECES);
 
     for (int p{0}; p < NUM_PIECES; ++p){
 
-        Node* pieceNode{ world_.scene_->CreateChild("Piece") };
+        Node* pieceNode{ world_.scene_->CreateChild("Piece", LOCAL) };
         Piece* newPiece{ pieceNode->CreateComponent<Piece>() };
         newPiece->Init(Piece::PieceAttributes(p));
 
-        world_.pieces_.Push(SharedPtr<Piece>(newPiece));
+        world_.pieces_.Push(newPiece);
         newPiece->SetPosition(AttributesToPosition(newPiece->ToInt())
                               + Vector3(Random(0.05f),
                                         0.0f,
@@ -237,14 +280,14 @@ void MasterControl::CreateBoardAndPieces()
 
 Sound* MasterControl::GetMusic(String name) const
 {
-    Sound* song{ CACHE->GetResource<Sound>("Music/"+name+".ogg") };
+    Sound* song{ CACHE->GetResource<Sound>("Music/" + name + ".ogg") };
     song->SetLooped(true);
 
     return song;
 }
 Sound* MasterControl::GetSample(String name) const
 {
-    Sound* sample{ CACHE->GetResource<Sound>("Samples/"+name+".ogg") };
+    Sound* sample{ CACHE->GetResource<Sound>("Samples/" + name + ".ogg") };
     sample->SetLooped(false);
 
     return sample;
@@ -276,6 +319,7 @@ void MasterControl::CameraSelectPiece(bool force)
     Piece* nearest{ selectedPiece_ };
 
     for (Piece* piece : world_.pieces_) {
+
         if (!nearest
          && (piece->GetState() == PieceState::FREE || piece->GetState() == PieceState::SELECTED))
         {
@@ -340,7 +384,7 @@ void MasterControl::DeselectPiece()
 }
 
 void MasterControl::NextPhase()
-{
+{    
     if (gameState_ == GameState::QUATTER)
         return;
 
@@ -387,18 +431,23 @@ void MasterControl::Reset()
 
     lastSelectedPiece_ = nullptr;
 
-    if (gameState_ == GameState::QUATTER){
+    if (gameState_ == GameState::MENU) {
 
-        if (previousGameState_ == GameState::PLAYER1PUTS){
+        GetSubsystem<GUIMaster>()->SetLogoVisible(false);
+        gameState_ = GameState::PLAYER1PICKS;
+
+    } else if (gameState_ == GameState::QUATTER) {
+
+        if (previousGameState_ == GameState::PLAYER1PUTS) {
             gameState_ = GameState::PLAYER1PICKS;
-        } else if (previousGameState_ == GameState::PLAYER2PUTS){
+        } else if (previousGameState_ == GameState::PLAYER2PUTS) {
             gameState_ = GameState::PLAYER2PICKS;
         }
     } else {
 
-        if (startGameState_ == GameState::PLAYER1PICKS){
-            gameState_ = GameState::PLAYER1PICKS;
-        } else if (startGameState_ == GameState::PLAYER2PICKS){
+        if (startGameState_ == GameState::PLAYER1PICKS) {
+            gameState_ = GameState::PLAYER2PICKS;
+        } else if (startGameState_ == GameState::PLAYER2PICKS) {
             gameState_ = GameState::PLAYER1PICKS;
         }
     }
@@ -485,13 +534,21 @@ void MasterControl::MusicGainDown(float step)
         FX->FadeTo(musicSource2_, musicGain_, 0.23f);
 }
 
+void MasterControl::EnterMenu()
+{
+    gameState_ = GameState::MENU;
+    world_.camera_->TargetMenu();
+
+    GetSubsystem<GUIMaster>()->SetLogoVisible(true);
+}
+
 void MasterControl::TakeScreenshot()
 {
     Image screenshot{ context_ };
     GRAPHICS->TakeScreenShot(screenshot);
     //Here we save in the Screenshots folder with date and time appended
-    String fileName{GetSubsystem<FileSystem>()->GetProgramDir() + "Screenshots/Screenshot_" +
-                Time::GetTimeStamp().Replaced(':', '_').Replaced('.', '_').Replaced(' ', '_')+".png"};
+    String fileName{ GetSubsystem<FileSystem>()->GetProgramDir() + "Screenshots/Screenshot_" +
+                Time::GetTimeStamp().Replaced(':', '_').Replaced('.', '_').Replaced(' ', '_') + ".png" };
     Log::Write(1, fileName);
     screenshot.SavePNG(fileName);
 }

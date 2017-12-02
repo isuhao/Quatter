@@ -31,7 +31,7 @@ class Indicator : public LogicComponent
 public:
     Indicator(Context* context);
     static void RegisterObject(Context* context);
-    void OnNodeSet(Node* node) override;
+    virtual void OnNodeSet(Node* node);
 
 private:
     Node* arrowNode1_;

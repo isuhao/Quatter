@@ -31,18 +31,20 @@ Indicator::Indicator(Context* context) : LogicComponent(context)
 void Indicator::OnNodeSet(Node *node)
 { if (!node) return;
 
+    node_->AddTag("Indicator");
+
     glow_ = MC->GetMaterial("Glow")->Clone();
     //Create nodes and models
-    arrowNode1_ = node_->CreateChild("Arrow");
+    arrowNode1_ = node_->CreateChild("Arrow", LOCAL);
     arrowNode1_->Rotate(Quaternion(-90.0f, Vector3::UP));
     model1_ = arrowNode1_->CreateComponent<AnimatedModel>();
 
-    arrowNode2_ = node_->CreateChild("Arrow");
+    arrowNode2_ = node_->CreateChild("Arrow", LOCAL);
     arrowNode2_->Rotate(Quaternion(90.0f, Vector3::UP));
     model2_ = arrowNode2_->CreateComponent<AnimatedModel>();
 
     //Create lights
-    Node* lightNode1{arrowNode1_->CreateChild("Light")};
+    Node* lightNode1{ arrowNode1_->CreateChild("Light", LOCAL) };
     lightNode1->SetPosition(Vector3::UP * 0.23f);
     light1_ = lightNode1->CreateComponent<Light>();
     light1_->SetColor(COLOR_GLOW);
@@ -50,7 +52,7 @@ void Indicator::OnNodeSet(Node *node)
     light1_->SetRange(2.0f);
     light1_->SetCastShadows(false);
 
-    Node* lightNode2{arrowNode2_->CreateChild("Light")};
+    Node* lightNode2{ arrowNode2_->CreateChild("Light", LOCAL) };
     lightNode2->SetPosition(Vector3::UP * 0.23f);
     light2_ = lightNode2->CreateComponent<Light>();
     light2_->SetColor(COLOR_GLOW);

@@ -40,7 +40,7 @@ void Square::OnNodeSet(Node *node)
     piece_ = nullptr;
 
     //Create slot
-    Node* slotNode{ node_->CreateChild("Slot") };
+    Node* slotNode{ node_->CreateChild("Slot", LOCAL) };
     slotNode->SetPosition(Vector3::UP * 0.05f);
     slot_ = slotNode->CreateComponent<AnimatedModel>();
     slot_->SetModel(MC->GetModel("Slot"));
@@ -48,7 +48,7 @@ void Square::OnNodeSet(Node *node)
     slot_->GetMaterial()->SetShaderParameter("MatDiffColor", Color(0.0f, 0.0f, 0.0f, 0.0f));
 
     //Create light
-    Node* lightNode{ slotNode->CreateChild("Light") };
+    Node* lightNode{ slotNode->CreateChild("Light", LOCAL) };
     lightNode->SetPosition(Vector3::UP * 0.23f);
     light_ = lightNode->CreateComponent<Light>();
     light_->SetColor(0.5f * COLOR_GLOW);

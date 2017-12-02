@@ -62,17 +62,15 @@ void InputMaster::ConstructYad()
 
     Node* yadNode{ MC->world_.scene_->CreateChild("Yad") };
     yad_ = yadNode->CreateComponent<Yad>();
-
-    yad_->Hide();
 }
 
 void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
 
-    float t{ eventData[Update::P_TIMESTEP].GetFloat() };
-    idleTime_ += t;
-    mouseIdleTime_ += t;
-    sinceStep_ += t;
+    float timeStep{ eventData[Update::P_TIMESTEP].GetFloat() };
+    idleTime_ += timeStep;
+    mouseIdleTime_ += timeStep;
+    sinceStep_ += timeStep;
 
     if (idleTime_ > IDLE_THRESHOLD)
         SetIdle();
@@ -80,10 +78,16 @@ void InputMaster::HandleUpdate(StringHash eventType, VariantMap &eventData)
     if (mouseIdleTime_ > IDLE_THRESHOLD * 0.23f)
         yad_->Hide();
 
-    HandleCameraMovement(t);
+    HandleCameraMovement(timeStep);
 
     HandleKeys();
     HandleJoystickButtons();
+}
+
+void InputMaster::AnyKey()
+{
+    if (MC->GetGameState() == GameState::SPLASH)
+        MC->EnterMenu();
 }
 
 void InputMaster::HandleKeys()
@@ -123,12 +127,7 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
     pressedKeys_.Insert(key);
 
     switch (key) {
-    case KEY_ESCAPE:
-        if (!BOARD->IsEmpty() || MC->GetSelectedPiece() || MC->GetPickedPiece()) {
-            MC->Reset();
 
-        } else MC->Exit();
-        break;
     case KEY_9:
         MC->TakeScreenshot();
         break;
@@ -141,8 +140,19 @@ void InputMaster::HandleKeyDown(StringHash eventType, VariantMap &eventData)
     case KEY_KP_MINUS:
         MC->MusicGainDown(VOLUME_STEP);
         break;
-    default: break;
+    case KEY_ESCAPE:
+        if (!BOARD->IsEmpty() || MC->GetSelectedPiece() || MC->GetPickedPiece()) {
+            MC->Reset();
+
+        } else {
+            MC->EnterMenu();
+        }
+        break;
+    default:
+        AnyKey();
+        break;
     }
+
 }
 void InputMaster::HandleKeyUp(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
@@ -175,8 +185,11 @@ void InputMaster::Step(Vector3 step)
     if (sinceStep_ < STEP_INTERVAL)
         return;
 
+    if (MC->InMenu()) {
+        //Send to menu
+        return;
 
-    if (MC->InPickState()) {
+    } else if (MC->InPickState()) {
 
             sinceStep_ = 0.0f;
             if (step == Vector3::RIGHT || step == Vector3::UP)
@@ -219,6 +232,9 @@ void InputMaster::Step(Vector3 step)
 void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
 
+    if (MC->InMenu())
+        return;
+
     UpdateMousePos();
 
     mousePos_.x_ += eventData[MouseMove::P_DX].GetFloat() / GRAPHICS->GetWidth();
@@ -248,7 +264,12 @@ void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData)
 void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
 
-    int button{eventData[MouseButtonDown::P_BUTTON].GetInt()};
+    if (MC->InMenu()) {
+        AnyKey();
+        return;
+    }
+
+    int button{ eventData[MouseButtonDown::P_BUTTON].GetInt() };
     pressedMouseButtons_.Insert(button);
     mouseMoveSinceClick_ = Vector2::ZERO;
 
@@ -265,7 +286,10 @@ void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventD
 void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
 
-    int button{eventData[MouseButtonUp::P_BUTTON].GetInt()};
+    if (MC->InMenu())
+        return;
+
+    int button{ eventData[MouseButtonUp::P_BUTTON].GetInt() };
 
     if (pressedMouseButtons_.Contains(button))
         pressedMouseButtons_.Erase(button);
@@ -305,11 +329,14 @@ void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventDat
 void InputMaster::HandleMouseWheel(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
 
-    CAMERA->SetDistance(CAMERA->GetDistance() - eventData[MouseWheel::P_WHEEL].GetInt() * 2.3f);
+    CAMERA->Zoom(eventData[MouseWheel::P_WHEEL].GetInt() * 2.3f);
 }
 
 void InputMaster::UpdateYad()
 {
+    if (MC->InMenu())
+        return;
+
     bool hide{ false };
     Vector3 yadPos{ YadRaycast(hide) };
 
@@ -450,7 +477,7 @@ bool InputMaster::CorrectJoystickId(int joystickId)
 }
 JoystickState* InputMaster::GetActiveJoystick()
 {
-    if (INPUT->GetNumJoysticks() > 1) {
+    if (MC->GetGameMode() == GM_PVP_LOCAL && INPUT->GetNumJoysticks() > 1) {
 
         if (MC->InPlayer1State())
         {
@@ -482,13 +509,16 @@ JoystickState* InputMaster::GetActiveJoystick()
 void InputMaster::HandleJoystickButtonDown(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
 
+    AnyKey();
+
     using namespace JoystickButtonDown;
     int joystickId{eventData[P_JOYSTICKID].GetInt()};
     int button{eventData[P_BUTTON].GetInt()};
 
     if (INPUT->GetNumJoysticks() > 1
      && !CorrectJoystickId(joystickId)
-     && MC->GetGameState() != GameState::QUATTER) return;
+     && MC->GetGameState() != GameState::QUATTER)
+        return;
 
     pressedJoystickButtons_[joystickId].Insert(button);
 }
@@ -528,7 +558,7 @@ void InputMaster::ActionButtonPressed()
     }
 }
 
-void InputMaster::HandleCameraMovement(float t)
+void InputMaster::HandleCameraMovement(float timeStep)
 {
     Vector2 camRot{};
     float camZoom{};
@@ -558,7 +588,7 @@ void InputMaster::HandleCameraMovement(float t)
     }
 
     //Mouse rotate
-    if (drag_){
+    if (drag_) {
         IntVector2 mouseMove{INPUT->GetMouseMove()};
         camRot += Vector2(mouseMove.x_, mouseMove.y_) * 0.1f;
     }
@@ -582,7 +612,7 @@ void InputMaster::HandleCameraMovement(float t)
 
         if (rotation.Length()){
             ResetIdle();
-            camRot += rotation * t * joyRotMultiplier;
+            camRot += rotation * timeStep * joyRotMultiplier;
         }
 
         float zoom{Clamp(joy->GetAxisPosition(13) - joy->GetAxisPosition(12),
@@ -595,7 +625,7 @@ void InputMaster::HandleCameraMovement(float t)
             zoom *= 1.0f / (1.0f - DEADZONE);
             zoom *= zoom * zoom;
         }
-        camZoom += t * joyZoomSpeed * zoom;
+        camZoom += timeStep * joyZoomSpeed * zoom;
     }
     //Move camera faster when shift key is held down
     if (pressedKeys_.Contains(KEY_SHIFT)){
@@ -608,8 +638,8 @@ void InputMaster::HandleCameraMovement(float t)
     //Slowly spin camera when there hasn't been any input for a while
     if (idle_){
         float idleStartup{Min(0.5f * (idleTime_ - IDLE_THRESHOLD), 1.0f)};
-        camRot += Vector2(t * idleStartup * -0.5f,
-                          t * idleStartup * MC->Sine(0.23f, -0.042f, 0.042f));
+        camRot += Vector2(timeStep * idleStartup * -0.5f,
+                          timeStep * idleStartup * MC->Sine(0.23f, -0.042f, 0.042f));
     }
 
     CAMERA->Rotate(smoothCamRotate_);
@@ -741,7 +771,8 @@ bool InputMaster::RaycastToTable()
 
     for (RayQueryResult r : results){
 
-            if (r.node_->HasTag("Table")){
+            if (r.node_->HasTag("Table")) {
+
                 return true;
             }
     }

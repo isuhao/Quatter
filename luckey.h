@@ -49,6 +49,7 @@
 #include <Urho3D/Graphics/RenderPath.h>
 #include <Urho3D/Graphics/Skybox.h>
 #include <Urho3D/Graphics/StaticModel.h>
+#include <Urho3D/Graphics/Technique.h>
 #include <Urho3D/Graphics/Texture2D.h>
 #include <Urho3D/Graphics/Viewport.h>
 #include <Urho3D/Graphics/Zone.h>
@@ -71,9 +72,14 @@
 #include <Urho3D/Scene/Node.h>
 #include <Urho3D/Scene/SceneEvents.h>
 #include <Urho3D/Scene/Scene.h>
+#include <Urho3D/UI/Button.h>
 #include <Urho3D/UI/Font.h>
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/UI.h>
+#include <Urho3D/UI/UIEvents.h>
+#include <Urho3D/UI/Sprite.h>
+#include <Urho3D/UI/UIComponent.h>
+#include <Urho3D/UI/Window.h>
 #include <Urho3D/Scene/ValueAnimation.h>
 
 #include <Urho3D/DebugNew.h>
@@ -85,12 +91,12 @@
 #define RENDERER GetSubsystem<Renderer>()
 #define TIME GetSubsystem<Time>()
 #define FILES GetSubsystem<FileSystem>()
+#define GUI GetSubsystem<UI>()
 
 namespace Urho3D {
 class Drawable;
 class Node;
 class Scene;
-class Sprite;
 class Viewport;
 class RenderPath;
 class Camera;

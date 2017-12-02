@@ -27,7 +27,8 @@ SOURCES += \
     effectmaster.cpp \
     square.cpp \
     yad.cpp \
-    indicator.cpp
+    indicator.cpp \
+    guimaster.cpp
 
 HEADERS += \
     luckey.h \
@@ -40,7 +41,8 @@ HEADERS += \
     effectmaster.h \
     square.h \
     yad.h \
-    indicator.h
+    indicator.h \
+    guimaster.h
 
 unix {
     isEmpty(PREFIX) {
