@@ -428,7 +428,7 @@ void InputMaster::SelectionButtonPressed()
 void InputMaster::HandleJoystickButtons()
 {
     for(int joystickId: {0, 1}) {
-        HashSet<int>& buttons{pressedJoystickButtons_[joystickId]};
+        HashSet<int>& buttons = pressedJoystickButtons_[joystickId];
 
         if (buttons.Size())
             ResetIdle();
