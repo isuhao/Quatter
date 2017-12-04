@@ -235,7 +235,7 @@ void Board::SelectLast()
     if (lastSelectedSquare_ && lastSelectedSquare_ != selectedSquare_)
         Select(lastSelectedSquare_);
     else if (!selectedSquare_)
-        SelectNearestFreeSquare();
+        SelectNearestFreeSquare(CAMERA->GetPosition());
 }
 void Board::Select(Square* square)
 {

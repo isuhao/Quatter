@@ -93,6 +93,8 @@
 #define FILES GetSubsystem<FileSystem>()
 #define GUI GetSubsystem<UI>()
 
+#define FX GetSubsystem<EffectMaster>()
+
 namespace Urho3D {
 class Drawable;
 class Node;

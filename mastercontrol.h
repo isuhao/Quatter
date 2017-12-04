@@ -49,10 +49,8 @@ typedef struct GameWorld
     Vector< Piece* > pieces_;
 } GameWorld;
 
-#define MC MasterControl::GetInstance()
-#define FX GetSubsystem<EffectMaster>()
-#define CAMERA MC->world_.camera_
-#define BOARD MC->world_.board_
+#define MC GetSubsystem<MasterControl>()
+
 #define NUM_PIECES 16
 #define TABLE_DEPTH 0.21f
 #define RESET_DURATION 1.23f
@@ -66,7 +64,6 @@ class MasterControl : public Application
 
 public:
     MasterControl(Context* context);
-    static MasterControl* GetInstance();
     String GetResourceFolder() const { return resourceFolder_; }
 
     GameWorld world_;
@@ -118,7 +115,6 @@ public:
     void Reset();
 
 private:
-    static MasterControl* instance_;
     String resourceFolder_;
 
     Node* leafyLightNode_;

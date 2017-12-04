@@ -45,6 +45,8 @@ using namespace Urho3D;
 #define ZOOM_EDGE 7.0f
 #define ZOOM_MENU 21.0f
 
+#define CAMERA MC->world_.camera_
+
 class QuatterCam : public LogicComponent
 {
     URHO3D_OBJECT(QuatterCam, LogicComponent);

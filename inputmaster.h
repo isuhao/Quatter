@@ -40,6 +40,7 @@ public:
     InputMaster(Context* context);
     bool IsIdle() const noexcept { return idle_; }
     void ConstructYad();
+    void UpdateYad();
 
 private:
     HashSet<int> pressedKeys_;
@@ -74,7 +75,6 @@ private:
 
     void HandleUpdate(StringHash eventType, VariantMap &eventData);
     void UpdateMousePos();
-    void UpdateYad();
     Vector3 YadRaycast(bool& none);
 
     void HandleKeyDown(StringHash eventType, VariantMap &eventData);

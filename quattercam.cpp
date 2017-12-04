@@ -17,9 +17,9 @@
 */
 
 #include "guimaster.h"
+#include "inputmaster.h"
 
 #include "quattercam.h"
-//#include <initializer_list>
 
 void QuatterCam::RegisterObject(Context *context)
 {
@@ -92,6 +92,8 @@ void QuatterCam::UpdateFov()
 
 void QuatterCam::Update(float timeStep)
 {
+    Vector3 oldPos{ node_->GetPosition() };
+
     if (effectRenderPath_->GetShaderParameter("BloomHDRMix").GetVector2().y_ != 0.7f)
         effectRenderPath_->SetShaderParameter("BloomHDRMix", Vector2(Clamp(TIME->GetElapsedTime() * 0.5f - 1.0f, 0.0f, 1.0f), Max(0.7f, 2.3f - TIME->GetElapsedTime() * 0.25f)));
 
@@ -136,6 +138,9 @@ void QuatterCam::Update(float timeStep)
 
     //Spin pockets
     UpdatePockets(timeStep);
+
+    if (oldPos != node_->GetPosition())
+        GetSubsystem<InputMaster>()->UpdateYad();
 }
 
 void QuatterCam::UpdatePockets(float timeStep)

@@ -235,22 +235,20 @@ void InputMaster::HandleMouseMove(StringHash eventType, VariantMap &eventData)
     if (MC->InMenu())
         return;
 
-    UpdateMousePos();
+    if (INPUT->GetMouseMode() != MM_WRAP) {
 
-    mousePos_.x_ += eventData[MouseMove::P_DX].GetFloat() / GRAPHICS->GetWidth();
-    mousePos_.y_ += eventData[MouseMove::P_DY].GetFloat() / GRAPHICS->GetHeight();
+        mousePos_.x_ = eventData[MouseMove::P_X].GetFloat() / GRAPHICS->GetWidth();
+        mousePos_.y_ = eventData[MouseMove::P_Y].GetFloat() / GRAPHICS->GetHeight();
+    }
 
     mouseMoveSinceClick_.x_ += eventData[MouseMove::P_DX].GetFloat() / GRAPHICS->GetWidth();
     mouseMoveSinceClick_.y_ += eventData[MouseMove::P_DY].GetFloat() / GRAPHICS->GetHeight();
 
     if (!drag_
      && mouseMoveSinceClick_.Length() > DRAG_THRESHOLD
-     && (pressedMouseButtons_.Contains(MOUSEB_LEFT)
-      || pressedMouseButtons_.Contains(MOUSEB_MIDDLE)
-      || pressedMouseButtons_.Contains(MOUSEB_RIGHT)))
+     && pressedMouseButtons_.Size())
     {
         drag_ = true;
-        INPUT->SetMouseMode(MM_WRAP);
         yad_->Hide();
     }
 
@@ -274,7 +272,6 @@ void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventD
     mouseMoveSinceClick_ = Vector2::ZERO;
 
     MC->SetSelectionMode(SM_YAD);
-    UpdateMousePos();
 
     boardClick_ = RaycastToBoard();
     tableClick_ = RaycastToTable();
@@ -282,6 +279,8 @@ void InputMaster::HandleMouseButtonDown(StringHash eventType, VariantMap &eventD
     UpdateYad();
     mouseIdleTime_ = 0.0f;
     ResetIdle();
+
+    INPUT->SetMouseMode(MM_WRAP);
 }
 void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
@@ -295,7 +294,6 @@ void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventDat
         pressedMouseButtons_.Erase(button);
 
     MC->SetSelectionMode(SM_YAD);
-    UpdateMousePos();
 
     UpdateYad();
     mouseIdleTime_ = 0.0f;
@@ -324,7 +322,9 @@ void InputMaster::HandleMouseButtonUp(StringHash eventType, VariantMap &eventDat
     }
 
     drag_ = false;
+
     INPUT->SetMouseMode(MM_FREE);
+    INPUT->SetMousePosition(VectorRoundToInt(Vector2(GRAPHICS->GetSize()) * mousePos_));
 }
 void InputMaster::HandleMouseWheel(StringHash eventType, VariantMap &eventData)
 { (void)eventType;
@@ -342,7 +342,7 @@ void InputMaster::UpdateYad()
 
     if (!yad_->hidden_) {
 
-        if (yadPos.Length()) {
+        if (INPUT->GetMouseMode() == MM_FREE) {
 
             yad_->node_->SetPosition(Vector3(0.5f * (yadPos.x_ + yad_->node_->GetPosition().x_),
                                              yadPos.y_,
@@ -422,12 +422,13 @@ void InputMaster::SelectionButtonPressed()
     if (MC->InPickState())
         MC->SetSelectionMode(SM_CAMERA);
     else if (MC->InPutState())
-        BOARD->SelectNearestFreeSquare();
+        BOARD->SelectNearestFreeSquare(CAMERA->GetPosition());
 }
 
 void InputMaster::HandleJoystickButtons()
 {
-    for(int joystickId: {0, 1}) {
+    for(int joystickId : {0, 1}) {
+
         HashSet<int>& buttons = pressedJoystickButtons_[joystickId];
 
         if (buttons.Size())
@@ -546,7 +547,7 @@ void InputMaster::ActionButtonPressed()
         Piece* selectedPiece{ MC->GetSelectedPiece() };
         if (selectedPiece){
             selectedPiece->Pick();
-            BOARD->SelectNearestFreeSquare();
+            BOARD->SelectNearestFreeSquare(CAMERA->GetPosition());
         } else if (MC->selectionMode_ == SM_STEP || MC->selectionMode_ == SM_YAD){
             if (!MC->SelectLastPiece())
                 MC->CameraSelectPiece();
@@ -747,7 +748,7 @@ Square* InputMaster::RaycastToSquare()
 }
 bool InputMaster::RaycastToBoard()
 {
-    Ray cameraRay{MouseRay()};
+    Ray cameraRay{ MouseRay() };
 
     PODVector<RayQueryResult> results;
     RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 1000.0f, DRAWABLE_GEOMETRY);
@@ -780,13 +781,7 @@ bool InputMaster::RaycastToTable()
 }
 Ray InputMaster::MouseRay()
 {
-    Ray mouseRay{CAMERA->GetScreenRay(mousePos_.x_, mousePos_.y_)};
+    Ray mouseRay{ CAMERA->GetScreenRay(mousePos_.x_, mousePos_.y_) };
 
     return mouseRay;
-}
-void InputMaster::UpdateMousePos()
-{
-    IntVector2 mousePos{INPUT->GetMousePosition()};
-    mousePos_.x_ = Clamp(static_cast<float>(mousePos.x_) / GRAPHICS->GetWidth(), 0.0f, 1.0f);
-    mousePos_.y_ = Clamp(static_cast<float>(mousePos.y_) / GRAPHICS->GetHeight(), 0.0f, 1.0f);
 }

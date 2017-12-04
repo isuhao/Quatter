@@ -29,13 +29,6 @@
 
 URHO3D_DEFINE_APPLICATION_MAIN(MasterControl);
 
-MasterControl* MasterControl::instance_ = NULL;
-
-MasterControl* MasterControl::GetInstance()
-{
-    return MasterControl::instance_;
-}
-
 MasterControl::MasterControl(Context *context):
     Application(context),
     musicGain_{1.0f},
@@ -51,8 +44,6 @@ MasterControl::MasterControl(Context *context):
     pickedPiece_{},
     lastReset_{0.0f}
 {
-    instance_ = this;
-
     QuatterCam::RegisterObject(context_);
     Piece::RegisterObject(context_);
     Board::RegisterObject(context_);
@@ -90,12 +81,10 @@ void MasterControl::Setup()
     engineParameters_[EP_RESOURCE_PATHS] = resourcePaths;
 
     LoadSettings();
-
-
-    //    engineParameters_["borderless"] = true;
 }
 void MasterControl::Start()
 {
+    context_->RegisterSubsystem(this);
     context_->RegisterSubsystem(new InputMaster(context_));
     context_->RegisterSubsystem(new EffectMaster(context_));
 

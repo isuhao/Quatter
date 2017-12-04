@@ -37,6 +37,8 @@ using namespace Urho3D;
 class Piece;
 class Indicator;
 
+#define BOARD MC->world_.board_
+
 class Board : public LogicComponent
 {
     URHO3D_OBJECT(Board, LogicComponent);
@@ -62,8 +64,8 @@ public:
     Square* GetLastSelectedSquare() const { return lastSelectedSquare_; }
     void Select(Square* square);
     void Deselect();
-    void SelectNearestSquare(Vector3 pos = CAMERA->GetPosition());
-    void SelectNearestFreeSquare(Vector3 pos = CAMERA->GetPosition());
+    void SelectNearestSquare(Vector3 pos);
+    void SelectNearestFreeSquare(Vector3 pos);
     void SelectLast();
     void Reset();
     void Refuse();

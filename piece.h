@@ -52,7 +52,7 @@ public:
     bool GetPieceAttribute(int index) const { return attributes_[index]; }
     PieceAttributes GetPieceAttributes() const { return attributes_; }
     String GetCodon(int length = NUM_ATTRIBUTES) const;
-    float GetAngle() const { return MC->AttributesToAngle(ToInt()); }
+    float GetAngle() const;
     void Select();
     void Deselect();
     PieceState GetState() const noexcept { return state_; }

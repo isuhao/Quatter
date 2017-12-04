@@ -110,6 +110,11 @@ String Piece::GetCodon(int length) const
     return codon;
 }
 
+float Piece::GetAngle() const
+{
+    return MC->AttributesToAngle(ToInt());
+}
+
 void Piece::Select()
 {
     if ((MC->GetGameState() == GameState::PLAYER1PICKS ||
